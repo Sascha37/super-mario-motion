@@ -1,0 +1,113 @@
+
+\newcommand{\COURSE}{Teamprojekt - Super Mario Motion}
+\newcommand{\STUDENTA}{Silas Jirikovsky}
+\newcommand{\STUDENTB}{Timo Barton}
+\newcommand{\STUDENTC}{Sascha}
+
+
+
+\newcommand\Leq{\stackrel{\mathclap{\normalfont\mbox{\scriptsize L'Hôpital}}}{=}}
+
+%Template
+\documentclass[a4paper]{scrartcl}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage[ngerman]{babel}
+\usepackage{geometry,forloop,fancyhdr,fancybox,lastpage}
+\geometry{a4paper,left=3cm, right=3cm, top=3cm, bottom=3cm}
+
+%Math
+\usepackage{amsmath,amssymb,amsfonts,tabularx}
+
+%Figures
+\usepackage{graphicx,tikz,color,float}
+\usetikzlibrary{shapes,trees, arrows}
+\usepackage{ragged2e}
+
+
+%Algorithms
+\usetikzlibrary{arrows}
+\usepackage{float}
+\usepackage[ruled,linesnumbered]{algorithm2e}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{geometry,forloop,fancyhdr,fancybox,lastpage}
+\geometry{a4paper,left=3cm, right=3cm, top=3cm, bottom=3cm}
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts}
+\usepackage[T1]{fontenc}
+\usepackage[babel]{microtype}
+\usepackage{calligra}
+\usepackage[ngerman]{babel}
+\usepackage{graphicx}
+\usepackage{mathtools}
+\usepackage{ wasysym }
+\setlength{\textwidth}{13.5cm}
+\setlength{\parindent}{0 cm}
+\usepackage{delarray}
+\usepackage[utf8]{inputenc}
+\usepackage{amsthm}
+\usepackage{makeidx}
+\usepackage{empheq}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage[shortlabels]{enumitem}
+\usepackage{tasks}
+\usepackage{cases}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\usepackage[ruled,linesnumbered]{algorithm2e}
+
+%Kopf- und Fußzeile
+\pagestyle {fancy}
+\fancyhead[L]{\STUDENTA \\ \STUDENTB \\ \STUDENTC}
+\fancyhead[C]{\COURSE}
+\fancyhead[R]{\today}
+
+\fancyfoot[L]{}
+\fancyfoot[C]{}
+\fancyfoot[R]{Seite \thepage}
+
+%Formatierung der Überschrift, hier nichts ändern
+\def\header#1#2{
+  \begin{center}
+    {\Large\textbf{Übungsblatt #1}}\\
+    {(Abgabetermin #2)}
+  \end{center}
+}
+
+%Definition der Punktetabelle, hier nichts ändern
+\newcounter{punktelistectr}
+\newcounter{punkte}
+\newcommand{\punkteliste}[2]{%
+  \setcounter{punkte}{#2}%
+  \addtocounter{punkte}{-#1}%
+  \stepcounter{punkte}%<-- also punkte = m-n+1 = Anzahl Spalten[1]
+  \begin{center}%
+  \begin{tabularx}{\linewidth}[]{@{}*{\thepunkte}{>{\centering\arraybackslash} X|}@{}>{\centering\arraybackslash}X}
+      \forloop{punktelistectr}{#1}{\value{punktelistectr} < #2 } %
+      {%
+        \thepunktelistectr &
+      }
+      #2 &  $\Sigma$ \\
+      \hline
+      \forloop{punktelistectr}{#1}{\value{punktelistectr} < #2 } %
+      {%
+        &
+      } &\\
+      \forloop{punktelistectr}{#1}{\value{punktelistectr} < #2 } %
+      {%
+        &
+      } &\\
+    \end{tabularx}
+  \end{center}
+}
+\lstset{
+    basicstyle=\ttfamily,
+    keywordstyle=\bfseries,
+    breaklines=true,
+    showstringspaces=false
+    mathescape
+}
