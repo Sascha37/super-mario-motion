@@ -5,7 +5,7 @@ PIP = ./venv/bin/pip
 
 # Create virtual environment and intall dependencies
 venv: requirements.txt
-	python3.11 -m venv venv
+	python3.12 -m venv venv
 	$(PIP) install -r requirements.txt
 
 # Runs our program, checks if we are in a virual environment
