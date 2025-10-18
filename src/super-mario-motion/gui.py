@@ -1,8 +1,9 @@
 import tkinter as tk
 from PIL import ImageTk, Image
 from pathlib import Path
+import sys
 
-# Height and Width
+# Width and Height
 window_width = 650
 window_height = 700
 
@@ -14,10 +15,10 @@ color_background = '#202326'
 color_foreground = '#141618'
 color_white = '#FFFFFF'
 
-# TODO: Throw exception if file not found
+#Filepaths for images that are being used on init
 path_data_folder = Path(__file__).parent / "data"
 path_image_webcam_sample = path_data_folder / 'webcam_sample.jpg'
-path_image_walking = path_data_folder / 'walking.png'
+path_image_pose_default = path_data_folder / 'standing.png'
 
 # Paddings
 default_image_top_padding = 50
@@ -33,10 +34,17 @@ def init():
     window.maxsize(window_width, window_height)
 
     window.configure(background=color_background)
+    
+    # Loading default images
+    try:
+        image_webcam_sample = ImageTk.PhotoImage(Image.open(path_image_webcam_sample).resize((webcam_image_width,webcam_image_height), Image.LANCZOS))
+        image_pose = ImageTk.PhotoImage(Image.open(path_image_pose_default).resize((100,100), Image.LANCZOS))
+    except(FileNotFoundError):
+        print("Error: File not found")
+        sys.exit(1)
 
-    image_webcam_sample = ImageTk.PhotoImage(Image.open(path_image_webcam_sample).resize((webcam_image_width,webcam_image_height), Image.LANCZOS))
-    image_walking = ImageTk.PhotoImage(Image.open(path_image_walking).resize((100,100), Image.LANCZOS))
-
+    # Label designated for the webcam footage
+    global label_webcam
     label_webcam = tk.Label(
         window,
         image = image_webcam_sample,
@@ -44,6 +52,7 @@ def init():
     label_webcam.image = image_webcam_sample
     label_webcam.pack(pady = default_image_top_padding)
 
+    # Frame containing two checkboxes
     global skeleton_active
     skeleton_active = tk.IntVar()
     global send_keystrokes
@@ -57,6 +66,7 @@ def init():
         side='left',
         padx = x_padding
     )
+
     checkbox_toggle_skeleton = tk.Checkbutton(
         frame_checkboxes,
         text='Enable Skeleton',
@@ -90,22 +100,42 @@ def init():
     checkbox_toggle_inputs.pack(
         anchor= 'w',)
 
+    #Label designated for displaing the current pose
+    global label_pose_visualizer
     label_pose_visualizer = tk.Label(
         window,
-        image=image_walking,
+        image=image_pose,
         bd=0)
-    label_pose_visualizer.image = image_walking
+    label_pose_visualizer.image = image_pose
     label_pose_visualizer.pack(
-        side='right'
-        , padx=x_padding)
-    
+        side='right',
+        padx=x_padding)
     print(Path(__file__).name + " initialized")
 
-# Both functions will be called in a loop in main.py,
-# updating the respective image labels with new information from opencv
-def update_label_webcam(new_image):
-    image = ImageTk.PhotoImage(new_image.resize((300,400), Image.LANCZOS))
-    window.label_webcam = tk.Label(window, image = image)
+# set_webcam_image and set_pose_image are supposed to be called in the update-loop in main.py
+def set_webcam_image(new_image):
+    image = ImageTk.PhotoImage(new_image.resize((webcam_image_width,webcam_image_height), Image.LANCZOS))
+    label_webcam.config(image=image)
+    label_webcam.image = image
 
-def update_label_pose_visualizer(pose):
-    print("update_label_pose_visualizer")
+def set_pose_image(pose):
+    valid_poses = ["standing", "jumping", "crouching", "throwing", "walking"]
+    if pose in valid_poses:
+        try:
+            window.image_pose = ImageTk.PhotoImage(
+                Image.open(path_data_folder / (pose+'.png')).resize((100,100), Image.LANCZOS))
+        except(FileNotFoundError):
+            print("Error: File not found")
+            sys.exit(1)
+            
+        label_pose_visualizer.config(image=window.image_pose)
+        label_pose_visualizer.image = window.image_pose
+    else:
+        print("Invalid pose")
+
+# get_boolean_send_keystrokes and get_boolean_skeleton_active return the interger representation of their respective variable
+def get_boolean_send_keystrokes():
+    return send_keystrokes.get()
+
+def get_boolean_skeleton_active():
+    return skeleton_active.get()
