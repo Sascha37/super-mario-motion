@@ -1,8 +1,22 @@
-import cv2
+from __future__ import annotations
+import threading
+import time
+from typing import Optional, Tuple
+
 import cv2 as cv
 import numpy as np
 import mediapipe as mp
 from pathlib import Path
+
+
+# globals
+raw_frame: Optional[np.ndarray] = None
+skel_frame: Optional[np.ndarray] = None
+lock = threading.Lock()
+
+# runtime
+cam = None
+running = False
 
 mpPose = mp.solutions.pose
 mpDrawing = mp.solutions.drawing_utils
@@ -25,10 +39,10 @@ def init():
             if not ret:
                 break
 
-            rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             results = pose.process(rgb)
 
-            frame = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            frame = cv.cvtColor(image, cv.COLOR_RGB2BGR)
 
             if results.pose_landmarks:
                 mpDrawing.draw_landmarks(
