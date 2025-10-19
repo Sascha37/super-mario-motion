@@ -1,15 +1,13 @@
 import threading
-import time
+from pathlib import Path
 
 import cv2 as cv
-import numpy as np
 import mediapipe as mp
-from pathlib import Path
 
 # globals
 raw_frame = None
 skel_frame = None
-exit = False
+exitApp = False
 
 # runtime
 cam = None
@@ -18,6 +16,7 @@ frame = None
 
 mpPose = mp.solutions.pose
 mpDrawing = mp.solutions.drawing_utils
+
 
 def init():
     global cam, rgb, frame
@@ -32,11 +31,11 @@ def init():
 def cam_loop():
     global frame, rgb, cam
     with mpPose.Pose(
-            static_image_mode = False,  # uses live video, not single pictures
-            model_complexity = 1,  # uses mid-precision and mid-speed
-            enable_segmentation = False,  # ignores the background
-            min_detection_confidence = 0.5,
-            min_tracking_confidence = 0.5
+            static_image_mode=False,  # uses live video, not single pictures
+            model_complexity=1,  # uses mid-precision and mid-speed
+            enable_segmentation=False,  # ignores the background
+            min_detection_confidence=0.5,
+            min_tracking_confidence=0.5
     ) as pose:
         print(Path(__file__).name + " initialized")
         while cam.isOpened():
@@ -54,7 +53,7 @@ def cam_loop():
                     results.pose_landmarks,
                     mpPose.POSE_CONNECTIONS
                 )
-            if exit:
+            if exitApp:
                 break
     cam.release()
 

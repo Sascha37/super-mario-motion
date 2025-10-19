@@ -1,7 +1,8 @@
-import tkinter as tk
-from PIL import ImageTk, Image
-from pathlib import Path
 import sys
+import tkinter as tk
+from pathlib import Path
+
+from PIL import ImageTk, Image
 
 # Width and Height
 window_width = 650
@@ -15,7 +16,7 @@ color_background = '#202326'
 color_foreground = '#141618'
 color_white = '#FFFFFF'
 
-#Filepaths for images that are being used on init
+# Filepaths for images that are being used on init
 path_data_folder = Path(__file__).parent / "data"
 path_image_webcam_sample = path_data_folder / 'webcam_sample.jpg'
 path_image_pose_default = path_data_folder / 'standing.png'
@@ -24,9 +25,10 @@ path_image_pose_default = path_data_folder / 'standing.png'
 default_image_top_padding = 50
 x_padding = 20
 
+
 # Function gets called once in main.py once the program starts
 def init():
-    global window     
+    global window
     window = tk.Tk()
 
     window.title('Super Mario Motion')
@@ -34,12 +36,13 @@ def init():
     window.maxsize(window_width, window_height)
 
     window.configure(background=color_background)
-    
+
     # Loading default images
     try:
-        image_webcam_sample = ImageTk.PhotoImage(Image.open(path_image_webcam_sample).resize((webcam_image_width,webcam_image_height), Image.LANCZOS))
-        image_pose = ImageTk.PhotoImage(Image.open(path_image_pose_default).resize((100,100), Image.LANCZOS))
-    except(FileNotFoundError):
+        image_webcam_sample = ImageTk.PhotoImage(
+            Image.open(path_image_webcam_sample).resize((webcam_image_width, webcam_image_height), Image.LANCZOS))
+        image_pose = ImageTk.PhotoImage(Image.open(path_image_pose_default).resize((100, 100), Image.LANCZOS))
+    except FileNotFoundError:
         print("Error: File not found")
         sys.exit(1)
 
@@ -47,10 +50,10 @@ def init():
     global label_webcam
     label_webcam = tk.Label(
         window,
-        image = image_webcam_sample,
+        image=image_webcam_sample,
         bd=0)
     label_webcam.image = image_webcam_sample
-    label_webcam.pack(pady = default_image_top_padding)
+    label_webcam.pack(pady=default_image_top_padding)
 
     # Frame containing two checkboxes
     global skeleton_active
@@ -64,17 +67,17 @@ def init():
 
     frame_checkboxes.pack(
         side='left',
-        padx = x_padding
+        padx=x_padding
     )
 
     checkbox_toggle_skeleton = tk.Checkbutton(
         frame_checkboxes,
         text='Enable Skeleton',
-        bg = color_foreground,
-        fg = color_white,
+        bg=color_foreground,
+        fg=color_white,
         selectcolor=color_background,
-        highlightthickness = 0,
-        bd = 0,
+        highlightthickness=0,
+        bd=0,
         variable=skeleton_active,
         onvalue=1,
         offvalue=0,
@@ -86,11 +89,11 @@ def init():
     checkbox_toggle_inputs = tk.Checkbutton(
         frame_checkboxes,
         text='Send Inputs',
-        bg = color_foreground,
-        fg = color_white,
+        bg=color_foreground,
+        fg=color_white,
         selectcolor=color_background,
-        highlightthickness = 0,
-        bd = 0,
+        highlightthickness=0,
+        bd=0,
         variable=send_keystrokes,
         onvalue=1,
         offvalue=0,
@@ -98,9 +101,9 @@ def init():
         height=2)
 
     checkbox_toggle_inputs.pack(
-        anchor= 'w',)
+        anchor='w', )
 
-    #Label designated for displaing the current pose
+    # Label designated for displaying the current pose
     global label_pose_visualizer
     label_pose_visualizer = tk.Label(
         window,
@@ -112,30 +115,35 @@ def init():
         padx=x_padding)
     print(Path(__file__).name + " initialized")
 
+
 # set_webcam_image and set_pose_image are supposed to be called in the update-loop in main.py
 def set_webcam_image(array):
-    image = ImageTk.PhotoImage(Image.fromarray(array).resize((webcam_image_width,webcam_image_height), Image.LANCZOS))
+    image = ImageTk.PhotoImage(Image.fromarray(array).resize((webcam_image_width, webcam_image_height), Image.LANCZOS))
     label_webcam.config(image=image)
     label_webcam.image = image
 
+
 def set_pose_image(pose):
-    valid_poses = ["standing", "jumping", "crouching", "throwing", "walking_right", "walking_left", "running_right", "running_left"]
+    valid_poses = ["standing", "jumping", "crouching", "throwing", "walking_right", "walking_left", "running_right",
+                   "running_left"]
     if pose in valid_poses:
         try:
             window.image_pose = ImageTk.PhotoImage(
-                Image.open(path_data_folder / (pose+'.png')).resize((100,100), Image.LANCZOS))
-        except(FileNotFoundError):
+                Image.open(path_data_folder / (pose + '.png')).resize((100, 100), Image.LANCZOS))
+        except FileNotFoundError:
             print("Error: File not found")
             sys.exit(1)
-            
+
         label_pose_visualizer.config(image=window.image_pose)
         label_pose_visualizer.image = window.image_pose
     else:
         print("Invalid pose")
 
-# get_boolean_send_keystrokes and get_boolean_skeleton_active return the interger representation of their respective variable
+
+# get_boolean_send_keystrokes and get_boolean_skeleton_active return the integer representation of their respective variable
 def get_boolean_send_keystrokes():
     return send_keystrokes.get()
+
 
 def get_boolean_skeleton_active():
     return skeleton_active.get()
