@@ -30,7 +30,7 @@ def init():
 
 
 def cam_loop():
-    global frame, cam
+    global frame, rgb, cam
     with mpPose.Pose(
             static_image_mode = False,  # uses live video, not single pictures
             model_complexity = 1,  # uses mid-precision and mid-speed

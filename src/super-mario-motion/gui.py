@@ -113,8 +113,8 @@ def init():
     print(Path(__file__).name + " initialized")
 
 # set_webcam_image and set_pose_image are supposed to be called in the update-loop in main.py
-def set_webcam_image(new_image):
-    image = ImageTk.PhotoImage(new_image.resize((webcam_image_width,webcam_image_height), Image.LANCZOS))
+def set_webcam_image(array):
+    image = ImageTk.PhotoImage(Image.fromarray(array).resize((webcam_image_width,webcam_image_height), Image.LANCZOS))
     label_webcam.config(image=image)
     label_webcam.image = image
 
