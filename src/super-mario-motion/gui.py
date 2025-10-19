@@ -119,7 +119,7 @@ def set_webcam_image(new_image):
     label_webcam.image = image
 
 def set_pose_image(pose):
-    valid_poses = ["standing", "jumping", "crouching", "throwing", "walking"]
+    valid_poses = ["standing", "jumping", "crouching", "throwing", "walking_right", "walking_left", "running_right", "running_left"]
     if pose in valid_poses:
         try:
             window.image_pose = ImageTk.PhotoImage(
