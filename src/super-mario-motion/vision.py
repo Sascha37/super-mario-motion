@@ -17,11 +17,14 @@ lock = threading.Lock()
 # runtime
 cam = None
 running = False
+rgb = None
+frame = None
 
 mpPose = mp.solutions.pose
 mpDrawing = mp.solutions.drawing_utils
 
 def init():
+    global cam, running, rgb, frame
     cam = cv.VideoCapture(0)
     if not cam.isOpened():
         raise IOError("Cannot open camera")
@@ -52,3 +55,9 @@ def init():
                 )
 
         cam.release()
+
+def get_latest_raw_frame():
+    return rgb
+
+def get_latest_skeleton():
+    return frame
