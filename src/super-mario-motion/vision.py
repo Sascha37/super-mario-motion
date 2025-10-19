@@ -29,6 +29,12 @@ def init():
     if not cam.isOpened():
         raise IOError("Cannot open camera")
 
+    running = True
+    thread = threading.Thread(target=cam_loop)
+    thread.start()
+    cam.release()
+
+def cam_loop():
     with mpPose.Pose(
         static_image_mode = False,        #uses live video, not single pictures
         model_complexity = 1,             #uses mid-precision and mid-speed
@@ -53,8 +59,6 @@ def init():
                     results.pose_landmarks,
                     mpPose.POSE_CONNECTIONS
                 )
-
-        cam.release()
 
 def get_latest_raw_frame():
     return rgb
