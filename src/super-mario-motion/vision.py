@@ -1,22 +1,18 @@
-from __future__ import annotations
 import threading
 import time
-from typing import Optional, Tuple
 
 import cv2 as cv
 import numpy as np
 import mediapipe as mp
 from pathlib import Path
 
-
 # globals
-raw_frame: Optional[np.ndarray] = None
-skel_frame: Optional[np.ndarray] = None
-lock = threading.Lock()
+raw_frame = None
+skel_frame = None
+exit = False
 
 # runtime
 cam = None
-running = False
 rgb = None
 frame = None
 
@@ -24,23 +20,23 @@ mpPose = mp.solutions.pose
 mpDrawing = mp.solutions.drawing_utils
 
 def init():
-    global cam, running, rgb, frame
+    global cam, rgb, frame
     cam = cv.VideoCapture(0)
     if not cam.isOpened():
         raise IOError("Cannot open camera")
-
-    running = True
+    print("cam opened")
     thread = threading.Thread(target=cam_loop)
     thread.start()
-    cam.release()
+
 
 def cam_loop():
+    global frame, cam
     with mpPose.Pose(
-        static_image_mode = False,        #uses live video, not single pictures
-        model_complexity = 1,             #uses mid-precision and mid-speed
-        enable_segmentation = False,      #ignores the background
-        min_detection_confidence = 0.5,
-        min_tracking_confidence = 0.5
+            static_image_mode = False,  # uses live video, not single pictures
+            model_complexity = 1,  # uses mid-precision and mid-speed
+            enable_segmentation = False,  # ignores the background
+            min_detection_confidence = 0.5,
+            min_tracking_confidence = 0.5
     ) as pose:
         print(Path(__file__).name + " initialized")
         while cam.isOpened():
@@ -52,16 +48,20 @@ def cam_loop():
             results = pose.process(rgb)
 
             frame = cv.cvtColor(image, cv.COLOR_RGB2BGR)
-
             if results.pose_landmarks:
                 mpDrawing.draw_landmarks(
                     frame,
                     results.pose_landmarks,
                     mpPose.POSE_CONNECTIONS
                 )
+            if exit:
+                break
+    cam.release()
+
 
 def get_latest_raw_frame():
     return rgb
+
 
 def get_latest_skeleton():
     return frame
