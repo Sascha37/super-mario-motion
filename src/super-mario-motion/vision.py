@@ -9,6 +9,7 @@ import numpy as np
 raw_frame = None
 skel_frame = None
 exitApp = False
+current_pose = "standing"
 
 # runtime
 cam = None
@@ -44,7 +45,7 @@ def init():
 
 
 def cam_loop():
-    global frame, rgb, cam
+    global frame, rgb, cam, current_pose
     with mpPose.Pose(
             static_image_mode=False,  # uses live video, not single pictures
             model_complexity=1,  # uses mid-precision and mid-speed
@@ -84,6 +85,9 @@ def cam_loop():
 
                 if right_hand_up:
                     print("Right hand up!")  # debug message
+                    current_pose = "walking_right"
+                else:
+                    current_pose = "standing"
             if exitApp:
                 break
 
@@ -96,3 +100,6 @@ def get_latest_raw_frame():
 
 def get_latest_skeleton():
     return frame
+
+def get_current_pose():
+    return current_pose
