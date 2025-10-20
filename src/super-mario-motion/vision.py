@@ -68,7 +68,7 @@ def cam_loop():
                     results.pose_landmarks,
                     mpPose.POSE_CONNECTIONS
                 )
-                # TODO: implement posture estimation
+                # TODO: implement posture estimations
 
                 lm = results.pose_landmarks.landmark
             if exitApp:
