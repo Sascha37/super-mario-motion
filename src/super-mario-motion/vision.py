@@ -55,6 +55,8 @@ def cam_loop():
                 )
             if exitApp:
                 break
+
+    # TODO: implement posture estimation
     cam.release()
 
 
