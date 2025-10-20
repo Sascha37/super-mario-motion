@@ -1,6 +1,5 @@
 import threading
 from pathlib import Path
-
 import cv2 as cv
 import mediapipe as mp
 
@@ -16,6 +15,12 @@ frame = None
 
 mpPose = mp.solutions.pose
 mpDrawing = mp.solutions.drawing_utils
+
+
+def landmark_coords(image, lm):
+    h = image.shape[0]
+    w = image.shape[1]
+    return int(w * lm.x), int(h * lm.y)
 
 
 def init():
@@ -53,10 +58,12 @@ def cam_loop():
                     results.pose_landmarks,
                     mpPose.POSE_CONNECTIONS
                 )
+                # TODO: implement posture estimation
+
+                lm = res.pose_landmarks.landmark
             if exitApp:
                 break
 
-    # TODO: implement posture estimation
     cam.release()
 
 
