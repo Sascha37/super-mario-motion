@@ -7,6 +7,7 @@ def update():
     image = vision.get_latest_raw_frame()
     image_with_skeleton = vision.get_latest_skeleton()
     skeleton_active_checkbox = gui.get_boolean_skeleton_active()
+    send_keystrokes_checkbox = gui.get_boolean_send_keystrokes()
     current_pose = vision.get_current_pose()
     # Update Webcam Preview in GUI
     if image is not None and image_with_skeleton is not None:
@@ -14,14 +15,16 @@ def update():
     # Update Pose Preview Indicator in GUI
     gui.set_pose_image(current_pose)
     # Press the respective button associated with the pose
-    if gui.get_boolean_send_keystrokes():
-        input.executeKeystroke(current_pose)
+    input.update_pose(current_pose)
+    input.update_send_permission(send_keystrokes_checkbox)
+
     gui.window.after(1, update)
 
 
 if __name__ == '__main__':
     print("Super Mario Motion started")
     vision.init()
+    input.init()
     gui.init()
 
     gui.window.after(0, update)
