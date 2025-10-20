@@ -118,6 +118,7 @@ def init():
 
 # set_webcam_image and set_pose_image are supposed to be called in the update-loop in main.py
 def set_webcam_image(array):
+    array = array[:, ::-1, :]   # flip the camera horizontally only for the user
     image = ImageTk.PhotoImage(Image.fromarray(array).resize((webcam_image_width, webcam_image_height), Image.LANCZOS))
     label_webcam.config(image=image)
     label_webcam.image = image

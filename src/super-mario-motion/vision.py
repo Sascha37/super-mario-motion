@@ -3,6 +3,7 @@ from pathlib import Path
 
 import cv2 as cv
 import mediapipe as mp
+import numpy as np
 
 # globals
 raw_frame = None
@@ -16,6 +17,20 @@ frame = None
 
 mpPose = mp.solutions.pose
 mpDrawing = mp.solutions.drawing_utils
+
+
+def landmark_coords(image, lm):
+    h = image.shape[0]
+    w = image.shape[1]
+    return int(w * lm.x), int(h * lm.y)
+
+
+def angle(a, b, c):
+    a = np.array(a)
+    b = np.array(b)
+    c = np.array(c)
+    cos = (np.dot(a - b, c - b)) / (np.linalg.norm(a - b) * np.linalg.norm(c - b))
+    return np.degrees(np.arccos(cos))
 
 
 def init():
@@ -45,16 +60,33 @@ def cam_loop():
 
             rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             results = pose.process(rgb)
-
             frame = cv.cvtColor(image, cv.COLOR_RGB2BGR)
+
             if results.pose_landmarks:
                 mpDrawing.draw_landmarks(
                     frame,
                     results.pose_landmarks,
                     mpPose.POSE_CONNECTIONS
                 )
+                # TODO: implement posture estimations
+
+                lm = results.pose_landmarks.landmark
+
+                # landmark indices
+                right_wrist = 16
+                right_shoulder = 12
+
+                # get right wrist and right shoulder coordinates
+                rw_x, rw_y = landmark_coords(frame, lm[right_wrist])
+                rs_x, rs_y = landmark_coords(frame, lm[right_shoulder])
+
+                right_hand_up = rw_y < rs_y  # check if right wrist is above right shoulder
+
+                if right_hand_up:
+                    print("Right hand up!")  # debug message
             if exitApp:
                 break
+
     cam.release()
 
 
