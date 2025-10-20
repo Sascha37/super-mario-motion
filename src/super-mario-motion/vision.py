@@ -58,7 +58,6 @@ def cam_loop():
             if not ret:
                 break
 
-            image = cv.flip(image, 1)  # flips the camera horizontally
             rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             results = pose.process(rgb)
             frame = cv.cvtColor(image, cv.COLOR_RGB2BGR)
