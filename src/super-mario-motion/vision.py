@@ -1,5 +1,6 @@
 import threading
 from pathlib import Path
+
 import cv2 as cv
 import mediapipe as mp
 import numpy as np
@@ -57,7 +58,7 @@ def cam_loop():
             if not ret:
                 break
 
-            image = cv.flip(image, 1)   #flips the camera horizontally
+            image = cv.flip(image, 1)  # flips the camera horizontally
             rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             results = pose.process(rgb)
             frame = cv.cvtColor(image, cv.COLOR_RGB2BGR)
@@ -71,6 +72,19 @@ def cam_loop():
                 # TODO: implement posture estimations
 
                 lm = results.pose_landmarks.landmark
+
+                # landmark indices
+                right_wrist = 16
+                right_shoulder = 12
+
+                # get right wrist and right shoulder coordinates
+                rw_x, rw_y = landmark_coords(frame, lm[right_wrist])
+                rs_x, rs_y = landmark_coords(frame, lm[right_shoulder])
+
+                right_hand_up = rw_y < rs_y  # check if right wrist is above right shoulder
+
+                if right_hand_up:
+                    print("Right hand up!")  # debug message
             if exitApp:
                 break
 
