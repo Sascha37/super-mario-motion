@@ -4,6 +4,17 @@ import input
 
 # Function gets called every millisecond after the mainloop of the tkinter ui
 def update():
+    """
+    Updates the graphical user interface (GUI) and manages interaction with the input
+    system based on the state of the webcam and settings.
+
+    This function is designed to continuously update webcam previews, pose indicators,
+    and manage user input settings for keystroke simulation in the GUI.
+
+    :raises: No exceptions are raised by this method.
+
+    :return: None
+    """
     image = vision.get_latest_raw_frame()
     image_with_skeleton = vision.get_latest_skeleton()
     skeleton_active_checkbox = gui.get_boolean_skeleton_active()
