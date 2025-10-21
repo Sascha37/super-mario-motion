@@ -9,6 +9,8 @@ import numpy as np
 raw_frame = None
 skel_frame = None
 current_pose = "standing"
+close_event = threading.Event()
+
 
 # runtime
 cam = None
@@ -31,6 +33,11 @@ def angle(a, b, c):
     c = np.array(c)
     cos = (np.dot(a - b, c - b)) / (np.linalg.norm(a - b) * np.linalg.norm(c - b))
     return np.degrees(np.arccos(cos))
+
+
+def close_thread():
+    close_event.set()
+
 
 
 def init():
@@ -87,6 +94,9 @@ def cam_loop():
                     current_pose = "walking_right"
                 else:
                     current_pose = "standing"
+
+                if close_event.is_set():
+                    break
 
     cam.release()
 
