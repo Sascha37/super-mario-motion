@@ -21,4 +21,4 @@ if __name__ == '__main__':
 
     gui.window.after(0, update)
     gui.window.mainloop()
-    vision.exitApp = True
+    vision.close_thread()
