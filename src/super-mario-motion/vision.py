@@ -8,7 +8,7 @@ import numpy as np
 # globals
 raw_frame = None
 skel_frame = None
-exitApp = False
+current_pose = "standing"
 
 # runtime
 cam = None
@@ -39,12 +39,12 @@ def init():
     if not cam.isOpened():
         raise IOError("Cannot open camera")
     print("cam opened")
-    thread = threading.Thread(target=cam_loop)
+    thread = threading.Thread(target=cam_loop, daemon=True)
     thread.start()
 
 
 def cam_loop():
-    global frame, rgb, cam
+    global frame, rgb, cam, current_pose
     with mpPose.Pose(
             static_image_mode=False,  # uses live video, not single pictures
             model_complexity=1,  # uses mid-precision and mid-speed
@@ -84,8 +84,9 @@ def cam_loop():
 
                 if right_hand_up:
                     print("Right hand up!")  # debug message
-            if exitApp:
-                break
+                    current_pose = "walking_right"
+                else:
+                    current_pose = "standing"
 
     cam.release()
 
@@ -96,3 +97,7 @@ def get_latest_raw_frame():
 
 def get_latest_skeleton():
     return frame
+
+
+def get_current_pose():
+    return current_pose
