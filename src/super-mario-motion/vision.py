@@ -104,24 +104,41 @@ def cam_loop():
                 ankle_left_x, ankle_left_y = landmark_coords(frame, lm[ankle_left])
                 ankle_right_x, ankle_right_y = landmark_coords(frame, lm[ankle_right])
 
-                running_right = wrist_right_y < shoulder_right_y and wrist_right_y > eye_right_y  # check if right wrist is above right shoulder
-                running_left = wrist_left_y < shoulder_left_y and wrist_left_y > eye_left_y         # check if left wrist is above left shoulder
-                both_hands_up = running_right and running_left
-                hands_below_knees = wrist_right_y < knee_right_y and wrist_left_y < knee_left_y
+                walking_left = shoulder_left_y < wrist_left_y < eye_left_y
+                walking_right = shoulder_right_y < wrist_right_y < eye_right_y
+                running_left = wrist_left_y > eye_left_y  # check if left wrist is above left shoulder
+                running_right = wrist_right_y > eye_right_y  # check if right wrist is above right shoulder
+                jumping = running_right and running_left
+                crouching = wrist_right_y < knee_right_y and wrist_left_y < knee_left_y
+                swimming_left = wrist_left_x < shoulder_right_x and wrist_right_x < shoulder_right_x
+                swimming_right = wrist_left_x > shoulder_left_x and wrist_right_x > shoulder_left_x
 
 
-                if both_hands_up:
-                    print("Both hands up!")
+
+                if jumping:
+                    print("Jumping!")
                     current_pose = "jumping"
+                elif walking_right:
+                    print("Walking right")
+                    current_pose = "walking_right"
+                elif walking_left:
+                    print("Walking reft!")
+                    current_pose = "walking_left"
                 elif running_right:
-                    print("Right hand up!")  # debug message
+                    print("Running right")  # debug message
                     current_pose = "running_right"
                 elif running_left:
-                    print("Left hand up!")
+                    print("Running left!")
                     current_pose = "running_left"
-                elif hands_below_knees:
+                elif crouching:
                     print("Both hands below knees!")
                     current_pose = "crouching"
+                elif swimming_left:
+                    print("Swimming left")
+                    current_pose = "swimming_left"
+                elif swimming_right:
+                    print("Swimming right")
+                    current_pose = "swimming_right"
                 else:
                     current_pose = "standing"
             if exitApp:
