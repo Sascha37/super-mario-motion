@@ -35,6 +35,15 @@ def angle(a, b, c):
 
 
 def init():
+    """
+    Initializes the camera, starts capturing frames, and creates a new thread to handle
+    the camera's loop. The function sets up the global `cam`, `rgb`, and `frame` variables.
+
+    Raises:
+        IOError: If the camera cannot be opened.
+
+    :return: None
+    """
     global cam, rgb, frame
     cam = cv.VideoCapture(0)
     if not cam.isOpened():
