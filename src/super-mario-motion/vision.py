@@ -45,6 +45,16 @@ def init():
 
 
 def cam_loop():
+    """
+    Run a loop to process video frames from the camera, detecting and processing pose landmarks using MediaPipe's Pose API.
+
+    This function reads frames from a global camera object, processes them with MediaPipe's Pose API in real-time, and
+    displays pose landmarks on the frames if detected. Within the processing loop, it analyzes pose landmarks to detect
+    specific poses (e.g., whether the person's right hand is raised above their shoulder). The processed pose detection
+    and tracking results are used to infer the current pose of the subject.
+
+    :return: None
+    """
     global frame, rgb, cam, current_pose
     with mpPose.Pose(
             static_image_mode=False,  # uses live video, not single pictures
