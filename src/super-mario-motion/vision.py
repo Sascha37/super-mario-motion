@@ -104,14 +104,15 @@ def cam_loop():
                 ankle_left_x, ankle_left_y = landmark_coords(frame, lm[ankle_left])
                 ankle_right_x, ankle_right_y = landmark_coords(frame, lm[ankle_right])
 
-                walking_left = shoulder_left_y < wrist_left_y < eye_left_y
-                walking_right = shoulder_right_y < wrist_right_y < eye_right_y
-                running_left = wrist_left_y > eye_left_y  # check if left wrist is above left shoulder
-                running_right = wrist_right_y > eye_right_y  # check if right wrist is above right shoulder
+                walking_left = shoulder_left_y > wrist_left_y > eye_left_y
+                walking_right = shoulder_right_y > wrist_right_y > eye_right_y
+                running_left = wrist_left_y < eye_left_y  # check if left wrist is above left shoulder
+                running_right = wrist_right_y < eye_right_y  # check if right wrist is above right shoulder
                 jumping = running_right and running_left
-                crouching = wrist_right_y < knee_right_y and wrist_left_y < knee_left_y
-                swimming_left = wrist_left_x < shoulder_right_x and wrist_right_x < shoulder_right_x
-                swimming_right = wrist_left_x > shoulder_left_x and wrist_right_x > shoulder_left_x
+                crouching = wrist_right_y > knee_right_y and wrist_left_y > knee_left_y
+                #TODO: fix swimming
+                #swimming_left = wrist_left_x < shoulder_right_x and wrist_right_x < shoulder_right_x
+                #swimming_right = wrist_left_x > shoulder_left_x and wrist_right_x > shoulder_left_x
 
 
 
@@ -141,6 +142,9 @@ def cam_loop():
                     current_pose = "swimming_right"
                 else:
                     current_pose = "standing"
+                    print("Standing")
+                #print("Wrist right:" + str(wrist_right_y))
+                #print("Eye right:" + str(eye_right_y))
             if exitApp:
                 break
 
