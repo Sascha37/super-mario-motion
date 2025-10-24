@@ -10,8 +10,9 @@ pose = "standing"
 
 
 mapping ={
-    "walking_right": "right",
-    "standing": ""
+    "walking_right": ["right", "hold"],
+    "standing": ["","hold"],
+    "jumping": ["y", "prolonged_single_press"]
 }
 
 def init():
@@ -24,13 +25,13 @@ def input_loop():
     while(True):
         if send_permission:
             if previous_send_permission == False: # When send_permission just changed from False to True
-                pyautogui.keyDown(mapping[pose])
+                pyautogui.keyDown(mapping[pose][0])
                 last_pose = pose
                 previous_send_permission = True
             if (last_pose != pose):
-                pyautogui.keyUp(mapping[last_pose])
+                pyautogui.keyUp(mapping[last_pose][0])
                 last_pose = pose
-                pyautogui.keyDown(mapping[pose])
+                pyautogui.keyDown(mapping[pose][0])
         elif previous_send_permission: #When send_permission just changed from True to False
             pyautogui.keyUp(mapping[last_pose])
             previous_send_permission = False
