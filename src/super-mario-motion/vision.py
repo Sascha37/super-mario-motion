@@ -134,12 +134,12 @@ def cam_loop():
                 elif crouching:
                     print("Both hands below knees!")
                     current_pose = "crouching"
-                elif swimming_left:
-                    print("Swimming left")
-                    current_pose = "swimming_left"
-                elif swimming_right:
-                    print("Swimming right")
-                    current_pose = "swimming_right"
+#                elif swimming_left:
+#                    print("Swimming left")
+#                    current_pose = "swimming_left"
+#                elif swimming_right:
+#                    print("Swimming right")
+#                    current_pose = "swimming_right"
                 else:
                     current_pose = "standing"
                     print("Standing")
