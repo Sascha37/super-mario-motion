@@ -8,12 +8,8 @@ previous_send_permission = False
 last_pose = "standing" #Initial position is standing
 pose = "standing"
 
-
-mapping ={
-    "walking_right": ["right", "hold"],
-    "standing": ["","hold"],
-    "jumping": ["y", "prolonged_single_press"]
-}
+currently_held_keys = []
+last_orientation = "right"
 
 def init():
     thread = threading.Thread(target=input_loop,daemon=True)
@@ -25,20 +21,61 @@ def input_loop():
     while(True):
         if send_permission:
             if previous_send_permission == False: # When send_permission just changed from False to True
-                pyautogui.keyDown(mapping[pose][0])
+                press_designated_input(pose)
                 last_pose = pose
                 previous_send_permission = True
             if (last_pose != pose):
-                pyautogui.keyUp(mapping[last_pose][0])
+                release_held_keys()
                 last_pose = pose
-                pyautogui.keyDown(mapping[pose][0])
+                press_designated_input(pose)
         elif previous_send_permission: #When send_permission just changed from True to False
-            pyautogui.keyUp(mapping[last_pose])
+            release_held_keys()
             previous_send_permission = False
 
-
         time.sleep(0.001)
-    
+
+def press_designated_input(pose):
+    global currently_held_keys, last_orientation
+    match pose:
+        case "standing":
+            if last_pose == "walking_left" or "walking_right" or "running_left" or "running_right":
+                countersteer = "left" if last_orientation == "right" else "right"
+                pyautogui.keyDown(countersteer)
+                pyautogui.keyUp(countersteer)
+                print("countersteer against direction: " + last_orientation)
+        case "jumping":
+            pyautogui.keyDown("x")
+            pyautogui.keyDown(last_orientation)
+            time.sleep(0.1)
+            pyautogui.keyUp(last_orientation)
+            pyautogui.keyUp("x")
+        case "running_right":
+            pyautogui.keyDown("y")
+            pyautogui.keyDown("right")
+            currently_held_keys.append("y")
+            currently_held_keys.append("right")
+            last_orientation = "right"
+        case "running_left":
+            pyautogui.keyDown("y")
+            pyautogui.keyDown("left")
+            currently_held_keys.append("y")
+            currently_held_keys.append("left")
+            last_orientation = "left"
+        case "walking_right":
+            pyautogui.keyDown("right")
+            currently_held_keys.append("right")
+            last_orientation = "right"
+        case "walking_left":
+            pyautogui.keyDown("left")
+            currently_held_keys.append("left")
+            last_orientation = "left"
+
+
+def release_held_keys():
+    global currently_held_keys
+    for key in currently_held_keys:
+        pyautogui.keyUp(key)
+    currently_held_keys = []
 
 def update_pose(new_pose):
     global pose
