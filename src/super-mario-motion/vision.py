@@ -7,6 +7,7 @@ import mediapipe as mp
 import numpy as np
 
 # globals
+skeleton_only_frame = None
 raw_frame = None
 skel_frame = None
 exitApp = False
@@ -61,7 +62,7 @@ def init():
 
 
 def cam_loop():
-    global frame, rgb, cam, current_pose
+    global frame, rgb, cam, current_pose, skeleton_only_frame
     with mpPose.Pose(
             static_image_mode=False,  # uses live video, not single pictures
             model_complexity=1,  # uses mid-precision and mid-speed
@@ -80,8 +81,16 @@ def cam_loop():
             frame = cv.cvtColor(image, cv.COLOR_RGB2BGR)
 
             if results.pose_landmarks:
+                # Draw webcam footage and skeleton
                 mpDrawing.draw_landmarks(
                     frame,
+                    results.pose_landmarks,
+                    mpPose.POSE_CONNECTIONS
+                )
+
+                skeleton_only_frame = np.zeros_like(frame)
+                mpDrawing.draw_landmarks(
+                    skeleton_only_frame,
                     results.pose_landmarks,
                     mpPose.POSE_CONNECTIONS
                 )
@@ -109,7 +118,7 @@ def cam_loop():
                 walking_right = shoulder_right_y > wrist_right_y > eye_right_y
                 running_left = wrist_left_y < eye_left_y  # check if left wrist is above left shoulder
                 running_right = wrist_right_y < eye_right_y  # check if right wrist is above right shoulder
-                jumping = running_right and running_left
+                jumping = (running_right or walking_right) and (running_left or walking_left)
                 crouching = wrist_right_y > knee_right_y and wrist_left_y > knee_left_y
                 #TODO: fix swimming
                 #swimming_left = wrist_left_x < shoulder_right_x and wrist_right_x < shoulder_right_x
@@ -159,3 +168,6 @@ def get_latest_skeleton():
 
 def get_current_pose():
     return current_pose
+
+def get_only_sekeleton():
+    return skeleton_only_frame
