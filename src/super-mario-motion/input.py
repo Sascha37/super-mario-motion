@@ -3,9 +3,10 @@ from pathlib import Path
 import threading
 import time
 
+# Set initial values
 send_permission = False
 previous_send_permission = False 
-last_pose = "standing" #Initial position is standing
+last_pose = "standing"
 pose = "standing"
 
 currently_held_keys = []
@@ -69,6 +70,9 @@ def press_designated_input(pose):
             pyautogui.keyDown("left")
             currently_held_keys.append("left")
             last_orientation = "left"
+        case "crouching":
+            pyautogui.keyDown("down")
+            currently_held_keys.append("down")
 
 
 def release_held_keys():
