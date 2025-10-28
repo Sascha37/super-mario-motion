@@ -73,6 +73,9 @@ def press_designated_input(pose):
         case "crouching":
             pyautogui.keyDown("down")
             currently_held_keys.append("down")
+        case "throwing":
+            pyautogui.keyDown("y")
+            pyautogui.keyUp("y")
 
 
 def release_held_keys():
