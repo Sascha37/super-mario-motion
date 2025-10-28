@@ -1,3 +1,4 @@
+import math
 import threading
 from pathlib import Path
 
@@ -110,13 +111,17 @@ def cam_loop():
                 running_right = wrist_right_y < eye_right_y  # check if right wrist is above right shoulder
                 jumping = running_right and running_left
                 crouching = wrist_right_y > knee_right_y and wrist_left_y > knee_left_y
+                throwing = math.sqrt((wrist_right_x-wrist_left_x)*(wrist_right_x-wrist_left_x) + (wrist_right_y - wrist_left_y)*(wrist_right_y - wrist_left_y)) < 50
                 #TODO: fix swimming
                 #swimming_left = wrist_left_x < shoulder_right_x and wrist_right_x < shoulder_right_x
                 #swimming_right = wrist_left_x > shoulder_left_x and wrist_right_x > shoulder_left_x
 
 
 
-                if jumping:
+                if throwing:
+                    print("Throwing!")
+                    current_pose = "throwing"
+                elif jumping:
                     print("Jumping!")
                     current_pose = "jumping"
                 elif walking_right:
