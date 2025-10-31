@@ -46,7 +46,7 @@ def init():
         print("Error: File not found")
         sys.exit(1)
 
-    # Label designated for the webcam footage
+    # Label displaying Webcam Preview
     global label_webcam
     label_webcam = tk.Label(
         window,
@@ -55,25 +55,22 @@ def init():
     label_webcam.image = image_webcam_sample
     label_webcam.pack(pady=default_image_top_padding)
 
-    # Frame containing two checkboxes
+    # Frame containing UI Elements located on the bottom left
     global skeleton_active
-    skeleton_active = tk.IntVar()
-    global send_keystrokes
-    send_keystrokes = tk.IntVar()
-    global allow_debug_info
-    allow_debug_info = tk.IntVar()
 
-    frame_checkboxes = tk.Frame(
+    skeleton_active = tk.IntVar()
+
+    frame_bottom_left = tk.Frame(
         window,
         bg=color_foreground)
 
-    frame_checkboxes.pack(
+    frame_bottom_left.pack(
         side='left',
         padx=x_padding
     )
 
     checkbox_toggle_skeleton = tk.Checkbutton(
-        frame_checkboxes,
+        frame_bottom_left,
         text='Enable Skeleton',
         bg=color_foreground,
         fg=color_white,
@@ -89,8 +86,11 @@ def init():
         anchor='w')
 
     # Debug Checkbox
+    global allow_debug_info
+    allow_debug_info = tk.IntVar()
+
     checkbox_debug_info = tk.Checkbutton(
-        frame_checkboxes,
+        frame_bottom_left,
         text='Debug Info',
         bg=color_foreground,
         fg=color_white,
@@ -107,8 +107,11 @@ def init():
         anchor='w', )
 
     # Send Inputs Checkbox
+    global send_keystrokes
+    send_keystrokes = tk.IntVar()
+
     checkbox_toggle_inputs = tk.Checkbutton(
-        frame_checkboxes,
+        frame_bottom_left,
         text='Send Inputs',
         bg=color_foreground,
         fg=color_white,
@@ -126,9 +129,10 @@ def init():
 
     # Text Label "Mode:"
     label_mode = tk.Label(
-        frame_checkboxes,
+        frame_bottom_left,
         text = "Mode:")
     label_mode.pack(side=tk.LEFT)
+
     # Mode Option Menu
     list_modes = ["Simple", "Full-body"]
 
@@ -137,12 +141,13 @@ def init():
     selected_mode.set("Simple")
 
     option_menu_mode = tk.OptionMenu(
-        frame_checkboxes,
+        frame_bottom_left,
         selected_mode,
         *list_modes
         )
 
     option_menu_mode.pack(side=tk.RIGHT)
+
     # Label designated for displaying the current pose
     global label_pose_visualizer
     label_pose_visualizer = tk.Label(
