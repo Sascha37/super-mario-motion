@@ -15,6 +15,9 @@ option_menu_width = 17
 webcam_image_width = 612
 webcam_image_height = 408
 
+gamepad_image_width = 200
+gamepad_image_height = 100
+
 # Colors
 color_background = '#202326'
 color_foreground = '#141618'
@@ -47,7 +50,7 @@ def init():
         image_webcam_sample = ImageTk.PhotoImage(
             Image.open(path_image_webcam_sample).resize((webcam_image_width, webcam_image_height), Image.LANCZOS))
         image_pose = ImageTk.PhotoImage(Image.open(path_image_pose_default).resize((100, 100), Image.LANCZOS))
-        image_gamepad = ImageTk.PhotoImage(Image.open(path_image_gamepad).resize((200, 100), Image.LANCZOS))
+        image_gamepad = ImageTk.PhotoImage(Image.open(path_image_gamepad).resize((gamepad_image_width, gamepad_image_height), Image.LANCZOS))
     except FileNotFoundError:
         print("Error: File not found")
         sys.exit(1)
@@ -63,7 +66,8 @@ def init():
         row=0,
         column=0,
         columnspan=2,
-        pady=(label_webcam_top_padding,0))
+        pady=(label_webcam_top_padding,0),
+        padx=(edge_padding_default,0))
 
     # Frame containing UI Elements located on the bottom left
     frame_bottom_left = tk.Frame(
@@ -259,6 +263,12 @@ def set_webcam_image(webcam,webcam_skeleton,only_sekeleton):
     label_webcam.config(image=image)
     label_webcam.image = image
 
+def set_gamepad_image(updated_gamepad_image):
+    if gamepad_image is None:
+        return
+    image = ImageTk.PhotoImage(updated_gamepad_image.resize((gamepad_image_width, gamepad_image_height), Image.LANCZOS))
+    label_virtual_gamepad_visualizer.config(image=image)
+    label_virtual_gamepad_visualizer.image = image
 
 def update_pose(new_pose):
     global pose
