@@ -60,6 +60,8 @@ def init():
     skeleton_active = tk.IntVar()
     global send_keystrokes
     send_keystrokes = tk.IntVar()
+    global allow_debug_info
+    allow_debug_info = tk.IntVar()
 
     frame_checkboxes = tk.Frame(
         window,
@@ -86,6 +88,25 @@ def init():
     checkbox_toggle_skeleton.pack(
         anchor='w')
 
+    # Debug Checkbox
+    checkbox_debug_info = tk.Checkbutton(
+        frame_checkboxes,
+        text='Debug Info',
+        bg=color_foreground,
+        fg=color_white,
+        selectcolor=color_background,
+        highlightthickness=0,
+        bd=0,
+        variable=allow_debug_info,
+        onvalue=1,
+        offvalue=0,
+        width=20,
+        height=2)
+
+    checkbox_debug_info.pack(
+        anchor='w', )
+
+    # Send Inputs Checkbox
     checkbox_toggle_inputs = tk.Checkbutton(
         frame_checkboxes,
         text='Send Inputs',
@@ -103,6 +124,25 @@ def init():
     checkbox_toggle_inputs.pack(
         anchor='w', )
 
+    # Text Label "Mode:"
+    label_mode = tk.Label(
+        frame_checkboxes,
+        text = "Mode:")
+    label_mode.pack(side=tk.LEFT)
+    # Mode Option Menu
+    list_modes = ["Simple", "Full-body"]
+
+    global selected_mode
+    selected_mode = tk.StringVar()
+    selected_mode.set("Simple")
+
+    option_menu_mode = tk.OptionMenu(
+        frame_checkboxes,
+        selected_mode,
+        *list_modes
+        )
+
+    option_menu_mode.pack(side=tk.RIGHT)
     # Label designated for displaying the current pose
     global label_pose_visualizer
     label_pose_visualizer = tk.Label(
@@ -148,3 +188,6 @@ def get_boolean_send_keystrokes():
 
 def get_boolean_skeleton_active():
     return skeleton_active.get()
+
+def get_active_mode():
+    return selected_mode.get()

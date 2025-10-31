@@ -18,6 +18,9 @@ def update():
     input.update_pose(current_pose)
     input.update_send_permission(send_keystrokes_checkbox)
 
+    #Debug
+    print(gui.get_active_mode())
+    #
     gui.window.after(1, update)
 
 
