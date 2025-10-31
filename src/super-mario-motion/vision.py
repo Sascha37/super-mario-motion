@@ -12,6 +12,7 @@ raw_frame = None
 skel_frame = None
 exitApp = False
 current_pose = "standing"
+lm_string = ""
 
 # runtime
 cam = None
@@ -62,9 +63,8 @@ def init():
 
 
 def cam_loop():
-    global frame, rgb, cam, current_pose, skeleton_only_frame
+    global frame, rgb, cam, current_pose, skeleton_only_frame,lm_string
     with mpPose.Pose(
-            static_image_mode=False,  # uses live video, not single pictures
             model_complexity=1,  # uses mid-precision and mid-speed
             enable_segmentation=False,  # ignores the background
             min_detection_confidence=0.5,
@@ -151,8 +151,15 @@ def cam_loop():
                 else:
                     current_pose = "standing"
                     print("Standing")
-                #print("Wrist right:" + str(wrist_right_y))
-                #print("Eye right:" + str(eye_right_y))
+
+                # Saves all Landmark cords into a string
+                lm_string_temp = ""
+                for x in range(33):
+                    lm_string_temp+= str(x)+ str(landmark_coords(frame, lm[x])) + " "
+                    if (x+1) % 4 == 0:
+                        lm_string_temp += "\n"
+                lm_string = lm_string_temp
+
             if exitApp:
                 break
 
@@ -171,3 +178,7 @@ def get_current_pose():
 
 def get_only_sekeleton():
     return skeleton_only_frame
+
+def get_lm_string():
+    return lm_string
+
