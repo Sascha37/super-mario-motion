@@ -16,11 +16,12 @@ def update():
     current_pose = vision.get_current_pose()
 
     # Update Images to display in gui.py
-    if image is not None and image_with_skeleton is not None:
-        gui.set_webcam_image(image)
+    gui.set_webcam_image(image,image_with_skeleton,image_only_skeleton)
 
     # Update Pose Preview Indicator in gui.py
-    gui.set_pose_image(current_pose)
+    gui.update_pose(current_pose)
+    gui.update_pose_image()
+    gui.update_pose_text()
 
     # Update Pose and update_send_permission in input.py
     input.update_pose(current_pose)
