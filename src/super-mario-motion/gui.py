@@ -78,7 +78,7 @@ def init():
         row=1,
         column=0,
         padx=edge_padding_default,
-        pady=(20,0)
+        pady=(5,0)
     )
 
     # Text Label "Preview:"
@@ -207,7 +207,7 @@ def init():
         row=1,
         column=1,
         padx=edge_padding_default,
-        pady=(0,0)
+        pady=(20,0)
     )
     # Image Label Virtual Gamepad Visualizer
     global label_virtual_gamepad_visualizer
@@ -220,7 +220,7 @@ def init():
         row=0,
         column=0)
 
-    # Label designated for displaying the current pose
+    # Image Label designated for displaying the current pose
     global label_pose_visualizer
     label_pose_visualizer = tk.Label(
         frame_bottom_right,
@@ -241,6 +241,22 @@ def init():
 
     label_current_pose.grid(
         row=1,
+        column=0,
+        columnspan=2)
+
+    # Debug Text Label Displaying Landmark Coordinates
+    global label_debug_landmarks
+    label_debug_landmarks = tk.Label(
+        frame_bottom_right,
+        bg=color_foreground,
+        fg=color_white,
+        width=60,
+        height=10,
+        text = "",
+        font=("Consolas", 6))
+
+    label_debug_landmarks.grid(
+        row=2,
         column=0,
         columnspan=2)
     # Init completed
@@ -293,6 +309,10 @@ def update_pose_image():
 def update_pose_text():
     label_current_pose.config(
         text = "Current pose:" + pose)
+
+def update_debug_landmarks(landmarks):
+    label_debug_landmarks.config(
+        text = landmarks if allow_debug_info.get() else "")
 
 def get_boolean_send_keystrokes():
     return send_keystrokes.get()

@@ -22,10 +22,13 @@ def update():
     gui.update_pose(current_pose)
     gui.update_pose_image()
     gui.update_pose_text()
+    gui.update_debug_landmarks(vision.get_lm_string())
 
     # Update Pose and update_send_permission in input.py
     input.update_pose(current_pose)
     input.update_send_permission(send_keystrokes_checkbox)
+
+
 
     gui.window.after(1, update)
 
