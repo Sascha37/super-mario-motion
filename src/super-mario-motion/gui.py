@@ -22,7 +22,7 @@ path_image_webcam_sample = path_data_folder / 'webcam_sample.jpg'
 path_image_pose_default = path_data_folder / 'standing.png'
 
 # Paddings
-default_image_top_padding = 50
+label_webcam_top_padding = 20
 x_padding = 20
 
 
@@ -53,7 +53,7 @@ def init():
         image=image_webcam_sample,
         bd=0)
     label_webcam.image = image_webcam_sample
-    label_webcam.pack(pady=default_image_top_padding)
+    label_webcam.pack(pady=(label_webcam_top_padding,0))
 
     # Frame containing UI Elements located on the bottom left
     global skeleton_active
@@ -66,7 +66,8 @@ def init():
 
     frame_bottom_left.pack(
         side='left',
-        padx=x_padding
+        padx=x_padding,
+        pady=(0,0)
     )
 
     checkbox_toggle_skeleton = tk.Checkbutton(
@@ -82,8 +83,7 @@ def init():
         offvalue=0,
         width=20,
         height=2)
-    checkbox_toggle_skeleton.pack(
-        anchor='w')
+    checkbox_toggle_skeleton.pack()
 
     # Debug Checkbox
     global allow_debug_info
@@ -103,8 +103,7 @@ def init():
         width=20,
         height=2)
 
-    checkbox_debug_info.pack(
-        anchor='w', )
+    checkbox_debug_info.pack()
 
     # Send Inputs Checkbox
     global send_keystrokes
@@ -124,8 +123,7 @@ def init():
         width=20,
         height=2)
 
-    checkbox_toggle_inputs.pack(
-        anchor='w', )
+    checkbox_toggle_inputs.pack()
 
     # Text Label "Mode:"
     label_mode = tk.Label(
