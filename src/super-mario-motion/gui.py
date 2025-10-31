@@ -8,6 +8,8 @@ from PIL import ImageTk, Image
 window_width = 650
 window_height = 700
 
+option_menu_width = 17
+
 webcam_image_width = 612
 webcam_image_height = 408
 
@@ -23,7 +25,7 @@ path_image_pose_default = path_data_folder / 'standing.png'
 
 # Paddings
 label_webcam_top_padding = 20
-x_padding = 20
+edge_padding_default = 20
 
 
 # Function gets called once in main.py once the program starts
@@ -53,37 +55,90 @@ def init():
         image=image_webcam_sample,
         bd=0)
     label_webcam.image = image_webcam_sample
-    label_webcam.pack(pady=(label_webcam_top_padding,0))
+    label_webcam.grid(
+        row=0,
+        column=0,
+        columnspan=2,
+        pady=(label_webcam_top_padding,0))
 
     # Frame containing UI Elements located on the bottom left
-    global skeleton_active
-
-    skeleton_active = tk.IntVar()
-
     frame_bottom_left = tk.Frame(
         window,
         bg=color_foreground)
 
-    frame_bottom_left.pack(
-        side='left',
-        padx=x_padding,
-        pady=(0,0)
+    frame_bottom_left.grid(
+        row=1,
+        column=0,
+        padx=edge_padding_default,
+        pady=(20,0)
     )
 
-    checkbox_toggle_skeleton = tk.Checkbutton(
+    # Text Label "Preview:"
+    label_preview = tk.Label(
         frame_bottom_left,
-        text='Enable Skeleton',
         bg=color_foreground,
         fg=color_white,
-        selectcolor=color_background,
-        highlightthickness=0,
-        bd=0,
-        variable=skeleton_active,
-        onvalue=1,
-        offvalue=0,
-        width=20,
-        height=2)
-    checkbox_toggle_skeleton.pack()
+        text = "Preview:")
+    label_preview.grid(
+        row=0,
+        column=0)
+
+    # Preview Option Menu
+    list_preview = ["Webcam", "Webcam + Skeleton", "Skeleton Only"]
+
+    global selected_preview
+    selected_preview = tk.StringVar()
+    selected_preview.set("Webcam")
+
+    option_menu_preview = tk.OptionMenu(
+        frame_bottom_left,
+        selected_preview,
+        *list_preview)
+
+    option_menu_preview.config(
+        bg=color_foreground,
+        fg=color_white,
+        width=option_menu_width)
+
+    option_menu_preview.grid(
+        row=0,
+        column=1
+        )
+
+    # Text Label "Mode:"
+    label_mode = tk.Label(
+        frame_bottom_left,
+        bg=color_foreground,
+        fg=color_white,
+        text = "Mode:")
+
+    label_mode.grid(
+        row=1,
+        column=0,
+        )
+
+    # Mode Option Menu
+    list_modes = ["Simple", "Full-body"]
+
+    global selected_mode
+    selected_mode = tk.StringVar()
+    selected_mode.set("Simple")
+
+    option_menu_mode = tk.OptionMenu(
+        frame_bottom_left,
+        selected_mode,
+        *list_modes
+        )
+
+    option_menu_mode.config(
+        bg=color_foreground,
+        fg=color_white,
+        width=option_menu_width)
+
+    option_menu_mode.grid(
+        row=1,
+        column=1,
+        )
 
     # Debug Checkbox
     global allow_debug_info
@@ -103,7 +158,11 @@ def init():
         width=20,
         height=2)
 
-    checkbox_debug_info.pack()
+    checkbox_debug_info.grid(
+        row=2,
+        column=0,
+        columnspan=2
+        )
 
     # Send Inputs Checkbox
     global send_keystrokes
@@ -123,39 +182,37 @@ def init():
         width=20,
         height=2)
 
-    checkbox_toggle_inputs.pack()
-
-    # Text Label "Mode:"
-    label_mode = tk.Label(
-        frame_bottom_left,
-        text = "Mode:")
-    label_mode.pack(side=tk.LEFT)
-
-    # Mode Option Menu
-    list_modes = ["Simple", "Full-body"]
-
-    global selected_mode
-    selected_mode = tk.StringVar()
-    selected_mode.set("Simple")
-
-    option_menu_mode = tk.OptionMenu(
-        frame_bottom_left,
-        selected_mode,
-        *list_modes
+    checkbox_toggle_inputs.grid(
+        row=3,
+        column=0,
+        columnspan=2
         )
 
-    option_menu_mode.pack(side=tk.RIGHT)
+
+    # Frame containing UI Elements located on the bottom right
+
+    frame_bottom_right = tk.Frame(
+        window,
+        bg=color_foreground)
+
+    frame_bottom_right.grid(
+        row=1,
+        column=1,
+        padx=edge_padding_default,
+        pady=(0,0)
+    )
 
     # Label designated for displaying the current pose
     global label_pose_visualizer
     label_pose_visualizer = tk.Label(
-        window,
+        frame_bottom_right,
         image=image_pose,
         bd=0)
     label_pose_visualizer.image = image_pose
     label_pose_visualizer.pack(
-        side='right',
-        padx=x_padding)
+        side=tk.RIGHT)
+
+    # Init completed
     print(Path(__file__).name + " initialized")
 
 
@@ -184,13 +241,10 @@ def set_pose_image(pose):
         print("Invalid pose")
 
 
-# get_boolean_send_keystrokes and get_boolean_skeleton_active return the integer representation of their respective variable
+# returns the integer representation of their respective variable
 def get_boolean_send_keystrokes():
     return send_keystrokes.get()
 
-
-def get_boolean_skeleton_active():
-    return skeleton_active.get()
 
 def get_active_mode():
     return selected_mode.get()
