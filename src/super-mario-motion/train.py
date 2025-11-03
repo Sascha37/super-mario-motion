@@ -8,8 +8,8 @@ from sklearn.svm import SVC
 from sklearn.metrics import classification_report, confusion_matrix
 from joblib import dump
 
-CSV_PATH = Path("../ml/pose_samples.csv")
-MODEL_PATH = Path("../ml/pose_model.joblib")
+CSV_PATH = Path(__file__).parent.parent.parent / "data" / "pose_samples.csv"
+MODEL_PATH = Path(__file__).parent.parent.parent / "data" / "pose_model.joblib"
 
 def load_csv(csv_path: Path):
     labels, feats = [], []

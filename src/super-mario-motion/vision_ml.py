@@ -66,9 +66,11 @@ def _extract_features(lm_arr: np.ndarray) -> np.ndarray:
     vis = lm_arr[:, 3].astype(np.float32)
     return np.concatenate([xy.flatten(), angs, dists, vis], axis=0)
 
-def init(model_path: str = "../ml/pose_model.joblib"):
+def init():
     global _thread, _exit, _model
     _exit = False
+    # Path
+    model_path = Path(__file__).parent.parent.parent / "data" / "pose_model.joblib"
     # Modell laden
     try:
         _model = load(model_path)

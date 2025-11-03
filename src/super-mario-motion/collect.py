@@ -61,7 +61,7 @@ def main():
     args = ap.parse_args()
 
     mpPose = mp.solutions.pose
-    out_path = Path('../ml')/Path(args.csv)
+    out_path = Path(__file__).parent.parent.parent / "data" / args.csv
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     print(f"[collect] Starte Aufnahme: label={args.label}, {args.seconds}s, source={args.source} → {out_path}")
