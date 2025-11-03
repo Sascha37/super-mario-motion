@@ -1,5 +1,6 @@
 import sys
 import tkinter as tk
+from tkinter import ttk
 from pathlib import Path
 
 from PIL import ImageTk, Image
@@ -92,21 +93,15 @@ def init():
         column=0)
 
     # Preview Option Menu
-    list_preview = ["Webcam", "Webcam + Skeleton", "Skeleton Only"]
-
     global selected_preview
     selected_preview = tk.StringVar()
-    selected_preview.set("Webcam")
 
-    option_menu_preview = tk.OptionMenu(
+    option_menu_preview = ttk.Combobox(
         frame_bottom_left,
-        selected_preview,
-        *list_preview)
+        textvariable=selected_preview
+    )
 
-    option_menu_preview.config(
-        bg=color_foreground,
-        fg=color_white,
-        width=option_menu_width)
+    option_menu_preview['values'] = ["Webcam", "Webcam + Skeleton", "Skeleton Only"]
 
     option_menu_preview.grid(
         row=0,
@@ -126,22 +121,13 @@ def init():
         )
 
     # Mode Option Menu
-    list_modes = ["Simple", "Full-body"]
-
     global selected_mode
     selected_mode = tk.StringVar()
-    selected_mode.set("Simple")
-
-    option_menu_mode = tk.OptionMenu(
+    option_menu_mode = ttk.Combobox(
         frame_bottom_left,
-        selected_mode,
-        *list_modes
+        textvariable=selected_mode,
         )
-
-    option_menu_mode.config(
-        bg=color_foreground,
-        fg=color_white,
-        width=option_menu_width)
+    option_menu_mode['values'] = ["Simple", "Full-body"]
 
     option_menu_mode.grid(
         row=1,
