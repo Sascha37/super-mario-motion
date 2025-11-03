@@ -102,6 +102,7 @@ def init():
     )
 
     option_menu_preview['values'] = ["Webcam", "Webcam + Skeleton", "Skeleton Only"]
+    option_menu_preview.current(0)
 
     option_menu_preview.grid(
         row=0,
@@ -128,6 +129,7 @@ def init():
         textvariable=selected_mode,
         )
     option_menu_mode['values'] = ["Simple", "Full-body"]
+    option_menu_mode.current(0)
 
     option_menu_mode.grid(
         row=1,
