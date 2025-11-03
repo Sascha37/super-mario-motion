@@ -1,3 +1,4 @@
+import math
 import threading
 from pathlib import Path
 
@@ -114,35 +115,33 @@ def cam_loop():
                 #swimming_left = wrist_left_x < shoulder_right_x and wrist_right_x < shoulder_right_x
                 #swimming_right = wrist_left_x > shoulder_left_x and wrist_right_x > shoulder_left_x
 
-
-
                 if jumping:
-                    #print("Jumping!")
+                    print("Jumping!")
                     current_pose = "jumping"
                 elif walking_right:
-                   # print("Walking right")
+                    print("Walking right")
                     current_pose = "walking_right"
                 elif walking_left:
-                   # print("Walking reft!")
+                    print("Walking reft!")
                     current_pose = "walking_left"
                 elif running_right:
-                   # print("Running right")  # debug message
+                    print("Running right")  # debug message
                     current_pose = "running_right"
                 elif running_left:
-                  #  print("Running left!")
+                    print("Running left!")
                     current_pose = "running_left"
                 elif crouching:
-                 #   print("Both hands below knees!")
+                    print("Both hands below knees!")
                     current_pose = "crouching"
-          #     elif swimming_left:
-          #          print("Swimming left")
-          #         current_pose = "swimming_left"
-          #     elif swimming_right:
-          #         print("Swimming right")
-          #         current_pose = "swimming_right"
+#                elif swimming_left:
+#                    print("Swimming left")
+#                    current_pose = "swimming_left"
+#                elif swimming_right:
+#                    print("Swimming right")
+#                    current_pose = "swimming_right"
                 else:
                     current_pose = "standing"
-                 #   print("Standing")
+                    print("Standing")
                 #print("Wrist right:" + str(wrist_right_y))
                 #print("Eye right:" + str(eye_right_y))
             if exitApp:
