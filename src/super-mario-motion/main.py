@@ -1,5 +1,6 @@
 import gui
 import vision
+import vision_ml
 import input
 
 # Function gets called every millisecond after the mainloop of the tkinter ui
@@ -24,6 +25,7 @@ def update():
 if __name__ == '__main__':
     print("Super Mario Motion started")
     vision.init()
+    vision_ml.init()
     input.init()
     gui.init()
 

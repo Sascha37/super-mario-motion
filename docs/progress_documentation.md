@@ -96,3 +96,15 @@ We decided to use version 1 because it runs the best and is the most stable and 
 - Complete integration of PyAutoGUI with motion recognition.  
 - Begin testing gameplay with motion-based controls.  
 - Optimize gesture detection for accuracy and performance.
+
+## Week 4
+
+
+## Week 5
+### Progress (as of 04.11.2025)
+- Implemented classes to handle motion detection via scikit-learn
+- You can now collect, train and test your own gestures
+
+### How to use collect and train
+- Run `python collect.py --label <your label> --seconds <seconds to record>` to collect a gesture
+- Run `python train.py` to train the model

@@ -2,5 +2,7 @@
 venv/
 .venv/
 env/
+# Ignore Python Cache
 __pycache__/
-
+# Ignore machine learning data
+data/

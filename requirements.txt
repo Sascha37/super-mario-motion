@@ -1,4 +1,7 @@
+numpy
 mediapipe
 opencv-python
 PyAutoGUI
 pillow
+joblib
+scikit-learn
