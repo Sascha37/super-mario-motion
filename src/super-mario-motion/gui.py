@@ -92,15 +92,34 @@ def init():
         row=0,
         column=0)
 
+    # Custom ttk Style for Combobox
+    style = ttk.Style()
+    style.theme_use('default')
+    style.configure("Custom.TCombobox",
+                    fieldbackground=color_foreground,
+                    background = color_foreground,
+                    foreground ="white"
+        )
+    style.map("Custom.TCombobox",
+            fieldbackground=[("readonly",color_foreground)],
+            foreground=[("readonly","white")],
+            background=[("readonly",color_foreground)])
+    # What to do when ComboboxSelected
+
+    def clear_combobox_selection(event):
+        event.widget.selection_clear()
+
     # Preview Option Menu
     global selected_preview
     selected_preview = tk.StringVar()
 
     option_menu_preview = ttk.Combobox(
         frame_bottom_left,
-        textvariable=selected_preview
+        textvariable=selected_preview,
+        state="readonly",
+        style="Custom.TCombobox"
     )
-
+    option_menu_preview.bind("<<ComboboxSelected>>", clear_combobox_selection)
     option_menu_preview['values'] = ["Webcam", "Webcam + Skeleton", "Skeleton Only"]
     option_menu_preview.current(0)
 
@@ -127,7 +146,10 @@ def init():
     option_menu_mode = ttk.Combobox(
         frame_bottom_left,
         textvariable=selected_mode,
+        state="readonly",
+        style="Custom.TCombobox"
         )
+    option_menu_mode.bind("<<ComboboxSelected>>", clear_combobox_selection)
     option_menu_mode['values'] = ["Simple", "Full-body"]
     option_menu_mode.current(0)
 
