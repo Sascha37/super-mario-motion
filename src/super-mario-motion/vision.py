@@ -10,7 +10,6 @@ import numpy as np
 skeleton_only_frame = None
 raw_frame = None
 skel_frame = None
-exitApp = False
 current_pose = "standing"
 lm_string = ""
 
@@ -58,7 +57,7 @@ def init():
     if not cam.isOpened():
         raise IOError("Cannot open camera")
     print("cam opened")
-    thread = threading.Thread(target=cam_loop)
+    thread = threading.Thread(target=cam_loop, daemon=True)
     thread.start()
 
 
@@ -159,9 +158,6 @@ def cam_loop():
                     if (x+1) % 4 == 0:
                         lm_string_temp += "\n"
                 lm_string = lm_string_temp
-
-            if exitApp:
-                break
 
     cam.release()
 
