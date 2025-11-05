@@ -2,6 +2,7 @@ import gui
 import vision
 import vision_ml
 import input
+from state import StateManager
 
 # Function gets called every millisecond after the mainloop of the tkinter ui
 def update():
@@ -36,6 +37,8 @@ def update():
 
 if __name__ == '__main__':
     print("Super Mario Motion started")
+    StateManager().set_pose("newwallo")
+    print(StateManager().get_pose())#TODO: Remove Debug
     vision.init()
     vision_ml.init()
     input.init()
