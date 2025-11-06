@@ -44,11 +44,7 @@ def press_designated_input(pose):
     global currently_held_keys, last_orientation
     match pose:
         case "standing":
-            if last_pose == "walking_left" or "walking_right" or "running_left" or "running_right":
-                countersteer = "left" if last_orientation == "right" else "right"
-                pyautogui.keyDown(countersteer)
-                pyautogui.keyUp(countersteer)
-                print("countersteer against direction: " + last_orientation)
+            pass
         case "jumping":
             pyautogui.keyDown("x")
             pyautogui.keyDown(last_orientation)
@@ -82,7 +78,7 @@ def press_designated_input(pose):
             pyautogui.keyDown("y")
             pyautogui.keyUp("y")
         case _:
-            print("Input: Invalid Pose")
+            print("Input: No input defined for: " + pose)
 
 
 def release_held_keys():
