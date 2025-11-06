@@ -90,7 +90,9 @@ def _worker():
                      min_tracking_confidence=0.5) as pose:
         print(Path(__file__).name + " initialized (passive)")
         while not _exit:
-            bgr = vision.get_latest_raw_frame()
+
+            bgr = vision.rgb #latest raw frame from vision
+
             if bgr is None:
                 time.sleep(0.01)
                 continue
@@ -130,11 +132,13 @@ def _worker():
 def get_current_pose():
     return _current_pose
 
-def get_latest_raw_frame():
-    return vision.get_latest_raw_frame()
+# TODO: For now I just commented it out, I dont know why this would be needed - Sascha
 
-def get_latest_skeleton():
-    return _skeleton_frame
+#def get_latest_raw_frame():
+#    return vision.get_latest_raw_frame()
+
+#def get_latest_skeleton():
+#    return _skeleton_frame
 
 def stop():
     global _exit, _thread

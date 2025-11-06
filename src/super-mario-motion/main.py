@@ -6,10 +6,6 @@ from state import StateManager
 
 # Function gets called every millisecond after the mainloop of the tkinter ui
 def update():
-    # Retrieve Images from vision.py:
-    image = vision.get_latest_raw_frame()
-    image_with_skeleton = vision.get_latest_skeleton()
-    image_only_skeleton = vision.get_only_sekeleton()
 
     # Retrieve Checkbox Info from gui.py
     send_keystrokes_checkbox = gui.get_boolean_send_keystrokes()
@@ -18,13 +14,14 @@ def update():
     current_pose = vision.get_current_pose()
 
     # Update Images to display in gui.py
-    gui.set_webcam_image(image,image_with_skeleton,image_only_skeleton)
+    vision.update_images()
+    gui.set_webcam_image(*state_manager.get_all_opencv_images())
 
     # Update Pose Preview Indicator in gui.py
     gui.update_pose(current_pose)
     gui.update_pose_image()
     gui.update_pose_text()
-    gui.update_debug_landmarks(vision.get_lm_string())
+    gui.update_debug_landmarks(state_manager.get_landmark_string())
 
     # Update Pose and update_send_permission in input.py
     input.update_pose(current_pose)
@@ -37,8 +34,9 @@ def update():
 
 if __name__ == '__main__':
     print("Super Mario Motion started")
-    StateManager().set_pose("newwallo")
-    print(StateManager().get_pose())#TODO: Remove Debug
+    state_manager = StateManager()
+    state_manager.set_pose("newwallo")
+    print(state_manager.get_pose())#TODO: Remove Debug
     vision.init()
     vision_ml.init()
     input.init()

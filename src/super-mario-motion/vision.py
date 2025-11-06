@@ -6,12 +6,13 @@ import cv2 as cv
 import mediapipe as mp
 import numpy as np
 
+from state import StateManager
+
 # globals
 skeleton_only_frame = None
 raw_frame = None
 skel_frame = None
 current_pose = "standing"
-lm_string = ""
 
 # runtime
 cam = None
@@ -20,6 +21,8 @@ frame = None
 
 mpPose = mp.solutions.pose
 mpDrawing = mp.solutions.drawing_utils
+
+state_manger = StateManager()
 
 # landmark indices
 eye_left = 2
@@ -87,13 +90,15 @@ def cam_loop():
                     mpPose.POSE_CONNECTIONS
                 )
 
+                # Draw an image of only the skeleton
                 skeleton_only_frame = np.zeros_like(frame)
                 mpDrawing.draw_landmarks(
                     skeleton_only_frame,
                     results.pose_landmarks,
                     mpPose.POSE_CONNECTIONS
                 )
-                # TODO: implement posture estimations
+
+                # Simple pose detection
 
                 lm = results.pose_landmarks.landmark
 
@@ -119,62 +124,46 @@ def cam_loop():
                 running_right = wrist_right_y < eye_right_y  # check if right wrist is above right shoulder
                 jumping = (running_right or walking_right) and (running_left or walking_left)
                 crouching = wrist_right_y > knee_right_y and wrist_left_y > knee_left_y
-                #TODO: fix swimming
-                #swimming_left = wrist_left_x < shoulder_right_x and wrist_right_x < shoulder_right_x
-                #swimming_right = wrist_left_x > shoulder_left_x and wrist_right_x > shoulder_left_x
+                #TODO: implement swimming and throwing
+                #swimming = ???
+                #trowing = ???
 
-                if jumping:
-                    print("Jumping!")
-                    current_pose = "jumping"
-                elif walking_right:
-                    print("Walking right")
-                    current_pose = "walking_right"
-                elif walking_left:
-                    print("Walking reft!")
-                    current_pose = "walking_left"
-                elif running_right:
-                    print("Running right")  # debug message
-                    current_pose = "running_right"
-                elif running_left:
-                    print("Running left!")
-                    current_pose = "running_left"
-                elif crouching:
-                    print("Both hands below knees!")
-                    current_pose = "crouching"
-#                elif swimming_left:
-#                    print("Swimming left")
-#                    current_pose = "swimming_left"
-#                elif swimming_right:
-#                    print("Swimming right")
-#                    current_pose = "swimming_right"
-                else:
-                    current_pose = "standing"
-                    print("Standing")
+                pose_mappings = [
+                    (jumping, "jumping"),
+                    (walking_right, "walking_right"),
+                    (walking_left, "walking_left"),
+                    (running_right, "running_right"),
+                    (running_left, "running_left"),
+                    (crouching, "crouching"),
+                    # (swimming, "swimming"),
+                    # (throwing, "throwing")
+                ]
+
+                current_pose = "standing"
+
+                for condition, mpose in pose_mappings:
+                    if condition:
+                        current_pose = mpose
+                        break
+                state_manger.set_pose(current_pose)
+                print(current_pose)
 
                 # Saves all Landmark cords into a string
-                lm_string_temp = ""
+                lm_string = ""
                 for x in range(33):
-                    lm_string_temp+= str(x)+ str(landmark_coords(frame, lm[x])) + " "
+                    lm_string+= str(x)+ str(landmark_coords(frame, lm[x])) + " "
                     if (x+1) % 4 == 0:
-                        lm_string_temp += "\n"
-                lm_string = lm_string_temp
+                        lm_string += "\n"
+                state_manger.set_landmark_string(lm_string)
 
     cam.release()
 
+def update_images():
+    state_manger.set_all_opencv_images(rgb,frame,skeleton_only_frame)
 
-def get_latest_raw_frame():
-    return rgb
-
-
-def get_latest_skeleton():
-    return frame
 
 def get_current_pose():
     return current_pose
 
-def get_only_sekeleton():
-    return skeleton_only_frame
 
-def get_lm_string():
-    return lm_string
 
