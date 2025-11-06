@@ -8,6 +8,8 @@ class StateManager:
     opencv_image_webcam_skeleton = None
     opencv_image_skeleton_only = None
 
+    gui_checkbox_send_permission = False
+
     # Getter
     @classmethod
     def get_pose(cls):
@@ -23,6 +25,9 @@ class StateManager:
                 cls.opencv_image_webcam_skeleton,
                 cls.opencv_image_skeleton_only)
 
+    @classmethod
+    def get_send_permission(cls):
+        return cls.gui_checkbox_send_permission
 
     # Setter
     @classmethod
@@ -39,3 +44,6 @@ class StateManager:
         cls.opencv_image_webcam_skeleton = new_webcam_skeleton
         cls.opencv_image_skeleton_only = new_skeleton_only
 
+    @classmethod
+    def set_send_permission(cls, new_send_permission):
+        cls.gui_checkbox_send_permission = new_send_permission

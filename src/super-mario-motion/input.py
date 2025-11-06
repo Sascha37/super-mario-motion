@@ -2,6 +2,7 @@ import pyautogui
 from pathlib import Path
 import threading
 import time
+from state import StateManager
 
 # Set initial values
 send_permission = False
@@ -12,6 +13,8 @@ pose = "standing"
 currently_held_keys = []
 last_orientation = "right"
 
+state_manager = StateManager()
+
 def init():
     thread = threading.Thread(target=input_loop,daemon=True)
     thread.start()
@@ -20,6 +23,8 @@ def input_loop():
     print(Path(__file__).name + " initialized")
     global pose, last_pose, mapping, send_permission, previous_send_permission
     while(True):
+        pose = state_manager.get_pose()
+        send_permission = state_manager.get_send_permission()
         if send_permission:
             if previous_send_permission == False: # When send_permission just changed from False to True
                 press_designated_input(pose)
@@ -76,6 +81,8 @@ def press_designated_input(pose):
         case "throwing":
             pyautogui.keyDown("y")
             pyautogui.keyUp("y")
+        case _:
+            print("Input: Invalid Pose")
 
 
 def release_held_keys():
@@ -83,11 +90,3 @@ def release_held_keys():
     for key in currently_held_keys:
         pyautogui.keyUp(key)
     currently_held_keys = []
-
-def update_pose(new_pose):
-    global pose
-    pose = new_pose
-
-def update_send_permission(new_send_permission):
-    global send_permission
-    send_permission = new_send_permission

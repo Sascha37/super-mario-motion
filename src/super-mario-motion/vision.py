@@ -162,8 +162,5 @@ def update_images():
     state_manger.set_all_opencv_images(rgb,frame,skeleton_only_frame)
 
 
-def get_current_pose():
-    return current_pose
-
 
 

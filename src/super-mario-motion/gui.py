@@ -314,8 +314,6 @@ def update_pose_image():
 
         label_pose_visualizer.config(image=window.image_pose)
         label_pose_visualizer.image = window.image_pose
-    else:
-        print("Invalid pose")
 
 def update_pose_text():
     label_current_pose.config(
