@@ -323,9 +323,5 @@ def update_debug_landmarks(landmarks):
     label_debug_landmarks.config(
         text = landmarks if allow_debug_info.get() else "")
 
-def get_boolean_send_keystrokes():
-    return send_keystrokes.get()
-
-
 def get_active_mode():
     return selected_mode.get()
