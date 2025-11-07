@@ -1,8 +1,19 @@
+import cv2 as cv
 import gui
 import vision
 import vision_ml
 import input
 from state import StateManager
+
+# Checks if a webcam is available
+def webcam_is_available():
+    cam = cv.VideoCapture(0)
+    if not cam.isOpened():
+        return False
+    tmp, _ = cam.read()
+    cam.release()
+    return tmp
+
 
 # Function gets called every millisecond after the mainloop of the tkinter ui
 def update():
@@ -27,14 +38,19 @@ def update():
 
 
 if __name__ == '__main__':
-    print("Super Mario Motion started")
+    if not webcam_is_available():
+        print("No Webcam found.")
 
-    state_manager = StateManager()
+    if webcam_is_available():
+        print("Super Mario Motion started")
+        print("Super Mario Motion started")
 
-    vision.init()
-    vision_ml.init()
-    input.init()
-    gui.init()
+        state_manager = StateManager()
 
-    gui.window.after(0, update)
-    gui.window.mainloop()
+        vision.init()
+        vision_ml.init()
+        input.init()
+        gui.init()
+
+        gui.window.after(0, update)
+        gui.window.mainloop()
