@@ -42,7 +42,7 @@ if __name__ == '__main__':
         print("No Webcam found.")
 
     if webcam_is_available():
-        print("Webcam found)
+        print("Webcam found")
         print("Super Mario Motion started")
 
         state_manager = StateManager()
