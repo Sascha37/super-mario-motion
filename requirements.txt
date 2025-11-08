@@ -1,3 +1,4 @@
+pydirectinput
 numpy
 mediapipe
 opencv-python
