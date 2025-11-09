@@ -33,6 +33,7 @@ path_image_gamepad = path_data_folder / 'gamepad.png'
 # Paddings
 label_webcam_top_padding = 20
 edge_padding_default = 20
+horizontal_padding = (window_width - webcam_image_width) // 2
 
 
 # Function gets called once in main.py once the program starts
@@ -69,7 +70,7 @@ def init():
         column=0,
         columnspan=2,
         pady=(label_webcam_top_padding,0),
-        padx=(edge_padding_default,0))
+        padx=(horizontal_padding, horizontal_padding))
 
     # Frame containing UI Elements located on the bottom left
     frame_bottom_left = tk.Frame(
@@ -79,7 +80,7 @@ def init():
     frame_bottom_left.grid(
         row=1,
         column=0,
-        padx=edge_padding_default,
+        padx=horizontal_padding,
         pady=(5,0)
     )
 
@@ -217,7 +218,7 @@ def init():
     frame_bottom_right.grid(
         row=1,
         column=1,
-        padx=edge_padding_default,
+        padx=horizontal_padding,
         pady=(20,0)
     )
     # Image Label Virtual Gamepad Visualizer
