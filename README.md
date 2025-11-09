@@ -3,15 +3,17 @@ An application written in Python that uses OpenCV alongside MediaPipe to transla
 
 This software is designed to be used alongside an NES emulator running the original Super Mario Bros. game.
 We do not provide the emulator or the game.
+
 ## Table of Contents
 - [Requirements](#requirements)
 - [How to Run and Edit](#how-to-run-and-edit)
-    - [On macOS and Linux](#on-macos-and-linux)
+    - [On macOS and Linux](#on-macos-and-linux-using-make)
     - [On Windows](#on-windows)
 - [Usage](#usage)
 - [Project Documentation](#project-documentation)
 - [Compatibility](#compatibility)
 - [License](#license)
+
 ## Requirements
 - **Python**: Version 3.12.11
 
@@ -43,6 +45,11 @@ If you want to **work with and modify this code**, open it in a code editor like
 - Start the emulator with your game.
 - You can now select, via the dropdown menu, either full body movement or simple movements (designed to be used while sitting on your chair).
 - Inputs can only be sent to the game if the emulator window is in focus and the `Send Inputs` checkbox has been checked.
+
+<p align="center">
+    <img src="docs/screenshots/ss1.png" alt="Screenshot" height="400"/>
+</p>
+
 ## Project Documentation
 - Everything related to documentation can be found in the `docs/` folder.
     - For PDFs used as bullet points to discuss in the weekly meetings, see `docs/meetings/`
