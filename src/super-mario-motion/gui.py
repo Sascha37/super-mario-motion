@@ -285,7 +285,29 @@ def set_webcam_image(webcam,webcam_skeleton,only_sekeleton):
         return
 
     array = array[:, ::-1, :]   # flip the camera horizontally only for the user
-    image = ImageTk.PhotoImage(Image.fromarray(array).resize((webcam_image_width, webcam_image_height), Image.LANCZOS))
+    # image = ImageTk.PhotoImage(Image.fromarray(array).resize((webcam_image_width, webcam_image_height), Image.LANCZOS))
+
+    # calculate the source and destination image ratios
+    img = Image.fromarray(array)
+    src_w, src_h = img.size
+    dst_w, dst_h = webcam_image_width, webcam_image_height
+    src_ratio = src_w / src_h
+    dst_ratio = dst_w / dst_h
+
+    # keep the aspect ratio and resize the image
+    if src_ratio > dst_ratio:
+        new_w = dst_w
+        new_h = int(dst_w / src_ratio)
+    else:
+        new_h = dst_h
+        new_w = int(dst_h * src_ratio)
+
+    # add black bars to the resized image to maintain webcam preview size
+    img = img.resize((new_w, new_h), Image.LANCZOS)
+    canvas = Image.new('RGB', (dst_w, dst_h), (0, 0, 0))
+    canvas.paste(img, ((dst_w - new_w) // 2, (dst_h - new_h) // 2))
+    image = ImageTk.PhotoImage(canvas)
+
     label_webcam.config(image=image)
     label_webcam.image = image
 
