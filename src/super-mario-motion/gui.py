@@ -25,7 +25,7 @@ color_foreground = '#141618'
 color_white = '#FFFFFF'
 
 # Filepaths for images that are being used on init
-path_data_folder = Path(__file__).parent / "data"
+path_data_folder = Path(__file__).parent / "images"
 path_image_webcam_sample = path_data_folder / 'webcam_sample.jpg'
 path_image_pose_default = path_data_folder / 'standing.png'
 path_image_gamepad = path_data_folder / 'gamepad.png'
@@ -52,8 +52,9 @@ def init():
             Image.open(path_image_webcam_sample).resize((webcam_image_width, webcam_image_height), Image.LANCZOS))
         image_pose = ImageTk.PhotoImage(Image.open(path_image_pose_default).resize((100, 100), Image.LANCZOS))
         image_gamepad = ImageTk.PhotoImage(Image.open(path_image_gamepad).resize((gamepad_image_width, gamepad_image_height), Image.LANCZOS))
-    except FileNotFoundError:
-        print("Error: File not found")
+    except FileNotFoundError as e:
+        print(f"Error: File not found: {e}")
+        print("Exiting...")
         sys.exit(1)
 
     # Label displaying Webcam Preview
@@ -335,8 +336,6 @@ def update_pose_image():
 
         label_pose_visualizer.config(image=window.image_pose)
         label_pose_visualizer.image = window.image_pose
-    else:
-        print("Invalid pose")
 
 def update_pose_text():
     label_current_pose.config(
@@ -345,10 +344,6 @@ def update_pose_text():
 def update_debug_landmarks(landmarks):
     label_debug_landmarks.config(
         text = landmarks if allow_debug_info.get() else "")
-
-def get_boolean_send_keystrokes():
-    return send_keystrokes.get()
-
 
 def get_active_mode():
     return selected_mode.get()
