@@ -233,7 +233,6 @@ def init():
     )
     label_debug_landmarks.grid(row=2, column=0, columnspan=2)
 
-    # COLLECT-UI: unterhalb des ganzen rechten Blocks, also in window.row=2
     global label_collect_status, button_collect_start
     label_collect_status = tk.Label(
         window,
@@ -249,7 +248,7 @@ def init():
         window,
         text="Start collecting",
         bg=color_foreground,
-        fg=color_white,
+        fg=color_background,
         command=start_collect_sequence
     )
     button_collect_start.grid(row=3, column=0, columnspan=2, pady=(10, 0))
@@ -260,11 +259,11 @@ def init():
     apply_mode(selected_mode.get())
 
 # set_webcam_image and set_pose_image are supposed to be called in the update-loop in main.py
-def set_webcam_image(webcam,webcam_skeleton,only_sekeleton):
+def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
     match selected_preview.get():
         case "Webcam": array = webcam
         case "Webcam + Skeleton": array = webcam_skeleton
-        case "Skeleton Only": array = only_sekeleton
+        case "Skeleton Only": array = only_skeleton
         case _: array = webcam
 
     if array is None:
@@ -377,7 +376,7 @@ def start_collect_sequence():
 
 def run_collect_step(index: int):
     if index >= len(COLLECTION_STEPS):
-        label_collect_status.config(text="Fertig.")
+        label_collect_status.config(text="Fertig.\nFinished.")
         return
 
     pose_name, seconds = COLLECTION_STEPS[index]
@@ -386,7 +385,7 @@ def run_collect_step(index: int):
 
 def show_collect_countdown(n: int, pose_name: str, seconds: float, index: int):
     if n == 0:
-        label_collect_status.config(text=f"Aufnahme: {pose_name}")
+        label_collect_status.config(text=f"Aufnahme: {pose_name}\nRecording: {pose_name}")
         threading.Thread(
             target=record_collect_pose,
             args=(pose_name, seconds, index),
