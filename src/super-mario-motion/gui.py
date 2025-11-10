@@ -376,7 +376,7 @@ def start_collect_sequence():
 
 def run_collect_step(index: int):
     if index >= len(COLLECTION_STEPS):
-        label_collect_status.config(text="Fertig.\nFinished.")
+        label_collect_status.config(text="Finished.")
         return
 
     pose_name, seconds = COLLECTION_STEPS[index]
@@ -385,17 +385,23 @@ def run_collect_step(index: int):
 
 def show_collect_countdown(n: int, pose_name: str, seconds: float, index: int):
     if n == 0:
-        label_collect_status.config(text=f"Aufnahme: {pose_name}\nRecording: {pose_name}")
+        label_collect_status.config(text=f"Recording: {pose_name} ({int(seconds)}s)")
         threading.Thread(
             target=record_collect_pose,
             args=(pose_name, seconds, index),
             daemon=True
         ).start()
+        show_recording_countdown(int(seconds), pose_name, index)
         return
 
     label_collect_status.config(text=f"{pose_name} in {n} …")
     window.after(1000, show_collect_countdown, n - 1, pose_name, seconds, index)
 
+def show_recording_countdown(remaining: int, pose_name: str, index: int):
+    if remaining <= 0:
+        return
+    label_collect_status.config(text=f"Recording: {pose_name} ({remaining}s)")
+    window.after(1000, show_recording_countdown, remaining - 1, pose_name, index)
 
 def record_collect_pose(pose_name: str, seconds: float, index: int):
     sys.argv = [
