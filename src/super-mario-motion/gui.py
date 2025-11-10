@@ -244,7 +244,7 @@ def init():
         bg=color_background,
         fg=color_white,
         text="",
-        font=("Consolas", 30)
+        font=("Consolas", 25)
     )
     label_collect_status.grid(row=2, column=0, columnspan=2, pady=(20, 0))
     label_collect_status.grid_remove()
@@ -302,14 +302,11 @@ def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
     label_webcam.image = image
 
 def set_gamepad_image(updated_gamepad_image):
-    try:
-        image = ImageTk.PhotoImage(
-            updated_gamepad_image.resize((gamepad_image_width, gamepad_image_height), Image.LANCZOS)
-        )
-        label_virtual_gamepad_visualizer.config(image=image)
-        label_virtual_gamepad_visualizer.image = image
-    except NameError:
+    if gamepad_image is None:
         return
+    image = ImageTk.PhotoImage(updated_gamepad_image.resize((gamepad_image_width, gamepad_image_height), Image.LANCZOS))
+    label_virtual_gamepad_visualizer.config(image=image)
+    label_virtual_gamepad_visualizer.image = image
 
 def update_pose(new_pose):
     global pose
