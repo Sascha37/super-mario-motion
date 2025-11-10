@@ -11,7 +11,7 @@ pose = ""
 
 # Window size
 window_width = 650
-window_height = 700
+window_height = 750
 
 # Webcam preview
 webcam_image_width = 612
