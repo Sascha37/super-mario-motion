@@ -6,6 +6,7 @@ import input
 import argparse
 import collect
 import sys
+import collecting_gui
 from state import StateManager
 
 # Checks if a webcam is available
@@ -39,6 +40,12 @@ def update():
 
     gui.window.after(1, update)
 
+def update_collect():
+    vision.update_images()
+    webcam, webcam_skeleton, only_skeleton = state_manager.get_all_opencv_images()
+    collecting_gui.set_webcam_image(webcam, webcam_skeleton, only_skeleton)
+    collecting_gui.update_debug_landmarks(state_manager.get_landmark_string())
+    collecting_gui.window.after(1, update_collect)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -50,6 +57,15 @@ if __name__ == '__main__':
     parser.add_argument('--source', type=str, choices=['auto', 'vision', 'camera'], help='Frame-Quelle')
     parser.add_argument('--camera-index', type=int, help='Kameraindex')
     args = parser.parse_args()
+
+    if args.collect and len(sys.argv) == 2:
+        state_manager = StateManager()
+
+        vision.init()
+        input.init()
+        collecting_gui.init()
+        collecting_gui.window.after(0, update_collect)
+        collecting_gui.window.mainloop()
 
     if args.collect:
         new_argv = ['collect.py']
