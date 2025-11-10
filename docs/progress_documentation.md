@@ -48,21 +48,21 @@ We analyzed how the original game handles player input and mapped them to possib
 - **Throw Fireball:**  
   - `B` – throw a fireball (tap repeatedly for rapid fire)
 
-### 🧠 Game Options Considered
+### Game Options Considered
 We evaluated different versions of Super Mario:
 
 1. **Original Super Mario Bros. (via RetroArch)**  
-   ✅ Predictable behavior  
-   ✅ No source editing needed  
-   ❗ Requires ROM and emulator
+   \+ Predictable behavior  
+   \+ No source editing needed  
+   \- Requires ROM and emulator
 
 2. **Super Mario Bros. Remastered (Godot)**  
-   ✅ Active development, modern visuals  
-   ❗ Large codebase, needs modification for motion input
+   \+ Active development, modern visuals  
+   \- Large codebase, needs modification for motion input
 
 3. **Mario-Level-1 (Python 2 project)**  
-   ✅ Easy to understand and extend  
-   ❗ Outdated, limited to first level
+   \+ Easy to understand and extend  
+   \- Outdated, limited to first level
 
 We decided to use version 1 because it runs the best and is the most stable and reliable option.
 ### Tools and Libraries
