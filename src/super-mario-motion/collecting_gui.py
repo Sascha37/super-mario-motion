@@ -27,9 +27,6 @@ option_menu_width = 17
 webcam_image_width = 612
 webcam_image_height = 408
 
-gamepad_image_width = 200
-gamepad_image_height = 100
-
 # Colors
 color_background = '#202326'
 color_foreground = '#141618'
@@ -139,7 +136,7 @@ def init():
 
     # Debug Checkbox
     global allow_debug_info
-    allow_debug_info = tk.IntVar()
+    allow_debug_info = tk.IntVar(value=1)
 
     checkbox_debug_info = tk.Checkbutton(
         frame_bottom_left,
@@ -198,9 +195,9 @@ def init():
         bg=color_background,
         fg=color_white,
         text="",
-        font=("Arial", 14)
+        font=("Consolas", 30)
     )
-    label_status.grid(row=2, column=0, columnspan=2, pady=(10,0))
+    label_status.grid(row=2, column=0, columnspan=2, pady=(60,0))
 
     window.after(500, start_sequence)
 
