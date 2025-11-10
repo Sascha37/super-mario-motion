@@ -1,21 +1,23 @@
 import sys
+import threading
 import tkinter as tk
 from tkinter import ttk
 from pathlib import Path
 
 from PIL import ImageTk, Image
 
+import collect
 pose = ""
 
-# Width and Height
+# Window size
 window_width = 650
 window_height = 700
 
-option_menu_width = 17
-
+# Webcam preview
 webcam_image_width = 612
 webcam_image_height = 408
 
+# Gamepad
 gamepad_image_width = 200
 gamepad_image_height = 100
 
@@ -35,54 +37,61 @@ label_webcam_top_padding = 20
 edge_padding_default = 20
 horizontal_padding = (window_width - webcam_image_width) // 2
 
+# Collecting
+COLLECTION_STEPS = [
+    ("standing", 10),
+    ("walking_left", 10),
+    ("walking_right", 10),
+    ("jumping", 10),
+]
+CSV_PATH = "pose_samples.csv"
+FPS = 30
 
 # Function gets called once in main.py once the program starts
 def init():
     global window
-    window = tk.Tk()
+    global frame_bottom_left, frame_bottom_right
+    global label_webcam
+    global selected_preview, selected_mode
+    global allow_debug_info, send_keystrokes, checkbox_toggle_inputs
+    global label_virtual_gamepad_visualizer, label_pose_visualizer, label_current_pose, label_debug_landmarks
+    global button_collect_start, label_collect_status
 
+    window = tk.Tk()
     window.title('Super Mario Motion')
     window.minsize(window_width, window_height)
     window.maxsize(window_width, window_height)
-
     window.configure(background=color_background)
 
-    # Loading default images
+    # Images
     try:
         image_webcam_sample = ImageTk.PhotoImage(
-            Image.open(path_image_webcam_sample).resize((webcam_image_width, webcam_image_height), Image.LANCZOS))
-        image_pose = ImageTk.PhotoImage(Image.open(path_image_pose_default).resize((100, 100), Image.LANCZOS))
-        image_gamepad = ImageTk.PhotoImage(Image.open(path_image_gamepad).resize((gamepad_image_width, gamepad_image_height), Image.LANCZOS))
+            Image.open(path_image_webcam_sample).resize((webcam_image_width, webcam_image_height), Image.LANCZOS)
+        )
+        image_pose = ImageTk.PhotoImage(
+            Image.open(path_image_pose_default).resize((100, 100), Image.LANCZOS)
+        )
+        image_gamepad = ImageTk.PhotoImage(
+            Image.open(path_image_gamepad).resize((gamepad_image_width, gamepad_image_height), Image.LANCZOS)
+        )
     except FileNotFoundError as e:
         print(f"Error: File not found: {e}")
-        print("Exiting...")
         sys.exit(1)
 
-    # Label displaying Webcam Preview
-    global label_webcam
-    label_webcam = tk.Label(
-        window,
-        image=image_webcam_sample,
-        bd=0)
+    # Webcam top
+    label_webcam = tk.Label(window, image=image_webcam_sample, bd=0)
     label_webcam.image = image_webcam_sample
     label_webcam.grid(
         row=0,
         column=0,
         columnspan=2,
-        pady=(label_webcam_top_padding,0),
-        padx=(horizontal_padding, horizontal_padding))
-
-    # Frame containing UI Elements located on the bottom left
-    frame_bottom_left = tk.Frame(
-        window,
-        bg=color_foreground)
-
-    frame_bottom_left.grid(
-        row=1,
-        column=0,
-        padx=horizontal_padding,
-        pady=(5,0)
+        pady=(label_webcam_top_padding, 0),
+        padx=(horizontal_padding, horizontal_padding)
     )
+
+
+    frame_bottom_left = tk.Frame(window, bg=color_foreground)
+    frame_bottom_left.grid(row=1, column=0, padx=horizontal_padding, pady=(5, 0))
 
     # Text Label "Preview:"
     label_preview = tk.Label(
@@ -111,10 +120,9 @@ def init():
     def clear_combobox_selection(event):
         event.widget.selection_clear()
 
-    # Preview Option Menu
+    # preview box
     global selected_preview
     selected_preview = tk.StringVar()
-
     option_menu_preview = ttk.Combobox(
         frame_bottom_left,
         textvariable=selected_preview,
@@ -124,46 +132,33 @@ def init():
     option_menu_preview.bind("<<ComboboxSelected>>", clear_combobox_selection)
     option_menu_preview['values'] = ["Webcam", "Webcam + Skeleton", "Skeleton Only"]
     option_menu_preview.current(0)
+    option_menu_preview.grid(row=0, column=1)
 
-    option_menu_preview.grid(
-        row=0,
-        column=1
-        )
+    # mode label
+    label_mode = tk.Label(frame_bottom_left, bg=color_foreground, fg=color_white, text="Mode:")
+    label_mode.grid(row=1, column=0)
 
-    # Text Label "Mode:"
-    label_mode = tk.Label(
-        frame_bottom_left,
-        bg=color_foreground,
-        fg=color_white,
-        text = "Mode:")
-
-    label_mode.grid(
-        row=1,
-        column=0,
-        )
-
-    # Mode Option Menu
+    # mode box
     global selected_mode
     selected_mode = tk.StringVar()
+
+    def on_mode_change(event=None):
+        apply_mode(selected_mode.get())
+
     option_menu_mode = ttk.Combobox(
         frame_bottom_left,
         textvariable=selected_mode,
         state="readonly",
         style="Custom.TCombobox"
-        )
-    option_menu_mode.bind("<<ComboboxSelected>>", clear_combobox_selection)
-    option_menu_mode['values'] = ["Simple", "Full-body"]
+    )
+    option_menu_mode.bind("<<ComboboxSelected>>", on_mode_change)
+    option_menu_mode['values'] = ["Simple", "Full-body", "Collect"]
     option_menu_mode.current(0)
+    option_menu_mode.grid(row=1, column=1)
 
-    option_menu_mode.grid(
-        row=1,
-        column=1,
-        )
-
-    # Debug Checkbox
+    # debug checkbox
     global allow_debug_info
-    allow_debug_info = tk.IntVar()
-
+    allow_debug_info = tk.IntVar(value=0)
     checkbox_debug_info = tk.Checkbutton(
         frame_bottom_left,
         text='Debug Info',
@@ -176,18 +171,13 @@ def init():
         onvalue=1,
         offvalue=0,
         width=20,
-        height=2)
+        height=2
+    )
+    checkbox_debug_info.grid(row=2, column=0, columnspan=2)
 
-    checkbox_debug_info.grid(
-        row=2,
-        column=0,
-        columnspan=2
-        )
-
-    # Send Inputs Checkbox
-    global send_keystrokes
+    # send inputs
+    global send_keystrokes, checkbox_toggle_inputs
     send_keystrokes = tk.IntVar()
-
     checkbox_toggle_inputs = tk.Checkbutton(
         frame_bottom_left,
         text='Send Inputs',
@@ -200,63 +190,37 @@ def init():
         onvalue=1,
         offvalue=0,
         width=20,
-        height=2)
-
-    checkbox_toggle_inputs.grid(
-        row=3,
-        column=0,
-        columnspan=2
-        )
-
-
-    # Frame containing UI Elements located on the bottom right
-
-    frame_bottom_right = tk.Frame(
-        window,
-        bg=color_foreground)
-
-    frame_bottom_right.grid(
-        row=1,
-        column=1,
-        padx=horizontal_padding,
-        pady=(20,0)
+        height=2
     )
-    # Image Label Virtual Gamepad Visualizer
+    checkbox_toggle_inputs.grid(row=3, column=0, columnspan=2)
+
+    # RIGHT
+    frame_bottom_right = tk.Frame(window, bg=color_foreground)
+    frame_bottom_right.grid(row=1, column=1, padx=horizontal_padding, pady=(20, 0))
+
+    # gamepad
     global label_virtual_gamepad_visualizer
-    label_virtual_gamepad_visualizer = tk.Label(
-        frame_bottom_right,
-        image=image_gamepad,
-        bd=0)
+    label_virtual_gamepad_visualizer = tk.Label(frame_bottom_right, image=image_gamepad, bd=0)
     label_virtual_gamepad_visualizer.image = image_gamepad
-    label_virtual_gamepad_visualizer.grid(
-        row=0,
-        column=0)
+    label_virtual_gamepad_visualizer.grid(row=0, column=0)
 
-    # Image Label designated for displaying the current pose
+    # pose image
     global label_pose_visualizer
-    label_pose_visualizer = tk.Label(
-        frame_bottom_right,
-        image=image_pose,
-        bd=0)
+    label_pose_visualizer = tk.Label(frame_bottom_right, image=image_pose, bd=0)
     label_pose_visualizer.image = image_pose
-    label_pose_visualizer.grid(
-        row=0,
-        column=1)
+    label_pose_visualizer.grid(row=0, column=1)
 
-    # Text Label "Current pose:"
+    # pose text
     global label_current_pose
     label_current_pose = tk.Label(
         frame_bottom_right,
         bg=color_foreground,
         fg=color_white,
-        text = "Current pose:" + pose)
+        text="Current pose:" + pose
+    )
+    label_current_pose.grid(row=1, column=0, columnspan=2)
 
-    label_current_pose.grid(
-        row=1,
-        column=0,
-        columnspan=2)
-
-    # Debug Text Label Displaying Landmark Coordinates
+    # debug text
     global label_debug_landmarks
     label_debug_landmarks = tk.Label(
         frame_bottom_right,
@@ -264,16 +228,36 @@ def init():
         fg=color_white,
         width=60,
         height=10,
-        text = "",
-        font=("Consolas", 6))
+        text="",
+        font=("Consolas", 6)
+    )
+    label_debug_landmarks.grid(row=2, column=0, columnspan=2)
 
-    label_debug_landmarks.grid(
-        row=2,
-        column=0,
-        columnspan=2)
-    # Init completed
+    # COLLECT-UI: unterhalb des ganzen rechten Blocks, also in window.row=2
+    global label_collect_status, button_collect_start
+    label_collect_status = tk.Label(
+        window,
+        bg=color_background,
+        fg=color_white,
+        text="",
+        font=("Consolas", 30)
+    )
+    label_collect_status.grid(row=2, column=0, columnspan=2, pady=(20, 0))
+    label_collect_status.grid_remove()
+
+    button_collect_start = tk.Button(
+        window,
+        text="Start collecting",
+        bg=color_foreground,
+        fg=color_white,
+        command=start_collect_sequence
+    )
+    button_collect_start.grid(row=3, column=0, columnspan=2, pady=(10, 0))
+    button_collect_start.grid_remove()
+
     print(Path(__file__).name + " initialized")
 
+    apply_mode(selected_mode.get())
 
 # set_webcam_image and set_pose_image are supposed to be called in the update-loop in main.py
 def set_webcam_image(webcam,webcam_skeleton,only_sekeleton):
@@ -314,23 +298,29 @@ def set_webcam_image(webcam,webcam_skeleton,only_sekeleton):
     label_webcam.image = image
 
 def set_gamepad_image(updated_gamepad_image):
-    if gamepad_image is None:
+    try:
+        image = ImageTk.PhotoImage(
+            updated_gamepad_image.resize((gamepad_image_width, gamepad_image_height), Image.LANCZOS)
+        )
+        label_virtual_gamepad_visualizer.config(image=image)
+        label_virtual_gamepad_visualizer.image = image
+    except NameError:
         return
-    image = ImageTk.PhotoImage(updated_gamepad_image.resize((gamepad_image_width, gamepad_image_height), Image.LANCZOS))
-    label_virtual_gamepad_visualizer.config(image=image)
-    label_virtual_gamepad_visualizer.image = image
 
 def update_pose(new_pose):
     global pose
     pose = new_pose
 
 def update_pose_image():
-    valid_poses = ["standing", "jumping", "crouching", "throwing", "walking_right", "walking_left", "running_right",
-                   "running_left"]
+    valid_poses = [
+        "standing", "jumping", "crouching", "throwing",
+        "walking_right", "walking_left", "running_right", "running_left"
+    ]
     if pose in valid_poses:
         try:
             window.image_pose = ImageTk.PhotoImage(
-                Image.open(path_data_folder / (pose + '.png')).resize((100, 100), Image.LANCZOS))
+                Image.open(path_data_folder / (pose + '.png')).resize((100, 100), Image.LANCZOS)
+            )
         except FileNotFoundError:
             print("Error: File not found")
             sys.exit(1)
@@ -339,12 +329,87 @@ def update_pose_image():
         label_pose_visualizer.image = window.image_pose
 
 def update_pose_text():
-    label_current_pose.config(
-        text = "Current pose:" + pose)
+    label_current_pose.config(text="Current pose:" + pose)
+
 
 def update_debug_landmarks(landmarks):
-    label_debug_landmarks.config(
-        text = landmarks if allow_debug_info.get() else "")
+    label_debug_landmarks.config(text=landmarks if allow_debug_info.get() else "")
+
+
+def apply_mode(mode: str):
+    global label_collect_status, button_collect_start
+    global label_virtual_gamepad_visualizer, label_pose_visualizer, label_current_pose
+    global checkbox_toggle_inputs, allow_debug_info
+
+    if mode == "Collect":
+        allow_debug_info.set(1)
+
+        checkbox_toggle_inputs.grid_remove()
+
+        label_virtual_gamepad_visualizer.grid_remove()
+        label_pose_visualizer.grid_remove()
+        label_current_pose.grid_remove()
+
+        label_collect_status.grid()
+        button_collect_start.grid()
+
+    else:
+        checkbox_toggle_inputs.grid(row=3, column=0, columnspan=2)
+
+        label_virtual_gamepad_visualizer.grid(row=1, column=1, padx=horizontal_padding, pady=(20, 0))
+        label_virtual_gamepad_visualizer.grid_forget()
+        label_virtual_gamepad_visualizer.grid(row=0, column=0)
+
+        label_pose_visualizer.grid_forget()
+        label_pose_visualizer.grid(row=0, column=1)
+
+        label_current_pose.grid_forget()
+        label_current_pose.grid(row=1, column=0, columnspan=2)
+
+        label_collect_status.grid_remove()
+        button_collect_start.grid_remove()
+
+
+def start_collect_sequence():
+    label_collect_status.config(text="Starte Sequenz…")
+    run_collect_step(0)
+
+
+def run_collect_step(index: int):
+    if index >= len(COLLECTION_STEPS):
+        label_collect_status.config(text="Fertig.")
+        return
+
+    pose_name, seconds = COLLECTION_STEPS[index]
+    show_collect_countdown(3, pose_name, seconds, index)
+
+
+def show_collect_countdown(n: int, pose_name: str, seconds: float, index: int):
+    if n == 0:
+        label_collect_status.config(text=f"Aufnahme: {pose_name}")
+        threading.Thread(
+            target=record_collect_pose,
+            args=(pose_name, seconds, index),
+            daemon=True
+        ).start()
+        return
+
+    label_collect_status.config(text=f"{pose_name} in {n} …")
+    window.after(1000, show_collect_countdown, n - 1, pose_name, seconds, index)
+
+
+def record_collect_pose(pose_name: str, seconds: float, index: int):
+    sys.argv = [
+        "collect.py",
+        "--label", pose_name,
+        "--seconds", str(seconds),
+        "--csv", CSV_PATH,
+        "--fps", str(FPS),
+        "--source", "auto",
+    ]
+    collect.main()
+    window.after(500, lambda: run_collect_step(index + 1))
+
 
 def get_active_mode():
     return selected_mode.get()
