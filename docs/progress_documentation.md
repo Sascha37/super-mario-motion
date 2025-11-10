@@ -98,8 +98,7 @@ We decided to use version 1 because it runs the best and is the most stable and 
 - Optimize gesture detection for accuracy and performance.
 
 ## Week 4
-*Progress Report (as of 28.10.2025)*
-
+### Progress (as of 28.10.2025)
 - Successfully completed the first level (World 1-1) of Super Mario Bros. **entirely via body motion controls**.  
   - Walking/running left and right and jumping all work through motion input.  
   - Considerable time was spent fine-tuning motion transitions for natural gameplay (e.g., counter-inputs to stop Mario’s momentum).
@@ -117,7 +116,7 @@ We decided to use version 1 because it runs the best and is the most stable and 
 ---
 
 ## Week 5
-*Progress Report (as of 04.11.2025)*
+### Progress (as of 04.11.2025)
 
 This week we focused on stability, full-body control, and usability:
 
@@ -146,7 +145,7 @@ This week we focused on stability, full-body control, and usability:
 ---
 
 ## Week 6
-*Progress Report (as of 11.11.2025)*
+### Progress (as of 11.11.2025)
 
 This week focused on improving the GUI and integrating a streamlined data collection mode:
 
