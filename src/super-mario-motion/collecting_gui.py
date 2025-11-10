@@ -1,9 +1,20 @@
 import sys
 import tkinter as tk
+import threading
+import collect
 from tkinter import ttk
 from pathlib import Path
 
 from PIL import ImageTk, Image
+
+COLLECTION_STEPS = [
+    ("standing", 10),
+    ("walking_left", 10),
+    ("walking_right", 10),
+    ("jumping", 10),
+]
+CSV_PATH = "pose_samples.csv"
+FPS = 30
 
 pose = ""
 
@@ -181,6 +192,18 @@ def init():
     # Init completed
     print(Path(__file__).name + " initialized")
 
+    global label_status
+    label_status = tk.Label(
+        window,
+        bg=color_background,
+        fg=color_white,
+        text="",
+        font=("Arial", 14)
+    )
+    label_status.grid(row=2, column=0, columnspan=2, pady=(10,0))
+
+    window.after(500, start_sequence)
+
 
 # set_webcam_image and set_pose_image are supposed to be called in the update-loop in main.py
 def set_webcam_image(webcam,webcam_skeleton,only_sekeleton):
@@ -194,7 +217,6 @@ def set_webcam_image(webcam,webcam_skeleton,only_sekeleton):
         return
 
     array = array[:, ::-1, :]   # flip the camera horizontally only for the user
-    # image = ImageTk.PhotoImage(Image.fromarray(array).resize((webcam_image_width, webcam_image_height), Image.LANCZOS))
 
     # calculate the source and destination image ratios
     img = Image.fromarray(array)
@@ -228,3 +250,41 @@ def update_pose(new_pose):
 def update_debug_landmarks(landmarks):
     label_debug_landmarks.config(
         text = landmarks if allow_debug_info.get() else "")
+
+def start_sequence():
+    run_step(0)
+
+def run_step(index):
+    if index >= len(COLLECTION_STEPS):
+        label_status.config(text="Fertig. Fenster schließt nach 5 Sekunden.")
+        window.after(5000, window.destroy)
+        return
+
+    pose_name, seconds = COLLECTION_STEPS[index]
+    show_countdown(5, pose_name, seconds, index)
+
+def show_countdown(n, pose_name, seconds, index):
+    if n == 0:
+        label_status.config(text=f"Aufnahme: {pose_name}")
+        threading.Thread(
+            target=record_pose,
+            args=(pose_name, seconds, index),
+            daemon=True
+        ).start()
+        return
+
+    label_status.config(text=f"{pose_name} in {n} …")
+    window.after(1000, show_countdown, n - 1, pose_name, seconds, index)
+
+def record_pose(pose_name, seconds, index):
+    sys.argv = [
+        "collect.py",
+        "--label", pose_name,
+        "--seconds", str(seconds),
+        "--csv", CSV_PATH,
+        "--fps", str(FPS),
+        "--source", "auto",
+    ]
+    collect.main()
+
+    window.after(500, lambda: run_step(index + 1))

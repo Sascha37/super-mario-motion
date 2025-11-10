@@ -67,7 +67,7 @@ if __name__ == '__main__':
         collecting_gui.window.after(0, update_collect)
         collecting_gui.window.mainloop()
 
-    if args.collect:
+    elif args.collect:
         new_argv = ['collect.py']
         if args.label is not None:
             new_argv += ['--label', args.label]
