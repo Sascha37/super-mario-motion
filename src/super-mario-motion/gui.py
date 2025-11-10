@@ -41,8 +41,13 @@ horizontal_padding = (window_width - webcam_image_width) // 2
 COLLECTION_STEPS = [
     ("standing", 10),
     ("walking_left", 10),
+    ("running_left", 10),
     ("walking_right", 10),
+    ("running_right", 10),
     ("jumping", 10),
+    ("crouching", 10),
+    ("throwing", 10),
+    ("swimming", 10),
 ]
 CSV_PATH = "pose_samples.csv"
 FPS = 30
