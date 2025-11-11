@@ -96,7 +96,7 @@ def init():
 
 
     frame_bottom_left = tk.Frame(window, bg=color_foreground)
-    frame_bottom_left.grid(row=1, column=0, padx=horizontal_padding, pady=(5, 0))
+    frame_bottom_left.grid(row=1, column=0, padx=horizontal_padding, pady=(5, 0), sticky="n")
 
     # Text Label "Preview:"
     label_preview = tk.Label(
@@ -253,7 +253,7 @@ def init():
         window,
         text="Start collecting",
         bg=color_foreground,
-        fg=color_background,
+        fg=color_white,
         command=start_collect_sequence
     )
     button_collect_start.grid(row=3, column=0, columnspan=2, pady=(10, 0))
@@ -372,7 +372,7 @@ def apply_mode(mode: str):
 
 
 def start_collect_sequence():
-    label_collect_status.config(text="Starte Sequenz…")
+    label_collect_status.config(text="Starting Sequence…")
     run_collect_step(0)
 
 
