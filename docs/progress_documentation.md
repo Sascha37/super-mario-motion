@@ -16,6 +16,7 @@ Over the next two weeks, we had to think about:
     - robust selection of machine learning and computer vision libraries (OpenCV, Mediapipe, NumPy)
 
 - Played through multiple versions of the game "Super Mario Bros.", some official, some fanmade. In the end we had three options left to pick from:
+  
 | Game                                                                                                        | Pros                                                                                          | Cons                                                                                                                                          |
 |-------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
 | The original Super Mario Bros.                                                                              | + The mechanics of the game are well documented<br>+ We do not need to change the source code | - Needs an emulator and rom to run                                                                                                            |
