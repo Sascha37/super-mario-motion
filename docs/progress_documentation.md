@@ -99,8 +99,8 @@ We decided to use version 1 because it runs the best and is the most stable and 
 
 ## Week 4
 ### Progress (as of 28.10.2025)
-- Successfully completed the first level (World 1-1) of Super Mario Bros. **entirely via body motion controls**.  
-  - Walking/running left and right and jumping all work through motion input.  
+- Successfully completed the first level (World 1-1) of Super Mario Bros. **entirely via body motion controls**.
+  - Walking/running left and right and jumping all work through motion input.
   - Considerable time was spent fine-tuning motion transitions for natural gameplay (e.g., counter-inputs to stop Mario’s momentum).
 - Fixed issues in motion-to-input responsiveness to make controls feel intuitive.
 - Encountered a thread termination issue on one machine — still under investigation.
@@ -120,15 +120,15 @@ We decided to use version 1 because it runs the best and is the most stable and 
 
 This week we focused on stability, full-body control, and usability:
 
-- **Thread Management:**  
-  Fixed thread shutdown issues when the program closes.  
+- **Thread Management:**
+  Fixed thread shutdown issues when the program closes.
   Identified and documented several bugs for follow-up.
-- **Full-Body Motion Controls:**  
-  Expanded motion recognition to support full-body gestures captured from webcam input.  
+- **Full-Body Motion Controls:**
+  Expanded motion recognition to support full-body gestures captured from webcam input.
   This marks the start of the project’s main functional phase.
-- **New User Interface:**  
-  Added a **mode selector** allowing users to switch between *Simple* and *Full-body* modes.  
-  Added a **preview selector** (`Webcam`, `Webcam + Skeleton`, `Skeleton Only`).  
+- **New User Interface:**
+  Added a **mode selector** allowing users to switch between *Simple* and *Full-body* modes.
+  Added a **preview selector** (`Webcam`, `Webcam + Skeleton`, `Skeleton Only`).
   Added a **Debug Info** checkbox for showing/hiding additional information.
 
 **Latency Issue**
@@ -147,7 +147,8 @@ This week we focused on stability, full-body control, and usability:
 ## Week 6
 ### Progress (as of 11.11.2025)
 
-This week focused on improving the GUI and integrating a streamlined data collection mode:
+This week focused mainly on three things:
+1. improving the GUI and integrating a streamlined data collection mode
 
 - Added a new **Collect Mode** to the GUI, selectable in the mode dropdown alongside “Simple” and “Full-body”.
 - In Collect Mode:
@@ -161,3 +162,12 @@ This week focused on improving the GUI and integrating a streamlined data collec
 - Live webcam preview and debug landmarks remain active during collection.
 - Improved cross-platform GUI layout (macOS/Linux) to ensure all content fits properly.
 - Fixed color and spacing inconsistencies and removed unwanted white borders around buttons.
+
+2. Updated the README.md file to better fit the current state of our project
+
+- additionally added issue templates to make it easier to write issues
+
+3. Refactored every module to change the way they communicate with each other
+
+- `state.py` was implemented allowing modules to write and retrieve information via getter and setter functions of the module
+- This makes the responsiveness of the program no longer reliant on the slow main-loop of Tkinter
