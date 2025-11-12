@@ -48,8 +48,7 @@ COLLECTION_STEPS = [
     ("jumping", 10),
     ("crouching", 10),
     ("throwing", 10),
-    ("swimming_right", 10),
-    ("swimming_left", 10),
+    ("swimming", 10),
 ]
 CSV_PATH = "pose_samples.csv"
 FPS = 30
