@@ -110,7 +110,7 @@ def init():
 
     # Custom ttk Style for Combobox
     style = ttk.Style()
-    style.theme_use('default')
+    style.theme_use('alt')
     style.configure("Custom.TCombobox",
                     fieldbackground=color_foreground,
                     background = color_foreground,
@@ -249,11 +249,9 @@ def init():
     label_collect_status.grid(row=2, column=0, columnspan=2, pady=(20, 0))
     label_collect_status.grid_remove()
 
-    button_collect_start = tk.Button(
+    button_collect_start = ttk.Button(
         window,
         text="Start collecting",
-        bg=color_foreground,
-        fg=color_white,
         command=start_collect_sequence
     )
     button_collect_start.grid(row=3, column=0, columnspan=2, pady=(10, 0))
