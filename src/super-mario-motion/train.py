@@ -14,6 +14,9 @@ MODEL_PATH = Path(__file__).parent.parent.parent / "data" / "pose_model.joblib"
 def combine_run_csvs(output_name: str = "pose_samples_all.csv",
                      runs_subdir: str = "collect_runs",
                      pattern: str = "pose_samples_*.csv") -> Path:
+    all_csvs = Path(__file__).parent.parent.parent / "data" / output_name
+    if all_csvs.exists():
+        (all_csvs.unlink())
     data_dir = Path(__file__).parent.parent.parent / "data"
     files = sorted(data_dir.glob(pattern))
     if not files:
