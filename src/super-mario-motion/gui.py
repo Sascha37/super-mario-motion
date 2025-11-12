@@ -52,6 +52,29 @@ COLLECTION_STEPS = [
 CSV_PATH = "pose_samples.csv"
 FPS = 30
 
+collecting = False
+collect_stop = False
+after_handles = []
+
+def _schedule_after(ms, func, *args):
+    aid = window.after(ms, func, *args)
+    after_handles.append(aid)
+    return aid
+
+def _cancel_scheduled():
+    while after_handles:
+        aid = after_handles.pop()
+        try:
+            window.after_cancel(aid)
+        except Exception:
+            pass
+
+def _set_collect_button(starting: bool):
+    if starting:
+        button_collect_start.config(text="Stop collecting", command=stop_collect_sequence)
+    else:
+        button_collect_start.config(text="Start collecting", command=start_collect_sequence)
+
 # Function gets called once in main.py once the program starts
 def init():
     global window
@@ -351,6 +374,7 @@ def apply_mode(mode: str):
 
         label_collect_status.grid()
         button_collect_start.grid()
+        _set_collect_button(starting=False)
 
     else:
         checkbox_toggle_inputs.grid(row=3, column=0, columnspan=2)
@@ -366,15 +390,35 @@ def apply_mode(mode: str):
         label_current_pose.grid(row=1, column=0, columnspan=2)
 
         label_collect_status.grid_remove()
+        _set_collect_button(starting=False)
         button_collect_start.grid_remove()
 
 
 def start_collect_sequence():
+    global collecting, collect_stop
+    if collecting:
+        return
+    collect_stop = False
+    collecting = True
+    _cancel_scheduled()
     label_collect_status.config(text="Starting Sequence…")
+    _set_collect_button(starting=True)
     run_collect_step(0)
 
+def stop_collect_sequence():
+    global collecting, collect_stop
+    collect_stop = True
+    collecting = False
+    _cancel_scheduled()
+    label_collect_status.config(text="Stopped.")
+    _set_collect_button(starting=False)
 
 def run_collect_step(index: int):
+    global collecting, collect_stop
+    if collect_stop:
+        _set_collect_button(starting=False)
+        return
+
     if index >= len(COLLECTION_STEPS):
         label_collect_status.config(text="Finished.")
         return
@@ -384,26 +428,33 @@ def run_collect_step(index: int):
 
 
 def show_collect_countdown(n: int, pose_name: str, seconds: float, index: int):
+    if collect_stop:
+        return
     if n == 0:
         label_collect_status.config(text=f"Recording: {pose_name} ({int(seconds)}s)")
-        threading.Thread(
-            target=record_collect_pose,
-            args=(pose_name, seconds, index),
-            daemon=True
-        ).start()
-        show_recording_countdown(int(seconds), pose_name, index)
+        if not collect_stop:
+            threading.Thread(
+                target=record_collect_pose,
+                args=(pose_name, seconds, index),
+                daemon=True
+            ).start()
+            show_recording_countdown(int(seconds), pose_name, index)
         return
 
     label_collect_status.config(text=f"{pose_name} in {n} …")
-    window.after(1000, show_collect_countdown, n - 1, pose_name, seconds, index)
+    _schedule_after(1000, show_collect_countdown, n - 1, pose_name, seconds, index)
 
 def show_recording_countdown(remaining: int, pose_name: str, index: int):
+    if collect_stop:
+        return
     if remaining <= 0:
         return
     label_collect_status.config(text=f"Recording: {pose_name} ({remaining}s)")
-    window.after(1000, show_recording_countdown, remaining - 1, pose_name, index)
+    _schedule_after(1000, show_recording_countdown, remaining - 1, pose_name, index)
 
 def record_collect_pose(pose_name: str, seconds: float, index: int):
+    if collect_stop:
+        return
     sys.argv = [
         "collect.py",
         "--label", pose_name,
@@ -413,7 +464,8 @@ def record_collect_pose(pose_name: str, seconds: float, index: int):
         "--source", "auto",
     ]
     collect.main()
-    window.after(500, lambda: run_collect_step(index + 1))
+    if not collect_stop:
+        _schedule_after(500, lambda: run_collect_step(index + 1))
 
 
 def get_active_mode():
