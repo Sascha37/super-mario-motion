@@ -47,6 +47,19 @@ def init():
 
     window.configure(background=color_background)
 
+    # always open the gui in the center of the screen
+    window.withdraw()
+    window.update_idletasks()
+    x = (window.winfo_screenwidth() - window_width) // 2
+    y = (window.winfo_screenheight() - window_height) // 2
+    window.geometry(f"{window_width}x{window_height}+{x}+{y}")
+    window.deiconify()
+
+    # always open the gui on top of all other windows
+    window.lift()
+    window.attributes('-topmost', True)
+    window.after(100, lambda: window.attributes('-topmost', False))
+
     # Loading default images
     try:
         image_webcam_sample = ImageTk.PhotoImage(
