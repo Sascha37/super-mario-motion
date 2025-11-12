@@ -3,7 +3,7 @@ import threading
 import tkinter as tk
 from tkinter import ttk
 from pathlib import Path
-
+from datetime import datetime
 from PIL import ImageTk, Image
 
 import collect
@@ -47,10 +47,12 @@ COLLECTION_STEPS = [
     ("jumping", 10),
     ("crouching", 10),
     ("throwing", 10),
-    ("swimming", 10),
+    ("swimming_right", 10),
+    ("swimming_left", 10),
 ]
 CSV_PATH = "pose_samples.csv"
 FPS = 30
+current_run_csv = CSV_PATH
 
 collecting = False
 collect_stop = False
@@ -395,12 +397,15 @@ def apply_mode(mode: str):
 
 
 def start_collect_sequence():
-    global collecting, collect_stop
+    global collecting, collect_stop, current_run_csv
     if collecting:
         return
     collect_stop = False
     collecting = True
     _cancel_scheduled()
+    runs_dir = Path(__file__).parent.parent.parent / "data"
+    runs_dir.mkdir(parents=True, exist_ok=True)
+    current_run_csv = str(runs_dir / f"pose_samples_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
     label_collect_status.config(text="Starting Sequence…")
     _set_collect_button(starting=True)
     run_collect_step(0)
@@ -455,11 +460,12 @@ def show_recording_countdown(remaining: int, pose_name: str, index: int):
 def record_collect_pose(pose_name: str, seconds: float, index: int):
     if collect_stop:
         return
+    global current_run_csv
     sys.argv = [
         "collect.py",
         "--label", pose_name,
         "--seconds", str(seconds),
-        "--csv", CSV_PATH,
+        "--csv", current_run_csv,
         "--fps", str(FPS),
         "--source", "auto",
     ]
