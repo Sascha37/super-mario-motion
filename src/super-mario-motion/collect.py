@@ -1,4 +1,3 @@
-# collect.py
 import argparse, time, csv
 from pathlib import Path
 import numpy as np

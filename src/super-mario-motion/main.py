@@ -3,8 +3,6 @@ import gui
 import vision
 import vision_ml
 import input
-import collect
-import sys
 from state import StateManager
 
 # Checks if a webcam is available

@@ -405,7 +405,7 @@ def start_collect_sequence():
     _cancel_scheduled()
     runs_dir = Path(__file__).parent.parent.parent / "data"
     runs_dir.mkdir(parents=True, exist_ok=True)
-    current_run_csv = str(runs_dir / f"pose_samples_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
+    current_run_csv = str(runs_dir / f"pose_samples_{datetime.now().strftime('%Y%m%d_%H%M')}.csv")
     label_collect_status.config(text="Starting Sequence…")
     _set_collect_button(starting=True)
     run_collect_step(0)
@@ -425,7 +425,11 @@ def run_collect_step(index: int):
         return
 
     if index >= len(COLLECTION_STEPS):
+        _cancel_scheduled()
         label_collect_status.config(text="Finished.")
+        collecting = False
+        collect_stop = False
+        _set_collect_button(starting=False)
         return
 
     pose_name, seconds = COLLECTION_STEPS[index]
