@@ -5,6 +5,7 @@ from tkinter import ttk
 from pathlib import Path
 from datetime import datetime
 from PIL import ImageTk, Image
+import random
 
 import collect
 pose = ""
@@ -53,6 +54,9 @@ COLLECTION_STEPS = [
 CSV_PATH = "pose_samples.csv"
 FPS = 30
 current_run_csv = CSV_PATH
+
+# Will hold the randomized order for a single collection run
+collection_order = None
 
 collecting = False
 collect_stop = False
@@ -397,12 +401,15 @@ def apply_mode(mode: str):
 
 
 def start_collect_sequence():
-    global collecting, collect_stop, current_run_csv
+    global collecting, collect_stop, current_run_csv, collection_order
     if collecting:
         return
     collect_stop = False
     collecting = True
     _cancel_scheduled()
+    # Randomize the order of collection steps for this run
+    collection_order = random.sample(COLLECTION_STEPS, len(COLLECTION_STEPS))
+
     runs_dir = Path(__file__).parent.parent.parent / "data"
     runs_dir.mkdir(parents=True, exist_ok=True)
     current_run_csv = str(runs_dir / f"pose_samples_{datetime.now().strftime('%Y%m%d_%H%M')}.csv")
@@ -419,20 +426,23 @@ def stop_collect_sequence():
     _set_collect_button(starting=False)
 
 def run_collect_step(index: int):
-    global collecting, collect_stop
+    global collecting, collect_stop, collection_order
     if collect_stop:
         _set_collect_button(starting=False)
         return
 
-    if index >= len(COLLECTION_STEPS):
+    steps = collection_order if collection_order else COLLECTION_STEPS
+
+    if index >= len(steps):
         _cancel_scheduled()
         label_collect_status.config(text="Finished.")
         collecting = False
         collect_stop = False
+        collection_order = None
         _set_collect_button(starting=False)
         return
 
-    pose_name, seconds = COLLECTION_STEPS[index]
+    pose_name, seconds = steps[index]
     show_collect_countdown(3, pose_name, seconds, index)
 
 
