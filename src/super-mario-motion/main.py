@@ -36,12 +36,10 @@ def update():
 
     gui.window.after(1, update)
 
-
 if __name__ == '__main__':
     if not webcam_is_available():
         print("No Webcam found.")
-
-    if webcam_is_available():
+    else:
         print("Webcam found")
         print("Super Mario Motion started")
 

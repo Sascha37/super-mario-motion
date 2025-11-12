@@ -1,11 +1,14 @@
-# collect.py
 import argparse, time, csv
 from pathlib import Path
 import numpy as np
 import cv2 as cv
 import mediapipe as mp
 
-import vision  # nutzt die Kamera aus laufenden Programm
+# TODO: Remove import vision  # nutzt die Kamera aus laufenden Programm
+from state import StateManager
+
+# Init StateManager
+state_manger = StateManager()
 
 # Landmarks
 eye_left, eye_right = 2, 5
@@ -74,7 +77,7 @@ def main():
     if args.source == "camera":
         cam = cv.VideoCapture(args.camera_index)
         if not cam.isOpened():
-            raise IOError(f"[collect] Konnte Kamera {args.camera_index} nicht öffnen.")
+            raise IOError(f"[collect] Could not open camera {args.camera_index}.")
 
     with mpPose.Pose(static_image_mode=False, model_complexity=1,
                      enable_segmentation=False,
@@ -89,10 +92,7 @@ def main():
             bgr = None
 
             if args.source in ("auto", "vision"):
-                try:
-                    bgr = vision.get_latest_raw_frame()
-                except Exception:
-                    bgr = None
+                bgr = state_manger.get_opencv_image_webcam()
 
             if bgr is None and args.source in ("auto", "camera"):
                 if cam is None:
