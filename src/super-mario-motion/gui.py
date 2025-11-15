@@ -2,6 +2,7 @@ import sys
 import tkinter as tk
 from tkinter import ttk
 from pathlib import Path
+import platform
 
 from PIL import ImageTk, Image
 
@@ -50,8 +51,22 @@ def init():
     # always open the gui in the center of the screen
     window.withdraw()
     window.update_idletasks()
-    x = (window.winfo_screenwidth() - window_width) // 2
-    y = (window.winfo_screenheight() - window_height) // 2
+
+    system = platform.system()
+
+    if system in ("Windows", "Darwin"):                   # normal calculation on Windows and macOS
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+        x = (screen_width - window_width) // 2
+        y = (screen_height - window_height) // 2
+    else:                                                 # calculation with virtual root on Linux
+        screen_width = window.winfo_vrootwidth()
+        screen_height = window.winfo_vrootheight()
+        offset_x = window.winfo_vrootx()
+        offset_y = window.winfo_vrooty()
+        x = offset_x + (screen_width - window_width) // 2
+        y = offset_y + (screen_height - window_height) // 2
+
     window.geometry(f"{window_width}x{window_height}+{x}+{y}")
     window.deiconify()
 
