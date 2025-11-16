@@ -43,7 +43,7 @@ def input_loop():
             release_held_keys()
             previous_send_permission = False
 
-        time.sleep(0.001)
+        time.sleep(0.02)
 
 def press_designated_input(pose):
     global currently_held_keys, last_orientation
