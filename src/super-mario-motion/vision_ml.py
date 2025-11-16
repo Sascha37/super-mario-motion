@@ -126,7 +126,7 @@ def _worker():
                 _smooth.append(label)
                 vals, counts = np.unique(list(_smooth), return_counts=True)
                 _current_pose = vals[np.argmax(counts)]
-                print(str(_current_pose))
+                # print(str(_current_pose))
             time.sleep(0.001)
 
 def get_current_pose():
