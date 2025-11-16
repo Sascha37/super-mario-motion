@@ -13,7 +13,7 @@ import vision
 
 from state import StateManager
 
-state_manger = StateManager()
+state_manager = StateManager()
 
 _current_pose = "standing"
 _raw_frame = None
@@ -130,7 +130,7 @@ def _worker():
                 vals, counts = np.unique(list(_smooth), return_counts=True)
                 _current_pose = vals[np.argmax(counts)]
 
-                state_manger.set_pose_full_body(_current_pose)
+                state_manager.set_pose_full_body(_current_pose)
             time.sleep(0.001)
 
 def stop():
