@@ -28,7 +28,7 @@ def input_loop():
     print(Path(__file__).name + " initialized")
     global pose, last_pose, mapping, send_permission, previous_send_permission
     while(True):
-        pose = state_manager.get_pose()
+        pose = state_manager.get_pose_full_body() if state_manager.get_current_mode() == "Full-body" else state_manager.get_pose()
         send_permission = state_manager.get_send_permission()
         if send_permission:
             if previous_send_permission == False: # When send_permission just changed from False to True
