@@ -26,6 +26,10 @@ class StateManager:
                 cls.opencv_image_skeleton_only)
 
     @classmethod
+    def get_opencv_image_webcam(cls):
+        return cls.opencv_image_webcam
+
+    @classmethod
     def get_send_permission(cls):
         return cls.gui_checkbox_send_permission
 

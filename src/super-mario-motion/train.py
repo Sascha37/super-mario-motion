@@ -11,6 +11,26 @@ from joblib import dump
 CSV_PATH = Path(__file__).parent.parent.parent / "data" / "pose_samples.csv"
 MODEL_PATH = Path(__file__).parent.parent.parent / "data" / "pose_model.joblib"
 
+def combine_run_csvs(output_name: str = "pose_samples_all.csv",
+                     runs_subdir: str = "collect_runs",
+                     pattern: str = "pose_samples_*.csv") -> Path:
+    all_csvs = Path(__file__).parent.parent.parent / "data" / output_name
+    if all_csvs.exists():
+        (all_csvs.unlink())
+    data_dir = Path(__file__).parent.parent.parent / "data"
+    files = sorted(data_dir.glob(pattern))
+    if not files:
+        raise FileNotFoundError(f"Keine Collect-Dateien in {data_dir} gefunden.")
+    out_path = data_dir / output_name
+    with open(out_path, "w") as out_f:
+        for i, fp in enumerate(files):
+            with open(fp, "r") as in_f:
+                for j, line in enumerate(in_f):
+                    if i > 0 and j == 0 and line.lower().startswith("label,"):
+                        continue
+                    out_f.write(line)
+    return out_path
+
 def load_csv(csv_path: Path):
     labels, feats = [], []
     with open(csv_path, "r") as f:
@@ -25,10 +45,10 @@ def load_csv(csv_path: Path):
     return X, y
 
 def main():
-    if not CSV_PATH.exists():
-        raise FileNotFoundError(f"{CSV_PATH} nicht gefunden. Erst Daten mit collect.py sammeln.")
-
-    X, y = load_csv(CSV_PATH)
+    #if not CSV_PATH.exists():
+    #    raise FileNotFoundError(f"{CSV_PATH} nicht gefunden. Erst Daten mit collect.py sammeln.")
+    training_csv = combine_run_csvs()
+    X, y = load_csv(training_csv)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, stratify=y, random_state=42
     )
