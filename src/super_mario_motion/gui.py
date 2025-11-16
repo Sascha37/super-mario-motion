@@ -7,7 +7,7 @@ from datetime import datetime
 from PIL import ImageTk, Image
 import random
 
-import collect
+from . import collect
 pose = ""
 
 # Window size

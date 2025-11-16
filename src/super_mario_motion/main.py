@@ -1,9 +1,9 @@
 import cv2 as cv
-import gui
-import vision
-import vision_ml
-import input
-from state import StateManager
+from . import gui
+from . import vision
+from . import vision_ml
+from . import input
+from .state import StateManager
 
 # Checks if a webcam is available
 def webcam_is_available():

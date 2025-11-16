@@ -5,7 +5,7 @@ import cv2 as cv
 import mediapipe as mp
 
 # TODO: Remove import vision  # nutzt die Kamera aus laufenden Programm
-from state import StateManager
+from .state import StateManager
 
 # Init StateManager
 state_manger = StateManager()

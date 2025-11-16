@@ -9,7 +9,7 @@ import mediapipe as mp
 from joblib import load
 
 # Wir beziehen Frames aus vision.py
-import vision
+from . import vision
 
 
 _current_pose = "standing"
