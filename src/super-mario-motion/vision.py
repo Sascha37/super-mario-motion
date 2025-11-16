@@ -75,7 +75,7 @@ def detect_pose_simple(frame, lm):
     wrist_right_xy     = coordinates(wrist_right)
 
     # define common coordinates
-    nose_x = nose_xy[0]
+    shoulder_width = distance(shoulder_left_xy, shoulder_right_xy)
     shoulder_left_y, shoulder_right_y = shoulder_left_xy[1], shoulder_right_xy[1]
     eye_left_y, eye_right_y = eye_left_xy[1], eye_right_xy[1]
     wrist_left_x, wrist_left_y, = wrist_left_xy
@@ -84,7 +84,7 @@ def detect_pose_simple(frame, lm):
     hands_below_shoulders = wrist_left_y > shoulder_left_y and wrist_right_y > shoulder_right_y
 
     # throwing: hands near each other
-    throwing = wrist_dist < 400 and not hands_below_shoulders
+    throwing = wrist_dist < shoulder_width*0.75 and not hands_below_shoulders
 
     # walking: hand between shoulder and eyes
     walking_left  = shoulder_left_y > wrist_left_y  > eye_left_y
@@ -98,7 +98,7 @@ def detect_pose_simple(frame, lm):
     jumping = (running_right or walking_right) and (running_left or walking_left)
 
     # crouching: hands near each other and below shoulders
-    crouching = hands_below_shoulders and wrist_dist < 400
+    crouching = wrist_dist < shoulder_width*0.75 and hands_below_shoulders
 
     swimming = wrist_left_x < wrist_right_x
 
@@ -169,7 +169,7 @@ def cam_loop():
                 current_pose = detect_pose_simple(frame, lm)
 
                 state_manger.set_pose(current_pose)
-                # print(current_pose)
+                print(current_pose)
 
                 # Saves all Landmark cords into a string
                 lm_string = ""
