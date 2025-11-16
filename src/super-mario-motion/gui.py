@@ -49,12 +49,12 @@ def init():
     window.configure(background=color_background)
 
     # always open the gui in the center of the screen
-    window.withdraw()
-    window.update_idletasks()
-
     system = platform.system()
 
-    if system in ("Windows", "Darwin"):                   # normal calculation on Windows and macOS
+    if system in ("Windows", "Darwin"):               # calculation for Windows and macOS
+        window.withdraw()
+        window.update_idletasks()
+
         screen_width = window.winfo_screenwidth()
         screen_height = window.winfo_screenheight()
         x = (screen_width - window_width) // 2
