@@ -100,17 +100,17 @@ def detect_pose_simple(frame, lm):
     # crouching: hands near each other and below shoulders
     crouching = hands_below_shoulders and wrist_dist < 400
 
-    swimming = (wrist_left_x > nose_x and wrist_right_x > nose_x) or (wrist_left_x < nose_x and wrist_right_x < nose_x)
+    swimming = wrist_left_x < wrist_right_x
 
     # setting priorities (higher = higher priority)
+    if swimming:
+        return "swimming"
+
     if throwing:
         return "throwing"
 
     if jumping:
         return "jumping"
-
-    if swimming:
-        return "swimming"
 
     if running_right:
         return "running_right"
