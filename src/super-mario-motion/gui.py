@@ -3,6 +3,8 @@ import threading
 import tkinter as tk
 from tkinter import ttk
 from pathlib import Path
+import platform
+
 from datetime import datetime
 from PIL import ImageTk, Image
 import random
@@ -96,7 +98,28 @@ def init():
     window.maxsize(window_width, window_height)
     window.configure(background=color_background)
 
-    # Images
+    # always open the gui in the center of the screen
+    system = platform.system()
+
+    if system in ("Windows", "Darwin"):               # calculation for Windows and macOS
+        window.withdraw()
+        window.update_idletasks()
+
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+        x = (screen_width - window_width) // 2
+        y = (screen_height - window_height) // 2
+
+        window.geometry(f"{window_width}x{window_height}+{x}+{y}")
+        window.deiconify()
+
+    if system == "Darwin":
+        # always open the gui on top of all other windows for macOS
+        window.lift()
+        window.attributes('-topmost', True)
+        window.after(100, lambda: window.attributes('-topmost', False))
+
+    # Loading default images
     try:
         image_webcam_sample = ImageTk.PhotoImage(
             Image.open(path_image_webcam_sample).resize((webcam_image_width, webcam_image_height), Image.LANCZOS)
