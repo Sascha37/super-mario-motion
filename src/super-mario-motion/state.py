@@ -1,6 +1,7 @@
 class StateManager:
     # Init defualt values
     pose = "default"
+    pose_full_body = "default"
 
     landmark_string = "default"
 
@@ -14,6 +15,10 @@ class StateManager:
     @classmethod
     def get_pose(cls):
         return cls.pose
+
+    @classmethod
+    def get_pose_full_body(cls):
+        return cls.pose_full_body
 
     @classmethod
     def get_landmark_string(cls):
@@ -37,6 +42,10 @@ class StateManager:
     @classmethod
     def set_pose(cls, new_pose):
         cls.pose = new_pose
+
+    @classmethod
+    def set_pose_full_body(cls, new_pose):
+        cls.pose_full_body = new_pose
 
     @classmethod
     def set_landmark_string(cls, new_landmark_string):

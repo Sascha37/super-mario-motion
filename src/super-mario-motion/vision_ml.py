@@ -11,6 +11,9 @@ from joblib import load
 # Wir beziehen Frames aus vision.py
 import vision
 
+from state import StateManager
+
+state_manger = StateManager()
 
 _current_pose = "standing"
 _raw_frame = None
@@ -126,19 +129,9 @@ def _worker():
                 _smooth.append(label)
                 vals, counts = np.unique(list(_smooth), return_counts=True)
                 _current_pose = vals[np.argmax(counts)]
-                print(str(_current_pose))
+
+                state_manger.set_pose_full_body(_current_pose)
             time.sleep(0.001)
-
-def get_current_pose():
-    return _current_pose
-
-# TODO: For now I just commented it out, I dont know why this would be needed - Sascha
-
-#def get_latest_raw_frame():
-#    return vision.get_latest_raw_frame()
-
-#def get_latest_skeleton():
-#    return _skeleton_frame
 
 def stop():
     global _exit, _thread

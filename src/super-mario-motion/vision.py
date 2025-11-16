@@ -144,8 +144,8 @@ def cam_loop():
                     if condition:
                         current_pose = mpose
                         break
+
                 state_manger.set_pose(current_pose)
-                print(current_pose)
 
                 # Saves all Landmark cords into a string
                 lm_string = ""
