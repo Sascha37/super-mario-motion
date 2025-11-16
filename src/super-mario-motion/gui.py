@@ -60,13 +60,14 @@ def init():
         x = (screen_width - window_width) // 2
         y = (screen_height - window_height) // 2
 
-    window.geometry(f"{window_width}x{window_height}+{x}+{y}")
-    window.deiconify()
+        window.geometry(f"{window_width}x{window_height}+{x}+{y}")
+        window.deiconify()
 
-    # always open the gui on top of all other windows
-    window.lift()
-    window.attributes('-topmost', True)
-    window.after(100, lambda: window.attributes('-topmost', False))
+    if system == "Darwin":
+        # always open the gui on top of all other windows for macOS
+        window.lift()
+        window.attributes('-topmost', True)
+        window.after(100, lambda: window.attributes('-topmost', False))
 
     # Loading default images
     try:
