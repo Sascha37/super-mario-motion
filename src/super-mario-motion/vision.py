@@ -1,3 +1,4 @@
+import math
 import threading
 from pathlib import Path
 
@@ -24,6 +25,7 @@ mpDrawing = mp.solutions.drawing_utils
 state_manger = StateManager()
 
 # landmark indices
+nose = 0
 eye_left = 2
 eye_right = 5
 shoulder_left = 11
@@ -45,14 +47,6 @@ def landmark_coords(image, lm):
     return int(w * lm.x), int(h * lm.y)
 
 
-def angle(a, b, c):
-    a = np.array(a)
-    b = np.array(b)
-    c = np.array(c)
-    cos = (np.dot(a - b, c - b)) / (np.linalg.norm(a - b) * np.linalg.norm(c - b))
-    return np.degrees(np.arccos(cos))
-
-
 def init():
     global cam, rgb, frame
     cam = cv.VideoCapture(0)
@@ -61,6 +55,77 @@ def init():
     print("cam opened")
     thread = threading.Thread(target=cam_loop, daemon=True)
     thread.start()
+
+
+def detect_pose_simple(frame, lm):
+    # helper functions for coordinates and distance
+    def coordinates(index):
+        return landmark_coords(frame, lm[index])
+
+    def distance(x, y):
+        return math.hypot(y[0] - x[0], y[1] - x[1])
+
+    # get relevant landmark coordinates
+    nose_xy            = coordinates(nose)
+    eye_left_xy        = coordinates(eye_left)
+    eye_right_xy       = coordinates(eye_right)
+    shoulder_left_xy   = coordinates(shoulder_left)
+    shoulder_right_xy  = coordinates(shoulder_right)
+    wrist_left_xy      = coordinates(wrist_left)
+    wrist_right_xy     = coordinates(wrist_right)
+
+    # define common coordinates
+    shoulder_width = distance(shoulder_left_xy, shoulder_right_xy)
+    shoulder_left_y, shoulder_right_y = shoulder_left_xy[1], shoulder_right_xy[1]
+    eye_left_y, eye_right_y = eye_left_xy[1], eye_right_xy[1]
+    wrist_left_x, wrist_left_y, = wrist_left_xy
+    wrist_right_x, wrist_right_y = wrist_right_xy
+    wrist_dist = distance(wrist_left_xy, wrist_right_xy)
+    hands_below_shoulders = wrist_left_y > shoulder_left_y and wrist_right_y > shoulder_right_y
+
+    # throwing: hands near each other
+    throwing = wrist_dist < shoulder_width*0.75 and not hands_below_shoulders
+
+    # walking: hand between shoulder and eyes
+    walking_left  = shoulder_left_y > wrist_left_y  > eye_left_y
+    walking_right = shoulder_right_y > wrist_right_y > eye_right_y
+
+    # running: hand above eyes
+    running_left  = wrist_left_y  < eye_left_y
+    running_right = wrist_right_y < eye_right_y
+
+    # jumping: both arms above shoulders
+    jumping = (running_right or walking_right) and (running_left or walking_left)
+
+    # crouching: hands near each other and below shoulders
+    crouching = wrist_dist < shoulder_width*0.75 and hands_below_shoulders
+
+    swimming = wrist_left_x < wrist_right_x
+
+    # setting priorities (higher = higher priority)
+    if swimming:
+        return "swimming"
+
+    if throwing:
+        return "throwing"
+
+    if jumping:
+        return "jumping"
+
+    if running_right:
+        return "running_right"
+    if running_left:
+        return "running_left"
+
+    if walking_right:
+        return "walking_right"
+    if walking_left:
+        return "walking_left"
+
+    if crouching:
+        return "crouching"
+
+    return "standing"
 
 
 def cam_loop():
@@ -98,52 +163,11 @@ def cam_loop():
                 )
 
                 # Simple pose detection
-
                 lm = results.pose_landmarks.landmark
 
-                # get joint coordinates
-                eye_left_x, eye_left_y = landmark_coords(frame, lm[eye_left])
-                eye_right_x, eye_right_y = landmark_coords(frame, lm[eye_right])
-                shoulder_left_x, shoulder_left_y = landmark_coords(frame, lm[shoulder_left])
-                shoulder_right_x, shoulder_right_y = landmark_coords(frame, lm[shoulder_right])
-                elbow_left_x, elbow_left_y = landmark_coords(frame, lm[elbow_left])
-                elbow_right_x, elbow_right_y = landmark_coords(frame, lm[elbow_right])
-                wrist_left_x, wrist_left_y = landmark_coords(frame, lm[wrist_left])
-                wrist_right_x, wrist_right_y = landmark_coords(frame, lm[wrist_right])
-                hip_left_x, hip_left_y = landmark_coords(frame, lm[hip_left])
-                hip_right_x, hip_right_y = landmark_coords(frame, lm[hip_right])
-                knee_left_x, knee_left_y = landmark_coords(frame, lm[knee_left])
-                knee_right_x, knee_right_y = landmark_coords(frame, lm[knee_right])
-                ankle_left_x, ankle_left_y = landmark_coords(frame, lm[ankle_left])
-                ankle_right_x, ankle_right_y = landmark_coords(frame, lm[ankle_right])
+                # get current pose via helper method
+                current_pose = detect_pose_simple(frame, lm)
 
-                walking_left = shoulder_left_y > wrist_left_y > eye_left_y
-                walking_right = shoulder_right_y > wrist_right_y > eye_right_y
-                running_left = wrist_left_y < eye_left_y  # check if left wrist is above left shoulder
-                running_right = wrist_right_y < eye_right_y  # check if right wrist is above right shoulder
-                jumping = (running_right or walking_right) and (running_left or walking_left)
-                crouching = wrist_right_y > knee_right_y and wrist_left_y > knee_left_y
-                #TODO: implement swimming and throwing
-                #swimming = ???
-                #trowing = ???
-
-                pose_mappings = [
-                    (jumping, "jumping"),
-                    (walking_right, "walking_right"),
-                    (walking_left, "walking_left"),
-                    (running_right, "running_right"),
-                    (running_left, "running_left"),
-                    (crouching, "crouching"),
-                    # (swimming, "swimming"),
-                    # (throwing, "throwing")
-                ]
-
-                current_pose = "standing"
-
-                for condition, mpose in pose_mappings:
-                    if condition:
-                        current_pose = mpose
-                        break
                 state_manger.set_pose(current_pose)
                 print(current_pose)
 
