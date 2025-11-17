@@ -12,6 +12,7 @@ class StateManager:
     gui_checkbox_send_permission = False
 
     gui_current_mode = "Simple"
+
     # Getter
     @classmethod
     def get_pose(cls):
@@ -27,9 +28,11 @@ class StateManager:
 
     @classmethod
     def get_all_opencv_images(cls):
-        return (cls.opencv_image_webcam,
-                cls.opencv_image_webcam_skeleton,
-                cls.opencv_image_skeleton_only)
+        return (
+            cls.opencv_image_webcam,
+            cls.opencv_image_webcam_skeleton,
+            cls.opencv_image_skeleton_only,
+            )
 
     @classmethod
     def get_opencv_image_webcam(cls):

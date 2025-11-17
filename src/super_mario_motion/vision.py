@@ -41,6 +41,7 @@ knee_right = 26
 ankle_left = 27
 ankle_right = 28
 
+
 def landmark_coords(image, lm):
     h = image.shape[0]
     w = image.shape[1]
@@ -66,39 +67,40 @@ def detect_pose_simple(frame, lm):
         return math.hypot(y[0] - x[0], y[1] - x[1])
 
     # get relevant landmark coordinates
-    nose_xy            = coordinates(nose)
-    eye_left_xy        = coordinates(eye_left)
-    eye_right_xy       = coordinates(eye_right)
-    shoulder_left_xy   = coordinates(shoulder_left)
-    shoulder_right_xy  = coordinates(shoulder_right)
-    wrist_left_xy      = coordinates(wrist_left)
-    wrist_right_xy     = coordinates(wrist_right)
+    eye_left_xy = coordinates(eye_left)
+    eye_right_xy = coordinates(eye_right)
+    shoulder_left_xy = coordinates(shoulder_left)
+    shoulder_right_xy = coordinates(shoulder_right)
+    wrist_left_xy = coordinates(wrist_left)
+    wrist_right_xy = coordinates(wrist_right)
 
     # define common coordinates
     shoulder_width = distance(shoulder_left_xy, shoulder_right_xy)
     shoulder_left_y, shoulder_right_y = shoulder_left_xy[1], shoulder_right_xy[1]
     eye_left_y, eye_right_y = eye_left_xy[1], eye_right_xy[1]
-    wrist_left_x, wrist_left_y, = wrist_left_xy
+    wrist_left_x, wrist_left_y = wrist_left_xy
     wrist_right_x, wrist_right_y = wrist_right_xy
     wrist_dist = distance(wrist_left_xy, wrist_right_xy)
-    hands_below_shoulders = wrist_left_y > shoulder_left_y and wrist_right_y > shoulder_right_y
+    hands_below_shoulders = (
+            wrist_left_y > shoulder_left_y and wrist_right_y > shoulder_right_y
+        )
 
     # throwing: hands near each other
-    throwing = wrist_dist < shoulder_width*0.75 and not hands_below_shoulders
+    throwing = wrist_dist < shoulder_width * 0.75 and not hands_below_shoulders
 
     # walking: hand between shoulder and eyes
-    walking_left  = shoulder_left_y > wrist_left_y  > eye_left_y
+    walking_left = shoulder_left_y > wrist_left_y > eye_left_y
     walking_right = shoulder_right_y > wrist_right_y > eye_right_y
 
     # running: hand above eyes
-    running_left  = wrist_left_y  < eye_left_y
+    running_left = wrist_left_y < eye_left_y
     running_right = wrist_right_y < eye_right_y
 
     # jumping: both arms above shoulders
     jumping = (running_right or walking_right) and (running_left or walking_left)
 
     # crouching: hands near each other and below shoulders
-    crouching = wrist_dist < shoulder_width*0.75 and hands_below_shoulders
+    crouching = wrist_dist < shoulder_width * 0.75 and hands_below_shoulders
 
     swimming = wrist_left_x < wrist_right_x
 
@@ -129,13 +131,13 @@ def detect_pose_simple(frame, lm):
 
 
 def cam_loop():
-    global frame, rgb, cam, current_pose, skeleton_only_frame,lm_string
+    global frame, rgb, cam, current_pose, skeleton_only_frame, lm_string
     with mpPose.Pose(
             model_complexity=1,  # uses mid-precision and mid-speed
             enable_segmentation=False,  # ignores the background
             min_detection_confidence=0.5,
-            min_tracking_confidence=0.5
-    ) as pose:
+            min_tracking_confidence=0.5,
+            ) as pose:
         print(Path(__file__).name + " initialized")
         while cam.isOpened():
             ret, image = cam.read()
@@ -149,18 +151,14 @@ def cam_loop():
             if results.pose_landmarks:
                 # Draw webcam footage and skeleton
                 mpDrawing.draw_landmarks(
-                    frame,
-                    results.pose_landmarks,
-                    mpPose.POSE_CONNECTIONS
-                )
+                    frame, results.pose_landmarks, mpPose.POSE_CONNECTIONS
+                    )
 
                 # Draw an image of only the skeleton
                 skeleton_only_frame = np.zeros_like(frame)
                 mpDrawing.draw_landmarks(
-                    skeleton_only_frame,
-                    results.pose_landmarks,
-                    mpPose.POSE_CONNECTIONS
-                )
+                    skeleton_only_frame, results.pose_landmarks, mpPose.POSE_CONNECTIONS
+                    )
 
                 # Simple pose detection
                 lm = results.pose_landmarks.landmark
@@ -173,16 +171,13 @@ def cam_loop():
                 # Saves all Landmark cords into a string
                 lm_string = ""
                 for x in range(33):
-                    lm_string+= str(x)+ str(landmark_coords(frame, lm[x])) + " "
-                    if (x+1) % 4 == 0:
+                    lm_string += str(x) + str(landmark_coords(frame, lm[x])) + " "
+                    if (x + 1) % 4 == 0:
                         lm_string += "\n"
                 state_manager.set_landmark_string(lm_string)
 
     cam.release()
 
+
 def update_images():
-    state_manager.set_all_opencv_images(rgb,frame,skeleton_only_frame)
-
-
-
-
+    state_manager.set_all_opencv_images(rgb, frame, skeleton_only_frame)

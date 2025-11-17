@@ -1,9 +1,11 @@
 import cv2 as cv
+
 import gui
+import input
 import vision
 import vision_ml
-import input
 from state import StateManager
+
 
 # Checks if a webcam is available
 def webcam_is_available():
@@ -31,7 +33,11 @@ def update():
     gui.set_webcam_image(*state_manager.get_all_opencv_images())
 
     # Update Pose Preview Indicator in gui.py
-    gui.update_pose(current_pose_full_body if state_manager.get_current_mode() == "Full-body" else current_pose)
+    gui.update_pose(
+        current_pose_full_body
+        if state_manager.get_current_mode() == "Full-body"
+        else current_pose
+        )
     gui.update_pose_image()
     gui.update_pose_text()
     gui.update_debug_landmarks(state_manager.get_landmark_string())
@@ -40,7 +46,8 @@ def update():
 
     gui.window.after(1, update)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     if not webcam_is_available():
         print("No Webcam found.")
     else:

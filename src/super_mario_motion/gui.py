@@ -1,15 +1,16 @@
+import platform
+import random
 import sys
 import threading
 import tkinter as tk
-from tkinter import ttk
-from pathlib import Path
-import platform
-
 from datetime import datetime
-from PIL import ImageTk, Image
-import random
+from pathlib import Path
+from tkinter import ttk
+
+from PIL import Image, ImageTk
 
 import collect
+
 pose = ""
 
 # Window size
@@ -51,7 +52,7 @@ COLLECTION_STEPS = [
     ("crouching", 10),
     ("throwing", 10),
     ("swimming", 10),
-]
+    ]
 CSV_PATH = "pose_samples.csv"
 FPS = 30
 current_run_csv = CSV_PATH
@@ -63,10 +64,12 @@ collecting = False
 collect_stop = False
 after_handles = []
 
+
 def _schedule_after(ms, func, *args):
     aid = window.after(ms, func, *args)
     after_handles.append(aid)
     return aid
+
 
 def _cancel_scheduled():
     while after_handles:
@@ -76,11 +79,13 @@ def _cancel_scheduled():
         except Exception:
             pass
 
+
 def _set_collect_button(starting: bool):
     if starting:
         button_collect_start.config(text="Stop collecting", command=stop_collect_sequence)
     else:
         button_collect_start.config(text="Start collecting", command=start_collect_sequence)
+
 
 # Function gets called once in main.py once the program starts
 def init():
@@ -89,7 +94,8 @@ def init():
     global label_webcam
     global selected_preview, selected_mode
     global allow_debug_info, send_keystrokes, checkbox_toggle_inputs
-    global label_virtual_gamepad_visualizer, label_pose_visualizer, label_current_pose, label_debug_landmarks
+    global label_virtual_gamepad_visualizer, label_pose_visualizer, label_current_pose, \
+        label_debug_landmarks
     global button_collect_start, label_collect_status
 
     window = tk.Tk()
@@ -101,7 +107,7 @@ def init():
     # always open the gui in the center of the screen
     system = platform.system()
 
-    if system in ("Windows", "Darwin"):               # calculation for Windows and macOS
+    if system in ("Windows", "Darwin"):  # calculation for Windows and macOS
         window.withdraw()
         window.update_idletasks()
 
@@ -122,14 +128,16 @@ def init():
     # Loading default images
     try:
         image_webcam_sample = ImageTk.PhotoImage(
-            Image.open(path_image_webcam_sample).resize((webcam_image_width, webcam_image_height), Image.LANCZOS)
-        )
+            Image.open(path_image_webcam_sample).resize((webcam_image_width, webcam_image_height),
+                                                        Image.LANCZOS)
+            )
         image_pose = ImageTk.PhotoImage(
             Image.open(path_image_pose_default).resize((100, 100), Image.LANCZOS)
-        )
+            )
         image_gamepad = ImageTk.PhotoImage(
-            Image.open(path_image_gamepad).resize((gamepad_image_width, gamepad_image_height), Image.LANCZOS)
-        )
+            Image.open(path_image_gamepad).resize((gamepad_image_width, gamepad_image_height),
+                                                  Image.LANCZOS)
+            )
     except FileNotFoundError as e:
         print(f"Error: File not found: {e}")
         sys.exit(1)
@@ -143,8 +151,7 @@ def init():
         columnspan=2,
         pady=(label_webcam_top_padding, 0),
         padx=(horizontal_padding, horizontal_padding)
-    )
-
+        )
 
     frame_bottom_left = tk.Frame(window, bg=color_foreground)
     frame_bottom_left.grid(row=1, column=0, padx=horizontal_padding, pady=(5, 0), sticky="n")
@@ -154,7 +161,7 @@ def init():
         frame_bottom_left,
         bg=color_foreground,
         fg=color_white,
-        text = "Preview:")
+        text="Preview:")
     label_preview.grid(
         row=0,
         column=0)
@@ -164,13 +171,14 @@ def init():
     style.theme_use('alt')
     style.configure("Custom.TCombobox",
                     fieldbackground=color_foreground,
-                    background = color_foreground,
-                    foreground ="white"
-        )
+                    background=color_foreground,
+                    foreground="white"
+                    )
     style.map("Custom.TCombobox",
-            fieldbackground=[("readonly",color_foreground)],
-            foreground=[("readonly","white")],
-            background=[("readonly",color_foreground)])
+              fieldbackground=[("readonly", color_foreground)],
+              foreground=[("readonly", "white")],
+              background=[("readonly", color_foreground)])
+
     # What to do when ComboboxSelected
 
     def clear_combobox_selection(event):
@@ -184,7 +192,7 @@ def init():
         textvariable=selected_preview,
         state="readonly",
         style="Custom.TCombobox"
-    )
+        )
     option_menu_preview.bind("<<ComboboxSelected>>", clear_combobox_selection)
     option_menu_preview['values'] = ["Webcam", "Webcam + Skeleton", "Skeleton Only"]
     option_menu_preview.current(0)
@@ -206,7 +214,7 @@ def init():
         textvariable=selected_mode,
         state="readonly",
         style="Custom.TCombobox"
-    )
+        )
     option_menu_mode.bind("<<ComboboxSelected>>", on_mode_change)
     option_menu_mode['values'] = ["Simple", "Full-body", "Collect"]
     option_menu_mode.current(0)
@@ -228,7 +236,7 @@ def init():
         offvalue=0,
         width=20,
         height=2
-    )
+        )
     checkbox_debug_info.grid(row=2, column=0, columnspan=2)
 
     # send inputs
@@ -247,7 +255,7 @@ def init():
         offvalue=0,
         width=20,
         height=2
-    )
+        )
     checkbox_toggle_inputs.grid(row=3, column=0, columnspan=2)
 
     # RIGHT
@@ -273,7 +281,7 @@ def init():
         bg=color_foreground,
         fg=color_white,
         text="Current pose:" + pose
-    )
+        )
     label_current_pose.grid(row=1, column=0, columnspan=2)
 
     # debug text
@@ -286,7 +294,7 @@ def init():
         height=10,
         text="",
         font=("Consolas", 6)
-    )
+        )
     label_debug_landmarks.grid(row=2, column=0, columnspan=2)
 
     global label_collect_status, button_collect_start
@@ -296,7 +304,7 @@ def init():
         fg=color_white,
         text="",
         font=("Consolas", 25)
-    )
+        )
     label_collect_status.grid(row=2, column=0, columnspan=2, pady=(20, 0))
     label_collect_status.grid_remove()
 
@@ -304,7 +312,7 @@ def init():
         window,
         text="Start collecting",
         command=start_collect_sequence
-    )
+        )
     button_collect_start.grid(row=3, column=0, columnspan=2, pady=(10, 0))
     button_collect_start.grid_remove()
 
@@ -312,19 +320,25 @@ def init():
 
     apply_mode(selected_mode.get())
 
+
 # set_webcam_image and set_pose_image are supposed to be called in the update-loop in main.py
 def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
     match selected_preview.get():
-        case "Webcam": array = webcam
-        case "Webcam + Skeleton": array = webcam_skeleton
-        case "Skeleton Only": array = only_skeleton
-        case _: array = webcam
+        case "Webcam":
+            array = webcam
+        case "Webcam + Skeleton":
+            array = webcam_skeleton
+        case "Skeleton Only":
+            array = only_skeleton
+        case _:
+            array = webcam
 
     if array is None:
         return
 
-    array = array[:, ::-1, :]   # flip the camera horizontally only for the user
-    # image = ImageTk.PhotoImage(Image.fromarray(array).resize((webcam_image_width, webcam_image_height), Image.LANCZOS))
+    array = array[:, ::-1, :]  # flip the camera horizontally only for the user
+    # image = ImageTk.PhotoImage(Image.fromarray(array).resize((webcam_image_width,
+    # webcam_image_height), Image.LANCZOS))
 
     # calculate the source and destination image ratios
     img = Image.fromarray(array)
@@ -350,33 +364,38 @@ def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
     label_webcam.config(image=image)
     label_webcam.image = image
 
+
 def set_gamepad_image(updated_gamepad_image):
     if gamepad_image is None:
         return
-    image = ImageTk.PhotoImage(updated_gamepad_image.resize((gamepad_image_width, gamepad_image_height), Image.LANCZOS))
+    image = ImageTk.PhotoImage(
+        updated_gamepad_image.resize((gamepad_image_width, gamepad_image_height), Image.LANCZOS))
     label_virtual_gamepad_visualizer.config(image=image)
     label_virtual_gamepad_visualizer.image = image
+
 
 def update_pose(new_pose):
     global pose
     pose = new_pose
 
+
 def update_pose_image():
     valid_poses = [
         "standing", "jumping", "crouching", "throwing",
         "walking_right", "walking_left", "running_right", "running_left"
-    ]
+        ]
     if pose in valid_poses:
         try:
             window.image_pose = ImageTk.PhotoImage(
                 Image.open(path_data_folder / (pose + '.png')).resize((100, 100), Image.LANCZOS)
-            )
+                )
         except FileNotFoundError:
             print("Error: File not found")
             sys.exit(1)
 
         label_pose_visualizer.config(image=window.image_pose)
         label_pose_visualizer.image = window.image_pose
+
 
 def update_pose_text():
     label_current_pose.config(text="Current pose:" + pose)
@@ -407,7 +426,8 @@ def apply_mode(mode: str):
     else:
         checkbox_toggle_inputs.grid(row=3, column=0, columnspan=2)
 
-        label_virtual_gamepad_visualizer.grid(row=1, column=1, padx=horizontal_padding, pady=(20, 0))
+        label_virtual_gamepad_visualizer.grid(row=1, column=1, padx=horizontal_padding,
+                                              pady=(20, 0))
         label_virtual_gamepad_visualizer.grid_forget()
         label_virtual_gamepad_visualizer.grid(row=0, column=0)
 
@@ -439,6 +459,7 @@ def start_collect_sequence():
     _set_collect_button(starting=True)
     run_collect_step(0)
 
+
 def stop_collect_sequence():
     global collecting, collect_stop
     collect_stop = True
@@ -446,6 +467,7 @@ def stop_collect_sequence():
     _cancel_scheduled()
     label_collect_status.config(text="Stopped.")
     _set_collect_button(starting=False)
+
 
 def run_collect_step(index: int):
     global collecting, collect_stop, collection_order
@@ -478,12 +500,13 @@ def show_collect_countdown(n: int, pose_name: str, seconds: float, index: int):
                 target=record_collect_pose,
                 args=(pose_name, seconds, index),
                 daemon=True
-            ).start()
+                ).start()
             show_recording_countdown(int(seconds), pose_name, index)
         return
 
     label_collect_status.config(text=f"{pose_name} in {n} …")
     _schedule_after(1000, show_collect_countdown, n - 1, pose_name, seconds, index)
+
 
 def show_recording_countdown(remaining: int, pose_name: str, index: int):
     if collect_stop:
@@ -492,6 +515,7 @@ def show_recording_countdown(remaining: int, pose_name: str, index: int):
         return
     label_collect_status.config(text=f"Recording: {pose_name} ({remaining}s)")
     _schedule_after(1000, show_recording_countdown, remaining - 1, pose_name, index)
+
 
 def record_collect_pose(pose_name: str, seconds: float, index: int):
     if collect_stop:
@@ -504,7 +528,7 @@ def record_collect_pose(pose_name: str, seconds: float, index: int):
         "--csv", current_run_csv,
         "--fps", str(FPS),
         "--source", "auto",
-    ]
+        ]
     collect.main()
     if not collect_stop:
         _schedule_after(500, lambda: run_collect_step(index + 1))

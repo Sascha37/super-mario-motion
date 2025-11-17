@@ -1,8 +1,11 @@
-import argparse, time, csv
+import argparse
+import csv
+import time
 from pathlib import Path
-import numpy as np
+
 import cv2 as cv
 import mediapipe as mp
+import numpy as np
 
 # TODO: Remove import vision  # nutzt die Kamera aus laufenden Programm
 from state import StateManager
@@ -19,25 +22,34 @@ hip_left, hip_right = 23, 24
 knee_left, knee_right = 25, 26
 ankle_left, ankle_right = 27, 28
 
-def _mid(a,b): return (a+b)/2.0
-def _angle(a,b,c):
-    ba, bc = a-b, c-b
-    denom = (np.linalg.norm(ba)*np.linalg.norm(bc))+1e-6
-    cosang = np.dot(ba, bc)/denom
+
+def _mid(a, b):
+    return (a + b) / 2.0
+
+
+def _angle(a, b, c):
+    ba, bc = a - b, c - b
+    denom = (np.linalg.norm(ba) * np.linalg.norm(bc)) + 1e-6
+    cosang = np.dot(ba, bc) / denom
     return np.degrees(np.arccos(np.clip(cosang, -1.0, 1.0)))
+
 
 def extract_features(lm_arr: np.ndarray) -> np.ndarray:
     xy = lm_arr[:, :2].copy()
-    mid_hip = _mid(xy[hip_left], xy[hip_right]); xy -= mid_hip
+    mid_hip = _mid(xy[hip_left], xy[hip_right]);
+    xy -= mid_hip
     mid_sh = _mid(xy[shoulder_left], xy[shoulder_right])
-    torso = np.linalg.norm(mid_sh) + 1e-6; xy /= torso
+    torso = np.linalg.norm(mid_sh) + 1e-6;
+    xy /= torso
     angs = np.array([
         _angle(xy[shoulder_left], xy[elbow_left], xy[wrist_left]),
         _angle(xy[shoulder_right], xy[elbow_right], xy[wrist_right]),
-        _angle(xy[hip_left],      xy[knee_left],  xy[ankle_left]),
-        _angle(xy[hip_right],     xy[knee_right], xy[ankle_right]),
-    ], dtype=np.float32)
-    def dist(i,j): return np.linalg.norm(xy[i]-xy[j])
+        _angle(xy[hip_left], xy[knee_left], xy[ankle_left]),
+        _angle(xy[hip_right], xy[knee_right], xy[ankle_right]),
+        ], dtype=np.float32)
+
+    def dist(i, j): return np.linalg.norm(xy[i] - xy[j])
+
     dists = np.array([
         dist(shoulder_left, shoulder_right),
         dist(hip_left, hip_right),
@@ -45,9 +57,10 @@ def extract_features(lm_arr: np.ndarray) -> np.ndarray:
         dist(ankle_left, ankle_right),
         dist(shoulder_left, hip_left),
         dist(shoulder_right, hip_right),
-    ], dtype=np.float32)
+        ], dtype=np.float32)
     vis = lm_arr[:, 3].astype(np.float32)
     return np.concatenate([xy.flatten(), angs, dists, vis], axis=0)
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -63,11 +76,13 @@ def main():
 
     args = ap.parse_args()
 
-    mpPose = mp.solutions.pose
+    mp_pose = mp.solutions.pose
     out_path = Path(__file__).parent.parent.parent / "data" / args.csv
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    print(f"[collect] Starte Aufnahme: label={args.label}, {args.seconds}s, source={args.source} → {out_path}")
+    print(
+        f"[collect] Starte Aufnahme: label={args.label}, {args.seconds}s, source={args.source} → "
+        f"{out_path}")
 
     t_end = time.time() + args.seconds
     period = 1.0 / max(1e-3, args.fps)
@@ -79,11 +94,11 @@ def main():
         if not cam.isOpened():
             raise IOError(f"[collect] Could not open camera {args.camera_index}.")
 
-    with mpPose.Pose(static_image_mode=False, model_complexity=1,
-                     enable_segmentation=False,
-                     min_detection_confidence=0.5,
-                     min_tracking_confidence=0.5) as pose, \
-         open(out_path, "a", newline="") as f:
+    with mp_pose.Pose(static_image_mode=False, model_complexity=1,
+                      enable_segmentation=False,
+                      min_detection_confidence=0.5,
+                      min_tracking_confidence=0.5) as pose, \
+            open(out_path, "a", newline="") as f:
         writer = csv.writer(f)
 
         next_t = 0.0
@@ -132,6 +147,7 @@ def main():
         cam.release()
 
     print(f"[collect] Fertig. Gespeichert: {n_saved} Samples.")
+
 
 if __name__ == "__main__":
     main()
