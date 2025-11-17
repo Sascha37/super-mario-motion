@@ -168,7 +168,7 @@ def cam_loop():
                 # get current pose via helper method
                 current_pose = detect_pose_simple(frame, lm)
 
-                state_manger.set_pose(current_pose)
+                state_manager.set_pose(current_pose)
                 print(current_pose)
 
                 # Saves all Landmark cords into a string
