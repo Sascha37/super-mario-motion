@@ -156,7 +156,7 @@ def init():
     frame_bottom_left = tk.Frame(window, bg=color_foreground)
     frame_bottom_left.grid(row=1, column=0, padx=horizontal_padding, pady=(5, 0), sticky="n")
 
-    # Text Label "Preview:"
+    # Text Label "Preview":
     label_preview = tk.Label(
         frame_bottom_left,
         bg=color_foreground,

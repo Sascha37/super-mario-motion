@@ -1,5 +1,5 @@
 class StateManager:
-    # Init defualt values
+    # Init default values
     pose = "default"
     pose_full_body = "default"
 

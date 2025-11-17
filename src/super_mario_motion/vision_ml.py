@@ -8,7 +8,7 @@ import mediapipe as mp
 import numpy as np
 from joblib import load
 
-# Wir beziehen Frames aus vision.py
+# we get frames from vision.py
 import vision
 from state import StateManager
 
@@ -81,7 +81,7 @@ def init():
     _exit = False
     # Path
     model_path = Path(__file__).parent.parent.parent / "data" / "pose_model.joblib"
-    # Modell laden
+    # load model
     try:
         _model = load(model_path)
         print(f"vision_ml: model loaded ({Path(model_path).name})")
@@ -116,7 +116,7 @@ def _worker():
                 time.sleep(0.005)
                 continue
 
-            # Skelett-Overlay
+            # Skeleton-Overlay
             skel = np.zeros_like(bgr)
             mpDrawing.draw_landmarks(skel, res.pose_landmarks, mpPose.POSE_CONNECTIONS)
             _skeleton_frame = skel

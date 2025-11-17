@@ -22,7 +22,7 @@ def combine_run_csvs(output_name: str = "pose_samples_all.csv",
     data_dir = Path(__file__).parent.parent.parent / "data"
     files = sorted(data_dir.glob(pattern))
     if not files:
-        raise FileNotFoundError(f"Keine Collect-Dateien in {data_dir} gefunden.")
+        raise FileNotFoundError(f"No collect-files found in {data_dir}.")
     out_path = data_dir / output_name
     with open(out_path, "w") as out_f:
         for i, fp in enumerate(files):
@@ -50,7 +50,7 @@ def load_csv(csv_path: Path):
 
 def main():
     # if not CSV_PATH.exists():
-    #    raise FileNotFoundError(f"{CSV_PATH} nicht gefunden. Erst Daten mit collect.py sammeln.")
+    #    raise FileNotFoundError(f"{CSV_PATH} not found. Collect data first with collect.py.")
     training_csv = combine_run_csvs()
     x, y = load_csv(training_csv)
     s_train, s_test, y_train, y_test = train_test_split(
@@ -59,7 +59,7 @@ def main():
 
     pipe = Pipeline([
         ("scaler", StandardScaler(with_mean=True)),
-        ("pca", PCA(n_components=0.95, svd_solver="full")),  # optional; kannst du auch entfernen
+        ("pca", PCA(n_components=0.95, svd_solver="full")),  # optional, can be removed
         ("clf", SVC(probability=True))
         ])
 

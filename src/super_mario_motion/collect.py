@@ -7,7 +7,7 @@ import cv2 as cv
 import mediapipe as mp
 import numpy as np
 
-# TODO: Remove import vision  # nutzt die Kamera aus laufenden Programm
+# TODO: Remove import vision  # use camera from running program
 from state import StateManager
 
 # Init StateManager
@@ -36,10 +36,10 @@ def _angle(a, b, c):
 
 def extract_features(lm_arr: np.ndarray) -> np.ndarray:
     xy = lm_arr[:, :2].copy()
-    mid_hip = _mid(xy[hip_left], xy[hip_right]);
+    mid_hip = _mid(xy[hip_left], xy[hip_right])
     xy -= mid_hip
     mid_sh = _mid(xy[shoulder_left], xy[shoulder_right])
-    torso = np.linalg.norm(mid_sh) + 1e-6;
+    torso = np.linalg.norm(mid_sh) + 1e-6
     xy /= torso
     angs = np.array([
         _angle(xy[shoulder_left], xy[elbow_left], xy[wrist_left]),
@@ -67,10 +67,10 @@ def main():
     ap.add_argument("--label", required=True, help="z.B. standing, walking_right, ...")
     ap.add_argument("--seconds", type=float, default=30, help="Dauer der Aufnahme")
     ap.add_argument("--csv", default="pose_samples.csv")
-    ap.add_argument("--fps", type=float, default=20.0, help="Ziel-Samplingrate")
+    ap.add_argument("--fps", type=float, default=20.0, help="goal-Samplingrate")
 
     ap.add_argument("--source", choices=["auto", "vision", "camera"], default="auto",
-                    help="Frame-Quelle: 'auto' versucht zuerst vision, sonst Kamera.")
+                    help="Frame-Source: 'auto' try vision first, else camera.")
     ap.add_argument("--camera-index", type=int, default=0,
                     help="OpenCV Kamera-Index (für source=camera bzw. auto-Fallback).")
 
@@ -81,7 +81,7 @@ def main():
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     print(
-        f"[collect] Starte Aufnahme: label={args.label}, {args.seconds}s, source={args.source} → "
+        f"[collect] start recording: label={args.label}, {args.seconds}s, source={args.source} → "
         f"{out_path}")
 
     t_end = time.time() + args.seconds
@@ -113,7 +113,7 @@ def main():
                 if cam is None:
                     cam = cv.VideoCapture(args.camera_index)
                     if not cam.isOpened():
-                        print(f"[collect] WARN: Kamera {args.camera_index} nicht verfügbar.")
+                        print(f"[collect] WARN: camera {args.camera_index} not available.")
                         time.sleep(0.05)
                         continue
                 ok, bgr = cam.read()
@@ -146,7 +146,7 @@ def main():
     if cam is not None:
         cam.release()
 
-    print(f"[collect] Fertig. Gespeichert: {n_saved} Samples.")
+    print(f"[collect] Done. Saved: {n_saved} Samples.")
 
 
 if __name__ == "__main__":
