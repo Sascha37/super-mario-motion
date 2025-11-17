@@ -29,9 +29,9 @@ def _mid(a, b):
 
 def _angle(a, b, c):
     ba, bc = a - b, c - b
-    denom = (np.linalg.norm(ba) * np.linalg.norm(bc)) + 1e-6
-    cosang = np.dot(ba, bc) / denom
-    return np.degrees(np.arccos(np.clip(cosang, -1.0, 1.0)))
+    length_product = (np.linalg.norm(ba) * np.linalg.norm(bc)) + 1e-6
+    angle_cosine = np.dot(ba, bc) / length_product
+    return np.degrees(np.arccos(np.clip(angle_cosine, -1.0, 1.0)))
 
 
 def extract_features(lm_arr: np.ndarray) -> np.ndarray:
@@ -41,7 +41,7 @@ def extract_features(lm_arr: np.ndarray) -> np.ndarray:
     mid_sh = _mid(xy[shoulder_left], xy[shoulder_right])
     torso = np.linalg.norm(mid_sh) + 1e-6
     xy /= torso
-    angs = np.array([
+    angles = np.array([
         _angle(xy[shoulder_left], xy[elbow_left], xy[wrist_left]),
         _angle(xy[shoulder_right], xy[elbow_right], xy[wrist_right]),
         _angle(xy[hip_left], xy[knee_left], xy[ankle_left]),
@@ -59,20 +59,20 @@ def extract_features(lm_arr: np.ndarray) -> np.ndarray:
         dist(shoulder_right, hip_right),
         ], dtype=np.float32)
     vis = lm_arr[:, 3].astype(np.float32)
-    return np.concatenate([xy.flatten(), angs, dists, vis], axis=0)
+    return np.concatenate([xy.flatten(), angles, dists, vis], axis=0)
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--label", required=True, help="z.B. standing, walking_right, ...")
-    ap.add_argument("--seconds", type=float, default=30, help="Dauer der Aufnahme")
+    ap.add_argument("--seconds", type=float, default=30, help="duration of recording")
     ap.add_argument("--csv", default="pose_samples.csv")
-    ap.add_argument("--fps", type=float, default=20.0, help="goal-Samplingrate")
+    ap.add_argument("--fps", type=float, default=20.0, help="goal-sampling rate")
 
     ap.add_argument("--source", choices=["auto", "vision", "camera"], default="auto",
                     help="Frame-Source: 'auto' try vision first, else camera.")
     ap.add_argument("--camera-index", type=int, default=0,
-                    help="OpenCV Kamera-Index (für source=camera bzw. auto-Fallback).")
+                    help="OpenCV camera-index (for source=camera or auto-fallback).")
 
     args = ap.parse_args()
 

@@ -3,12 +3,12 @@
 PYTHON = ./venv/bin/python3
 PIP = ./venv/bin/pip
 
-# Create virtual environment and intall dependencies
+# Create virtual environment and install dependencies
 venv: requirements.txt
 	python3.12 -m venv venv
 	$(PIP) install -r requirements.txt
 
-# Runs our program, checks if we are in a virual environment
+# Runs our program, checks if we are in a virtual environment
 run: venv
 	$(PYTHON) src/super-mario-motion/main.py
 
