@@ -22,7 +22,7 @@ If applicable, add screenshots to help explain your problem.
 **Hardware and software (please complete the following information):**
  - OS: [e.g. Windows 11, macOS, Linux]
  - Version [e.g. 25H2]
- - Python version: [e.g. 3.12.11, 3.12.10]
+ - Python version: [e.g., 3.12.11, 3.12.10]
 
 **Additional context**
 Add any other context about the problem here.

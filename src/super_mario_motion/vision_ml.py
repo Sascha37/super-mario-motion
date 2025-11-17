@@ -1,16 +1,15 @@
 import threading
 import time
-from pathlib import Path
 from collections import deque
+from pathlib import Path
 
-import numpy as np
 import cv2 as cv
 import mediapipe as mp
+import numpy as np
 from joblib import load
 
-# Wir beziehen Frames aus vision.py
+# we get frames from vision.py
 import vision
-
 from state import StateManager
 
 state_manager = StateManager()
@@ -20,7 +19,6 @@ _raw_frame = None
 _skeleton_frame = None
 _exit = False
 _thread = None
-
 
 mpPose = mp.solutions.pose
 mpDrawing = mp.solutions.drawing_utils
@@ -34,30 +32,38 @@ hip_left, hip_right = 23, 24
 knee_left, knee_right = 25, 26
 ankle_left, ankle_right = 27, 28
 
-
 _smooth = deque(maxlen=7)
 
 _model = None
 
-def _mid(a,b): return (a+b)/2.0
-def _angle(a,b,c):
-    ba, bc = a-b, c-b
-    denom = (np.linalg.norm(ba)*np.linalg.norm(bc))+1e-6
-    cosang = np.dot(ba, bc)/denom
+
+def _mid(a, b):
+    return (a + b) / 2.0
+
+
+def _angle(a, b, c):
+    ba, bc = a - b, c - b
+    denom = (np.linalg.norm(ba) * np.linalg.norm(bc)) + 1e-6
+    cosang = np.dot(ba, bc) / denom
     return np.degrees(np.arccos(np.clip(cosang, -1.0, 1.0)))
+
 
 def _extract_features(lm_arr: np.ndarray) -> np.ndarray:
     xy = lm_arr[:, :2].copy()
-    mid_hip = _mid(xy[hip_left], xy[hip_right]); xy -= mid_hip
+    mid_hip = _mid(xy[hip_left], xy[hip_right])
+    xy -= mid_hip
     mid_sh = _mid(xy[shoulder_left], xy[shoulder_right])
-    torso = np.linalg.norm(mid_sh) + 1e-6; xy /= torso
+    torso = np.linalg.norm(mid_sh) + 1e-6
+    xy /= torso
     angs = np.array([
         _angle(xy[shoulder_left], xy[elbow_left], xy[wrist_left]),
         _angle(xy[shoulder_right], xy[elbow_right], xy[wrist_right]),
-        _angle(xy[hip_left],      xy[knee_left],  xy[ankle_left]),
-        _angle(xy[hip_right],     xy[knee_right], xy[ankle_right]),
-    ], dtype=np.float32)
-    def dist(i,j): return np.linalg.norm(xy[i]-xy[j])
+        _angle(xy[hip_left], xy[knee_left], xy[ankle_left]),
+        _angle(xy[hip_right], xy[knee_right], xy[ankle_right]),
+        ], dtype=np.float32)
+
+    def dist(i, j): return np.linalg.norm(xy[i] - xy[j])
+
     dists = np.array([
         dist(shoulder_left, shoulder_right),
         dist(hip_left, hip_right),
@@ -65,16 +71,17 @@ def _extract_features(lm_arr: np.ndarray) -> np.ndarray:
         dist(ankle_left, ankle_right),
         dist(shoulder_left, hip_left),
         dist(shoulder_right, hip_right),
-    ], dtype=np.float32)
+        ], dtype=np.float32)
     vis = lm_arr[:, 3].astype(np.float32)
     return np.concatenate([xy.flatten(), angs, dists, vis], axis=0)
+
 
 def init():
     global _thread, _exit, _model
     _exit = False
     # Path
     model_path = Path(__file__).parent.parent.parent / "data" / "pose_model.joblib"
-    # Modell laden
+    # load model
     try:
         _model = load(model_path)
         print(f"vision_ml: model loaded ({Path(model_path).name})")
@@ -85,6 +92,7 @@ def init():
     _thread = threading.Thread(target=_worker, daemon=True)
     _thread.start()
 
+
 def _worker():
     global _current_pose, _raw_frame, _skeleton_frame
     with mpPose.Pose(static_image_mode=False, model_complexity=1,
@@ -94,7 +102,7 @@ def _worker():
         print(Path(__file__).name + " initialized (passive)")
         while not _exit:
 
-            bgr = vision.rgb #latest raw frame from vision
+            bgr = vision.rgb  # latest raw frame from vision
 
             if bgr is None:
                 time.sleep(0.01)
@@ -108,7 +116,7 @@ def _worker():
                 time.sleep(0.005)
                 continue
 
-            # Skelett-Overlay
+            # Skeleton-Overlay
             skel = np.zeros_like(bgr)
             mpDrawing.draw_landmarks(skel, res.pose_landmarks, mpPose.POSE_CONNECTIONS)
             _skeleton_frame = skel
@@ -119,9 +127,9 @@ def _worker():
 
             label = None
             if _model is not None:
-                X = feat.reshape(1, -1)
+                x = feat.reshape(1, -1)
                 try:
-                    label = _model.predict(X)[0]
+                    label = _model.predict(x)[0]
                 except Exception as e:
                     label = None
 
@@ -132,6 +140,7 @@ def _worker():
 
                 state_manager.set_pose_full_body(_current_pose)
             time.sleep(0.001)
+
 
 def stop():
     global _exit, _thread

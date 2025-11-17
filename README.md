@@ -55,7 +55,7 @@ If you want to **work with and modify this code**, open it in a code editor like
     - For PDFs used as bullet points to discuss in the weekly meetings, see `docs/meetings/`
     - A comprehensive report, including weekly feature updates, can be found in [progress_documentation.md](https://github.com/Sascha37/super-mario-motion/blob/main/docs/progress_documentation.md)
 ## Compatibility
-This project is being developed and tested on following operating systems:
+This project is being developed and tested on the following operating systems:
 - **Windows 10** (22H2) and **Windows 11** (25H2)
 - **macOS** (15.7.1 and 26.1)
 - **Arch Linux** using Wayland and KDE Plasma
