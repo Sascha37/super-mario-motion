@@ -11,3 +11,6 @@ venv: requirements.txt
 # Runs our program, checks if we are in a virual environment
 run: venv
 	$(PYTHON) src/super-mario-motion/main.py
+
+train: venv
+	$(PYTHON) src/super-mario-motion/train.py

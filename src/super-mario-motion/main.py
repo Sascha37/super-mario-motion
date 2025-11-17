@@ -18,21 +18,25 @@ def webcam_is_available():
 # Function gets called every millisecond after the mainloop of the tkinter ui
 def update():
 
-    # Retrieve Checkbox Info from gui.py
+    # Write GUI info into state
+    state_manager.set_current_mode(gui.get_active_mode())
     state_manager.set_send_permission(gui.send_keystrokes.get())
 
-    # Retrieve predicted pose from vision.py
+    # Retrieve predicted poses
     current_pose = state_manager.get_pose()
+    current_pose_full_body = state_manager.get_pose_full_body()
 
     # Update Images to display in gui.py
     vision.update_images()
     gui.set_webcam_image(*state_manager.get_all_opencv_images())
 
     # Update Pose Preview Indicator in gui.py
-    gui.update_pose(current_pose)
+    gui.update_pose(current_pose_full_body if state_manager.get_current_mode() == "Full-body" else current_pose)
     gui.update_pose_image()
     gui.update_pose_text()
     gui.update_debug_landmarks(state_manager.get_landmark_string())
+
+    print(f"simple: {current_pose}, full-body: {current_pose_full_body}")
 
     gui.window.after(1, update)
 

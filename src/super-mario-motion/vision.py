@@ -22,7 +22,7 @@ frame = None
 mpPose = mp.solutions.pose
 mpDrawing = mp.solutions.drawing_utils
 
-state_manger = StateManager()
+state_manager = StateManager()
 
 # landmark indices
 nose = 0
@@ -177,12 +177,12 @@ def cam_loop():
                     lm_string+= str(x)+ str(landmark_coords(frame, lm[x])) + " "
                     if (x+1) % 4 == 0:
                         lm_string += "\n"
-                state_manger.set_landmark_string(lm_string)
+                state_manager.set_landmark_string(lm_string)
 
     cam.release()
 
 def update_images():
-    state_manger.set_all_opencv_images(rgb,frame,skeleton_only_frame)
+    state_manager.set_all_opencv_images(rgb,frame,skeleton_only_frame)
 
 
 
