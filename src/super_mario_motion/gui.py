@@ -9,7 +9,7 @@ from tkinter import ttk
 
 from PIL import Image, ImageTk
 
-import collect
+from . import collect
 
 pose = ""
 
