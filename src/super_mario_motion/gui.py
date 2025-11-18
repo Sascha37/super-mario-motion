@@ -13,13 +13,10 @@ import collect
 
 pose = ""
 
-# Window size
-window_width = 650
-window_height = 750
-
 # Webcam preview
 webcam_image_width = 612
 webcam_image_height = 408
+
 
 # Gamepad
 gamepad_image_width = 200
@@ -39,8 +36,12 @@ path_image_gamepad = path_data_folder / 'gamepad.png'
 # Paddings
 label_webcam_top_padding = 20
 edge_padding_default = 20
-horizontal_padding = (window_width - webcam_image_width) // 2
+horizontal_padding = (650 - webcam_image_width) // 2
 frame_padding_y = (20, 0)
+
+# Window size
+window_width = webcam_image_width + 2 * edge_padding_default
+window_height = 750
 
 # Collecting
 COLLECTION_STEPS = [
@@ -79,7 +80,7 @@ def init():
     window = tk.Tk()
     window.title('Super Mario Motion')
     window.minsize(window_width, window_height)
-    window.maxsize(window_width, window_height)
+  #  window.maxsize(window_width, window_height)
     window.configure(background=color_background)
 
     # always open the gui in the center of the screen
@@ -136,7 +137,11 @@ def init():
     # Widgets on these rows expand evenly
     frame_bottom_left.columnconfigure(0, weight=1)
     frame_bottom_left.columnconfigure(1, weight=1)
-    frame_bottom_left.grid(row=1, column=0, padx=horizontal_padding, pady=frame_padding_y, sticky="n")
+    frame_bottom_left.grid(row=1,
+                           column=0,
+                           padx=(horizontal_padding,0),
+                           pady=frame_padding_y,
+                           sticky="nw")
 
     # Button "Launch Game"
     button_launch_game = ttk.Button(
@@ -165,6 +170,17 @@ def init():
         column=1,
         sticky="nsew")
 
+    # Separator
+    separator = ttk.Separator(frame_bottom_left,
+                              orient=tk.HORIZONTAL,
+                              style="Custom.TSeparator")
+    separator.grid(
+        row=1,
+        column=0,
+        columnspan=2,
+        stick="ew",
+        pady=30)
+
     # Text Label "Preview:"
     label_preview = tk.Label(
         frame_bottom_left,
@@ -172,7 +188,7 @@ def init():
         fg=color_white,
         text="Preview:")
     label_preview.grid(
-        row=1,
+        row=2,
         column=0)
 
     # Custom ttk Style for Combobox
@@ -199,6 +215,10 @@ def init():
               foreground = [("active", "black"), ("pressed", "black")]
               )
 
+    # Custom ttk Style for Separator
+    style.configure("Custom.TSeparator",
+                    background="black")
+
 
     # This is needed to deselect the text inside of a ttk Combobox
     def clear_combobox_selection(event):
@@ -216,11 +236,11 @@ def init():
     option_menu_preview.bind("<<ComboboxSelected>>", clear_combobox_selection)
     option_menu_preview['values'] = ["Webcam", "Webcam + Skeleton", "Skeleton Only"]
     option_menu_preview.current(0)
-    option_menu_preview.grid(row=1, column=1)
+    option_menu_preview.grid(row=2, column=1)
 
     # "Mode:" Text Label
     label_mode = tk.Label(frame_bottom_left, bg=color_dark_widget, fg=color_white, text="Mode:")
-    label_mode.grid(row=2, column=0)
+    label_mode.grid(row=3, column=0)
 
     # Mode Combobox
     global selected_mode
@@ -240,7 +260,7 @@ def init():
     option_menu_mode.bind("<<ComboboxSelected>>", on_mode_change)
     option_menu_mode['values'] = ["Simple", "Full-body", "Collect"]
     option_menu_mode.current(0)
-    option_menu_mode.grid(row=2, column=1)
+    option_menu_mode.grid(row=3, column=1)
 
     # Debug Info Checkbox
     global allow_debug_info
@@ -259,7 +279,10 @@ def init():
         width=20,
         height=2
         )
-    checkbox_debug_info.grid(row=3, column=0, columnspan=2)
+    checkbox_debug_info.grid(row=4,
+                             column=0,
+                             columnspan=2,
+                             sticky="ew")
 
     # Send Inputs Checkbox
     global send_keystrokes, checkbox_toggle_inputs
@@ -278,11 +301,18 @@ def init():
         width=20,
         height=2
         )
-    checkbox_toggle_inputs.grid(row=4, column=0, columnspan=2)
+    checkbox_toggle_inputs.grid(row=5,
+                                column=0,
+                                columnspan=2,
+                                sticky="ew")
 
     # Frame bottom right
     frame_bottom_right = tk.Frame(window, bg=color_dark_widget)
-    frame_bottom_right.grid(row=1, column=1, padx=horizontal_padding, pady=frame_padding_y)
+    frame_bottom_right.grid(row=1,
+                            column=1,
+                            padx=(0,horizontal_padding),
+                            pady=frame_padding_y,
+                            sticky="ne")
 
     # gamepad
     global label_virtual_gamepad_visualizer
