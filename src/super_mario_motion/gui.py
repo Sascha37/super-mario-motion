@@ -2,6 +2,7 @@ import platform
 import random
 import sys
 import threading
+import webbrowser
 import tkinter as tk
 from datetime import datetime
 from pathlib import Path
@@ -161,7 +162,7 @@ def init():
     button_help = ttk.Button(
         frame_bottom_left,
         text="Help",
-        command=None,
+        command=open_help_menu,
         style = "Custom.TButton"
         )
 
@@ -608,3 +609,13 @@ def record_collect_pose(pose_name: str, seconds: float, index: int):
     collect.main()
     if not collect_stop:
         _schedule_after(500, lambda: run_collect_step(index + 1))
+
+# Takes in a Path and opens this path as a file in the default browser
+def open_browser(path):
+    webbrowser.open_new_tab(path.as_uri())
+
+# gets called by the "Help"-Button, calls open_brower in a seperate thread, so that
+# the main thread does not have to wait for the browser to start up (~5 seconds)
+def open_help_menu():
+    help_file_path = Path(__file__).parent.parent.parent / "docs" / "help" / "help_page.pdf"
+    threading.Thread(target=open_browser, args=(help_file_path,), daemon=True).start()
