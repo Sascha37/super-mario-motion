@@ -92,3 +92,16 @@ This week focused mainly on four things:
         - The GUI shows a countdown, then records a series of predefined poses for a set duration.
         - A visible **recording countdown** now runs while capturing data.
         - Live webcam preview and debug landmarks remain active during collection, allowing the user to check if they are performing the motions correctly.
+---
+## Week 7 (11.11.25 - 18.11.25)
+This week’s changes once again mostly happened on the backend. We worked on
+
+- GUI now **starts in the middle of our screen** on Windows and macOS systems
+- **Fixed the collect mode** of our Application to now work on Windows and Linux without any issues. Also added a “Stop”-Button to cancel out early
+- **Changed folder structure** of our project to follow standards
+- **Redrew old and added missing symbols**, representing all possible poses (not yet implemented in the application)
+- **Started using pytest** to test our code (goal being that they are implemented in GitHub Actions and ran on every PR before merging)
+- Refactored almost every module according to the PEP 8 Python Style Guide to make sure our code will be maintainable and readable for the next few months (and hopefully years)
+- **Two big milestones:**
+    - **The game is now playable in `full-body` mode!**
+    - **The pose detection logic in `simple-mode` is finished**
