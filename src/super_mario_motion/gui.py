@@ -40,6 +40,7 @@ path_image_gamepad = path_data_folder / 'gamepad.png'
 label_webcam_top_padding = 20
 edge_padding_default = 20
 horizontal_padding = (window_width - webcam_image_width) // 2
+frame_padding_y = (20, 0)
 
 # Collecting
 COLLECTION_STEPS = [
@@ -132,7 +133,37 @@ def init():
 
     # Frame Bottom Left
     frame_bottom_left = tk.Frame(window, bg=color_dark_widget)
-    frame_bottom_left.grid(row=1, column=0, padx=horizontal_padding, pady=(5, 0), sticky="n")
+    # Widgets on these rows expand evenly
+    frame_bottom_left.columnconfigure(0, weight=1)
+    frame_bottom_left.columnconfigure(1, weight=1)
+    frame_bottom_left.grid(row=1, column=0, padx=horizontal_padding, pady=frame_padding_y, sticky="n")
+
+    # Button "Launch Game"
+    button_launch_game = ttk.Button(
+        frame_bottom_left,
+        text="Launch Game",
+        command=None,
+        style = "Custom.TButton"
+        )
+
+    button_launch_game.grid(
+        row=0,
+        column=0,
+        sticky="nsew")
+
+
+    # Button "Help"
+    button_help = ttk.Button(
+        frame_bottom_left,
+        text="Help",
+        command=None,
+        style = "Custom.TButton"
+        )
+
+    button_help.grid(
+        row=0,
+        column=1,
+        sticky="nsew")
 
     # Text Label "Preview:"
     label_preview = tk.Label(
@@ -141,7 +172,7 @@ def init():
         fg=color_white,
         text="Preview:")
     label_preview.grid(
-        row=0,
+        row=1,
         column=0)
 
     # Custom ttk Style for Combobox
@@ -185,11 +216,11 @@ def init():
     option_menu_preview.bind("<<ComboboxSelected>>", clear_combobox_selection)
     option_menu_preview['values'] = ["Webcam", "Webcam + Skeleton", "Skeleton Only"]
     option_menu_preview.current(0)
-    option_menu_preview.grid(row=0, column=1)
+    option_menu_preview.grid(row=1, column=1)
 
     # "Mode:" Text Label
     label_mode = tk.Label(frame_bottom_left, bg=color_dark_widget, fg=color_white, text="Mode:")
-    label_mode.grid(row=1, column=0)
+    label_mode.grid(row=2, column=0)
 
     # Mode Combobox
     global selected_mode
@@ -209,7 +240,7 @@ def init():
     option_menu_mode.bind("<<ComboboxSelected>>", on_mode_change)
     option_menu_mode['values'] = ["Simple", "Full-body", "Collect"]
     option_menu_mode.current(0)
-    option_menu_mode.grid(row=1, column=1)
+    option_menu_mode.grid(row=2, column=1)
 
     # Debug Info Checkbox
     global allow_debug_info
@@ -228,7 +259,7 @@ def init():
         width=20,
         height=2
         )
-    checkbox_debug_info.grid(row=2, column=0, columnspan=2)
+    checkbox_debug_info.grid(row=3, column=0, columnspan=2)
 
     # Send Inputs Checkbox
     global send_keystrokes, checkbox_toggle_inputs
@@ -247,11 +278,11 @@ def init():
         width=20,
         height=2
         )
-    checkbox_toggle_inputs.grid(row=3, column=0, columnspan=2)
+    checkbox_toggle_inputs.grid(row=4, column=0, columnspan=2)
 
     # Frame bottom right
     frame_bottom_right = tk.Frame(window, bg=color_dark_widget)
-    frame_bottom_right.grid(row=1, column=1, padx=horizontal_padding, pady=(20, 0))
+    frame_bottom_right.grid(row=1, column=1, padx=horizontal_padding, pady=frame_padding_y)
 
     # gamepad
     global label_virtual_gamepad_visualizer
