@@ -33,7 +33,7 @@ color_white = '#FFFFFF'
 # Filepaths for images that are being used on init
 path_data_folder = Path(__file__).parent / "images"
 path_image_webcam_sample = path_data_folder / 'webcam_sample.jpg'
-path_image_pose_default = path_data_folder / 'standing.png'
+path_image_pose_default = path_data_folder / 'unknown.png'
 path_image_gamepad = path_data_folder / 'gamepad.png'
 
 # Paddings
@@ -382,7 +382,8 @@ def update_pose(new_pose):
 def update_pose_image():
     valid_poses = [
         "standing", "jumping", "crouching", "throwing",
-        "walking_right", "walking_left", "running_right", "running_left"
+        "walking_right", "walking_left", "running_right", "running_left",
+        "swimming"
         ]
     if pose in valid_poses:
         try:
@@ -392,10 +393,14 @@ def update_pose_image():
         except FileNotFoundError:
             print("Error: File not found")
             sys.exit(1)
+    else:
+        # Display question mark symbol if unknown pose is performed
+        window.image_pose = ImageTk.PhotoImage(
+            Image.open(path_image_pose_default).resize((100, 100), Image.LANCZOS)
+            )
 
-        label_pose_visualizer.config(image=window.image_pose)
-        label_pose_visualizer.image = window.image_pose
-
+    label_pose_visualizer.config(image=window.image_pose)
+    label_pose_visualizer.image = window.image_pose
 
 def update_pose_text():
     label_current_pose.config(text="Current pose:" + pose)
