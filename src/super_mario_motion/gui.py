@@ -27,7 +27,7 @@ gamepad_image_height = 100
 
 # Colors
 color_background = '#202326'
-color_foreground = '#141618'
+color_dark_widget = '#141618'
 color_white = '#FFFFFF'
 
 # Filepaths for images that are being used on init
@@ -131,13 +131,13 @@ def init():
         )
 
     # Frame Bottom Left
-    frame_bottom_left = tk.Frame(window, bg=color_foreground)
+    frame_bottom_left = tk.Frame(window, bg=color_dark_widget)
     frame_bottom_left.grid(row=1, column=0, padx=horizontal_padding, pady=(5, 0), sticky="n")
 
     # Text Label "Preview:"
     label_preview = tk.Label(
         frame_bottom_left,
-        bg=color_foreground,
+        bg=color_dark_widget,
         fg=color_white,
         text="Preview:")
     label_preview.grid(
@@ -148,14 +148,26 @@ def init():
     style = ttk.Style()
     style.theme_use('alt')
     style.configure("Custom.TCombobox",
-                    fieldbackground=color_foreground,
-                    background=color_foreground,
+                    fieldbackground=color_dark_widget,
+                    background=color_dark_widget,
                     foreground="white"
                     )
     style.map("Custom.TCombobox",
-              fieldbackground=[("readonly", color_foreground)],
+              fieldbackground=[("readonly", color_dark_widget)],
               foreground=[("readonly", "white")],
-              background=[("readonly", color_foreground)])
+              background=[("readonly", color_dark_widget)])
+
+    # Custom ttk Style for Buttons
+    style.configure("Custom.TButton",
+                    fieldbackground=color_dark_widget,
+                    background=color_dark_widget,
+                    foreground="white"
+                    )
+    style.map("Custom.TButton",
+              background = [("active", "white"), ("pressed", "white")],
+              foreground = [("active", "black"), ("pressed", "black")]
+              )
+
 
     # This is needed to deselect the text inside of a ttk Combobox
     def clear_combobox_selection(event):
@@ -176,7 +188,7 @@ def init():
     option_menu_preview.grid(row=0, column=1)
 
     # "Mode:" Text Label
-    label_mode = tk.Label(frame_bottom_left, bg=color_foreground, fg=color_white, text="Mode:")
+    label_mode = tk.Label(frame_bottom_left, bg=color_dark_widget, fg=color_white, text="Mode:")
     label_mode.grid(row=1, column=0)
 
     # Mode Combobox
@@ -205,7 +217,7 @@ def init():
     checkbox_debug_info = tk.Checkbutton(
         frame_bottom_left,
         text='Debug Info',
-        bg=color_foreground,
+        bg=color_dark_widget,
         fg=color_white,
         selectcolor=color_background,
         highlightthickness=0,
@@ -224,7 +236,7 @@ def init():
     checkbox_toggle_inputs = tk.Checkbutton(
         frame_bottom_left,
         text='Send Inputs',
-        bg=color_foreground,
+        bg=color_dark_widget,
         fg=color_white,
         selectcolor=color_background,
         highlightthickness=0,
@@ -238,7 +250,7 @@ def init():
     checkbox_toggle_inputs.grid(row=3, column=0, columnspan=2)
 
     # Frame bottom right
-    frame_bottom_right = tk.Frame(window, bg=color_foreground)
+    frame_bottom_right = tk.Frame(window, bg=color_dark_widget)
     frame_bottom_right.grid(row=1, column=1, padx=horizontal_padding, pady=(20, 0))
 
     # gamepad
@@ -257,7 +269,7 @@ def init():
     global label_current_pose
     label_current_pose = tk.Label(
         frame_bottom_right,
-        bg=color_foreground,
+        bg=color_dark_widget,
         fg=color_white,
         text="Current pose:" + pose
         )
@@ -267,7 +279,7 @@ def init():
     global label_debug_landmarks
     label_debug_landmarks = tk.Label(
         frame_bottom_right,
-        bg=color_foreground,
+        bg=color_dark_widget,
         fg=color_white,
         width=60,
         height=10,
@@ -292,7 +304,8 @@ def init():
     button_collect_start = ttk.Button(
         window,
         text="Start collecting",
-        command=start_collect_sequence
+        command=start_collect_sequence,
+        style = "Custom.TButton"
         )
     button_collect_start.grid(row=3, column=0, columnspan=2, pady=(10, 0))
     button_collect_start.grid_remove()
