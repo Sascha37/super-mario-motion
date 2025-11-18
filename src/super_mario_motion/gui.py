@@ -64,29 +64,6 @@ collecting = False
 collect_stop = False
 after_handles = []
 
-
-def _schedule_after(ms, func, *args):
-    aid = window.after(ms, func, *args)
-    after_handles.append(aid)
-    return aid
-
-
-def _cancel_scheduled():
-    while after_handles:
-        aid = after_handles.pop()
-        try:
-            window.after_cancel(aid)
-        except Exception:
-            pass
-
-
-def _set_collect_button(starting: bool):
-    if starting:
-        button_collect_start.config(text="Stop collecting", command=stop_collect_sequence)
-    else:
-        button_collect_start.config(text="Start collecting", command=start_collect_sequence)
-
-
 # Function gets called once in main.py once the program starts
 def init():
     global window
@@ -322,8 +299,6 @@ def init():
 
     print(Path(__file__).name + " initialized")
 
-    #apply_mode(selected_mode.get())
-
 
 # set_webcam_image and set_pose_image are supposed to be called in the update-loop in main.py
 def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
@@ -435,24 +410,39 @@ def apply_mode(mode: str):
         _set_collect_button(starting=False)
 
     else:
-        checkbox_toggle_inputs.grid(row=3, column=0, columnspan=2)
+        checkbox_toggle_inputs.grid()
 
-        #label_virtual_gamepad_visualizer.grid(row=1, column=1, padx=horizontal_padding,
-        #                                      pady=(20, 0))
-        #label_virtual_gamepad_visualizer.grid_forget()
-        label_virtual_gamepad_visualizer.grid(row=0, column=0)
-
-        label_pose_visualizer.grid_forget()
-        label_pose_visualizer.grid(row=0, column=1)
-
-        label_current_pose.grid_forget()
-        label_current_pose.grid(row=1, column=0, columnspan=2)
+        # Display play mode specific widgets
+        label_virtual_gamepad_visualizer.grid()
+        label_pose_visualizer.grid()
+        label_current_pose.grid()
 
         # Hide collect mode specific widgets
         label_collect_status.grid_remove()
         _set_collect_button(starting=False)
         button_collect_start.grid_remove()
 
+# Collecting mode specific functions:
+def _schedule_after(ms, func, *args):
+    aid = window.after(ms, func, *args)
+    after_handles.append(aid)
+    return aid
+
+
+def _cancel_scheduled():
+    while after_handles:
+        aid = after_handles.pop()
+        try:
+            window.after_cancel(aid)
+        except Exception:
+            pass
+
+
+def _set_collect_button(starting: bool):
+    if starting:
+        button_collect_start.config(text="Stop collecting", command=stop_collect_sequence)
+    else:
+        button_collect_start.config(text="Start collecting", command=start_collect_sequence)
 
 def start_collect_sequence():
     global collecting, collect_stop, current_run_csv, collection_order
@@ -544,7 +534,3 @@ def record_collect_pose(pose_name: str, seconds: float, index: int):
     collect.main()
     if not collect_stop:
         _schedule_after(500, lambda: run_collect_step(index + 1))
-
-
-def get_active_mode():
-    return selected_mode.get()
