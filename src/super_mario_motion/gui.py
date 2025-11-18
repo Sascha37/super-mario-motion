@@ -156,7 +156,7 @@ def init():
     frame_bottom_left = tk.Frame(window, bg=color_foreground)
     frame_bottom_left.grid(row=1, column=0, padx=horizontal_padding, pady=(5, 0), sticky="n")
 
-    # Text Label "Preview":
+    # Text Label "Preview:"
     label_preview = tk.Label(
         frame_bottom_left,
         bg=color_foreground,
@@ -206,7 +206,9 @@ def init():
     global selected_mode
     selected_mode = tk.StringVar()
 
-    def on_mode_change(event=None):
+    # Gets called when the Mode-Combobox is selected
+    def on_mode_change(event):
+        event.widget.selection_clear()
         apply_mode(selected_mode.get())
 
     option_menu_mode = ttk.Combobox(
@@ -413,10 +415,11 @@ def update_debug_landmarks(landmarks):
 def apply_mode(mode: str):
     global label_collect_status, button_collect_start
     global label_virtual_gamepad_visualizer, label_pose_visualizer, label_current_pose
-    global checkbox_toggle_inputs, allow_debug_info
+    global checkbox_toggle_inputs, allow_debug_info, send_keystrokes
 
     if mode == "Collect":
         allow_debug_info.set(1)
+        send_keystrokes.set(0)
 
         checkbox_toggle_inputs.grid_remove()
 
