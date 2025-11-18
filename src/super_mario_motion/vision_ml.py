@@ -123,7 +123,7 @@ def _worker():
 
             lm = res.pose_landmarks.landmark
             lm_arr = np.array([[p.x, p.y, p.z, p.visibility] for p in lm], dtype=np.float32)
-            feat = _extract_features(lm_arr)
+            feat = extract_features_ml(lm_arr)
 
             label = None
             if _model is not None:
