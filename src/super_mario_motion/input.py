@@ -3,7 +3,7 @@ import threading
 import time
 from pathlib import Path
 
-from state import StateManager
+from .state import StateManager
 
 if sys.platform == 'win32':
     import pydirectinput as pyautogui

@@ -6,7 +6,7 @@ import cv2 as cv
 import mediapipe as mp
 import numpy as np
 
-from state import StateManager
+from .state import StateManager
 
 # globals
 skeleton_only_frame = None

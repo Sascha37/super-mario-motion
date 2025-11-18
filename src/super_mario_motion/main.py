@@ -1,10 +1,10 @@
 import cv2 as cv
 
-import gui
-import input
-import vision
-import vision_ml
-from state import StateManager
+from . import gui
+from . import input
+from . import vision
+from . import vision_ml
+from .state import StateManager
 
 
 # Checks if a webcam is available
