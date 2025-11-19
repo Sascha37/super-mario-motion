@@ -6,3 +6,4 @@ PyAutoGUI
 pillow
 joblib
 scikit-learn
+pytest

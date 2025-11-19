@@ -9,8 +9,8 @@ import numpy as np
 from joblib import load
 
 # we get frames from vision.py
-import vision
-from state import StateManager
+from . import vision
+from .state import StateManager
 
 state_manager = StateManager()
 
@@ -48,7 +48,7 @@ def _angle(a, b, c):
     return np.degrees(np.arccos(np.clip(cosang, -1.0, 1.0)))
 
 
-def _extract_features(lm_arr: np.ndarray) -> np.ndarray:
+def extract_features_ml(lm_arr: np.ndarray) -> np.ndarray:
     xy = lm_arr[:, :2].copy()
     mid_hip = _mid(xy[hip_left], xy[hip_right])
     xy -= mid_hip
@@ -123,7 +123,7 @@ def _worker():
 
             lm = res.pose_landmarks.landmark
             lm_arr = np.array([[p.x, p.y, p.z, p.visibility] for p in lm], dtype=np.float32)
-            feat = _extract_features(lm_arr)
+            feat = extract_features_ml(lm_arr)
 
             label = None
             if _model is not None:

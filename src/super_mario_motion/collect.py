@@ -8,7 +8,7 @@ import mediapipe as mp
 import numpy as np
 
 # TODO: Remove import vision  # use camera from running program
-from state import StateManager
+from .state import StateManager
 
 # Init StateManager
 state_manger = StateManager()
