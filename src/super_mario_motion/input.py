@@ -10,6 +10,8 @@ if sys.platform == 'win32':
 else:
     import pyautogui
 
+mapping = None
+
 # Set initial values
 send_permission = False
 previous_send_permission = False
@@ -51,9 +53,9 @@ def input_loop():
         time.sleep(0.02)
 
 
-def press_designated_input(pose):
+def press_designated_input(pose_):
     global currently_held_keys, last_orientation
-    match pose:
+    match pose_:
         case "standing":
             pass
         case "jumping":
@@ -89,7 +91,7 @@ def press_designated_input(pose):
             pyautogui.keyDown("y")
             pyautogui.keyUp("y")
         case _:
-            print("Input: No input defined for: " + pose)
+            print("Input: No input defined for: " + pose_)
 
 
 def release_held_keys():

@@ -1,9 +1,6 @@
 import cv2 as cv
 
-from . import gui
-from . import input
-from . import vision
-from . import vision_ml
+from . import gui, input, vision, vision_ml
 from .state import StateManager
 
 

@@ -9,6 +9,7 @@ import numpy as np
 from .state import StateManager
 
 # globals
+lm_string = None
 skeleton_only_frame = None
 raw_frame = None
 skel_frame = None
@@ -58,10 +59,10 @@ def init():
     thread.start()
 
 
-def detect_pose_simple(frame, lm):
+def detect_pose_simple(frame_, lm):
     # helper functions for coordinates and distance
     def coordinates(index):
-        return landmark_coords(frame, lm[index])
+        return landmark_coords(frame_, lm[index])
 
     def distance(x, y):
         return math.hypot(y[0] - x[0], y[1] - x[1])
@@ -132,12 +133,7 @@ def detect_pose_simple(frame, lm):
 
 def cam_loop():
     global frame, rgb, cam, current_pose, skeleton_only_frame, lm_string
-    with mpPose.Pose(
-            model_complexity=1,  # uses mid-precision and mid-speed
-            enable_segmentation=False,  # ignores the background
-            min_detection_confidence=0.5,
-            min_tracking_confidence=0.5,
-            ) as pose:
+    with mpPose.Pose() as pose:
         print(Path(__file__).name + " initialized")
         while cam.isOpened():
             ret, image = cam.read()

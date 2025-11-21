@@ -1,6 +1,5 @@
 import threading
 import time
-from collections import deque
 from pathlib import Path
 
 import cv2 as cv
@@ -10,6 +9,7 @@ from joblib import load
 
 # we get frames from vision.py
 from . import vision
+from .pose_features import extract_features
 from .state import StateManager
 
 state_manager = StateManager()
@@ -19,61 +19,10 @@ _raw_frame = None
 _skeleton_frame = None
 _exit = False
 _thread = None
+_model = None
 
 mpPose = mp.solutions.pose
 mpDrawing = mp.solutions.drawing_utils
-
-# Landmarks
-eye_left, eye_right = 2, 5
-shoulder_left, shoulder_right = 11, 12
-elbow_left, elbow_right = 13, 14
-wrist_left, wrist_right = 15, 16
-hip_left, hip_right = 23, 24
-knee_left, knee_right = 25, 26
-ankle_left, ankle_right = 27, 28
-
-_smooth = deque(maxlen=7)
-
-_model = None
-
-
-def _mid(a, b):
-    return (a + b) / 2.0
-
-
-def _angle(a, b, c):
-    ba, bc = a - b, c - b
-    denom = (np.linalg.norm(ba) * np.linalg.norm(bc)) + 1e-6
-    cosang = np.dot(ba, bc) / denom
-    return np.degrees(np.arccos(np.clip(cosang, -1.0, 1.0)))
-
-
-def extract_features_ml(lm_arr: np.ndarray) -> np.ndarray:
-    xy = lm_arr[:, :2].copy()
-    mid_hip = _mid(xy[hip_left], xy[hip_right])
-    xy -= mid_hip
-    mid_sh = _mid(xy[shoulder_left], xy[shoulder_right])
-    torso = np.linalg.norm(mid_sh) + 1e-6
-    xy /= torso
-    angs = np.array([
-        _angle(xy[shoulder_left], xy[elbow_left], xy[wrist_left]),
-        _angle(xy[shoulder_right], xy[elbow_right], xy[wrist_right]),
-        _angle(xy[hip_left], xy[knee_left], xy[ankle_left]),
-        _angle(xy[hip_right], xy[knee_right], xy[ankle_right]),
-        ], dtype=np.float32)
-
-    def dist(i, j): return np.linalg.norm(xy[i] - xy[j])
-
-    dists = np.array([
-        dist(shoulder_left, shoulder_right),
-        dist(hip_left, hip_right),
-        dist(wrist_left, wrist_right),
-        dist(ankle_left, ankle_right),
-        dist(shoulder_left, hip_left),
-        dist(shoulder_right, hip_right),
-        ], dtype=np.float32)
-    vis = lm_arr[:, 3].astype(np.float32)
-    return np.concatenate([xy.flatten(), angs, dists, vis], axis=0)
 
 
 def init():
@@ -95,10 +44,7 @@ def init():
 
 def _worker():
     global _current_pose, _raw_frame, _skeleton_frame
-    with mpPose.Pose(static_image_mode=False, model_complexity=1,
-                     enable_segmentation=False,
-                     min_detection_confidence=0.5,
-                     min_tracking_confidence=0.5) as pose:
+    with mpPose.Pose() as pose:
         print(Path(__file__).name + " initialized (passive)")
         while not _exit:
 
@@ -123,14 +69,14 @@ def _worker():
 
             lm = res.pose_landmarks.landmark
             lm_arr = np.array([[p.x, p.y, p.z, p.visibility] for p in lm], dtype=np.float32)
-            feat = extract_features_ml(lm_arr)
+            feat = extract_features(lm_arr)
 
             label = None
             if _model is not None:
                 x = feat.reshape(1, -1)
                 try:
                     label = _model.predict(x)[0]
-                except Exception as e:
+                except (ValueError, TypeError, NotFittedError):
                     label = None
 
             if label is not None:
