@@ -4,7 +4,7 @@ from pathlib import Path
 
 module_log_prefix ="[Launcher]"
 
-config_retroarch_path = r"/mnt/files/SteamLibrary/steamapps/common/RetroArch/"
+config_retroarch_path = r"/mnt/files/SteamLibrary/steamapps/common/RetroArchh/"
 config_rom_path = f"/mnt/files/roms/nes/Super Mario Bros. (World).ness"
 
 retroarch_path = Path(config_retroarch_path)
@@ -16,10 +16,10 @@ def validate_path(path):
     global all_paths_valid
 
     if not path.exists():
-        print(f"{module_log_prefix} {path}, Path does not exist, please edit the config.")
+        print(f"{module_log_prefix} {path}, Path/File does not exist, please edit the config.")
         all_paths_valid = False
     else:
-        print(f"{module_log_prefix} {path}, Path found.")
+        print(f"{module_log_prefix} {path}, Path/File found.")
 
 validate_path(rom_path)
 validate_path(retroarch_path)
