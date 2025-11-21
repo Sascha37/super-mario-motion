@@ -1,4 +1,7 @@
 import numpy as np
+import csv
+from pathlib import Path
+
 from super_mario_motion.collect import extract_features
 from super_mario_motion.vision_ml import extract_features_ml
 
@@ -27,7 +30,7 @@ def test_feature_shape_and_type():
 
 
 def test_training_csv_integrity():
-    data_dir = Path("data")
+    data_dir = Path(__file__).resolve().parents[1] / "data"
     files = list(data_dir.glob("pose_samples*.csv"))
     assert files, "No training data CSVs found!"
 
