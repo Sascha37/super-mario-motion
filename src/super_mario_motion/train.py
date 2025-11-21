@@ -14,7 +14,6 @@ MODEL_PATH = Path(__file__).parent.parent.parent / "data" / "pose_model.joblib"
 
 
 def combine_run_csvs(output_name: str = "pose_samples_all.csv",
-                     runs_subdir: str = "collect_runs",
                      pattern: str = "pose_samples_*.csv") -> Path:
     all_csvs = Path(__file__).parent.parent.parent / "data" / output_name
     if all_csvs.exists():
@@ -26,7 +25,7 @@ def combine_run_csvs(output_name: str = "pose_samples_all.csv",
     out_path = data_dir / output_name
     with open(out_path, "w") as out_f:
         for i, fp in enumerate(files):
-            with open(fp, "r") as in_f:
+            with open(fp) as in_f:
                 for j, line in enumerate(in_f):
                     if i > 0 and j == 0 and line.lower().startswith("label,"):
                         continue
@@ -36,7 +35,7 @@ def combine_run_csvs(output_name: str = "pose_samples_all.csv",
 
 def load_csv(csv_path: Path):
     labels, feats = [], []
-    with open(csv_path, "r") as f:
+    with open(csv_path) as f:
         for line in f:
             parts = line.strip().split(",")
             if len(parts) < 10:
@@ -58,7 +57,7 @@ def main():
         )
 
     pipe = Pipeline([
-        ("scaler", StandardScaler(with_mean=True)),
+        ("scaler", StandardScaler()),
         ("pca", PCA(n_components=0.95, svd_solver="full")),  # optional, can be removed
         ("clf", SVC(probability=True))
         ])

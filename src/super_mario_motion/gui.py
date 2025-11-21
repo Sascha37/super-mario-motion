@@ -13,6 +13,16 @@ from . import collect
 
 pose = ""
 
+array = None
+window = None
+frame_bottom_left, frame_bottom_right = None, None
+label_webcam = None
+selected_preview, selected_mode = None, None
+allow_debug_info, send_keystrokes, checkbox_toggle_inputs = None, None, None
+(label_virtual_gamepad_visualizer, label_pose_visualizer, label_current_pose,
+ label_debug_landmarks) = None, None, None, None
+button_collect_start, label_collect_status = None, None
+
 # Window size
 window_width = 650
 window_height = 750
@@ -76,7 +86,7 @@ def _cancel_scheduled():
         aid = after_handles.pop()
         try:
             window.after_cancel(aid)
-        except Exception:
+        except tk.TclError:
             pass
 
 
@@ -206,7 +216,7 @@ def init():
     global selected_mode
     selected_mode = tk.StringVar()
 
-    def on_mode_change(event=None):
+    def on_mode_change():
         apply_mode(selected_mode.get())
 
     option_menu_mode = ttk.Combobox(
@@ -223,39 +233,19 @@ def init():
     # debug checkbox
     global allow_debug_info
     allow_debug_info = tk.IntVar(value=0)
-    checkbox_debug_info = tk.Checkbutton(
-        frame_bottom_left,
-        text='Debug Info',
-        bg=color_foreground,
-        fg=color_white,
-        selectcolor=color_background,
-        highlightthickness=0,
-        bd=0,
-        variable=allow_debug_info,
-        onvalue=1,
-        offvalue=0,
-        width=20,
-        height=2
-        )
+    checkbox_debug_info = tk.Checkbutton(frame_bottom_left, text='Debug Info', bg=color_foreground,
+                                         fg=color_white, selectcolor=color_background,
+                                         highlightthickness=0, bd=0, variable=allow_debug_info,
+                                         width=20, height=2)
     checkbox_debug_info.grid(row=2, column=0, columnspan=2)
 
     # send inputs
     global send_keystrokes, checkbox_toggle_inputs
     send_keystrokes = tk.IntVar()
-    checkbox_toggle_inputs = tk.Checkbutton(
-        frame_bottom_left,
-        text='Send Inputs',
-        bg=color_foreground,
-        fg=color_white,
-        selectcolor=color_background,
-        highlightthickness=0,
-        bd=0,
-        variable=send_keystrokes,
-        onvalue=1,
-        offvalue=0,
-        width=20,
-        height=2
-        )
+    checkbox_toggle_inputs = tk.Checkbutton(frame_bottom_left, text='Send Inputs',
+                                            bg=color_foreground, fg=color_white,
+                                            selectcolor=color_background, highlightthickness=0,
+                                            bd=0, variable=send_keystrokes, width=20, height=2)
     checkbox_toggle_inputs.grid(row=3, column=0, columnspan=2)
 
     # RIGHT
@@ -286,25 +276,13 @@ def init():
 
     # debug text
     global label_debug_landmarks
-    label_debug_landmarks = tk.Label(
-        frame_bottom_right,
-        bg=color_foreground,
-        fg=color_white,
-        width=60,
-        height=10,
-        text="",
-        font=("Consolas", 6)
-        )
+    label_debug_landmarks = tk.Label(frame_bottom_right, bg=color_foreground, fg=color_white,
+                                     width=60, height=10, font=("Consolas", 6))
     label_debug_landmarks.grid(row=2, column=0, columnspan=2)
 
     global label_collect_status, button_collect_start
-    label_collect_status = tk.Label(
-        window,
-        bg=color_background,
-        fg=color_white,
-        text="",
-        font=("Consolas", 25)
-        )
+    label_collect_status = tk.Label(window, bg=color_background, fg=color_white,
+                                    font=("Consolas", 25))
     label_collect_status.grid(row=2, column=0, columnspan=2, pady=(20, 0))
     label_collect_status.grid_remove()
 
@@ -323,6 +301,7 @@ def init():
 
 # set_webcam_image and set_pose_image are supposed to be called in the update-loop in main.py
 def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
+    global array
     match selected_preview.get():
         case "Webcam":
             array = webcam
