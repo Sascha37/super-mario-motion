@@ -3,8 +3,8 @@ import random
 import sys
 import threading
 import webbrowser
-import subprocess #TODO:
 import tkinter as tk
+import game_launcher #from . import game_launcher
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk
@@ -149,7 +149,7 @@ def init():
     button_launch_game = ttk.Button(
         frame_bottom_left,
         text="Launch Game",
-        command=start_game,
+        command=start_game_button_action,
         style = "Custom.TButton"
         )
 
@@ -622,16 +622,5 @@ def open_help_menu():
     threading.Thread(target=open_browser, args=(help_file_path,), daemon=True).start()
 
 # gets called by the "Start Game"-Button
-def start_game():
-    #TODO: These are my local file paths, please edit them to test
-    #TODO: We should create a config file for things like these
-    launcher_steamid = "1118310"
-    launcher_core_path = "/mnt/files/SteamLibrary/steamapps/common/RetroArch/cores/fceumm_libretro.so"
-    launcher_rom_path = "/mnt/files/roms/nes/Super Mario Bros. (World).nes"
-
-    try:
-        subprocess.run(["steam", "-applaunch", launcher_steamid,"-L", launcher_core_path ,launcher_rom_path], check=True)
-    except subprocess.CalledProcessError:
-        print("Failed to open the game.")
-    except FileNotFoundError as e:
-        print(f"Could not find steam: {e}")
+def start_game_button_action():
+    threading.Thread(target=game_launcher.launch_game, daemon=True).start()
