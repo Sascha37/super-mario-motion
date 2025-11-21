@@ -130,6 +130,9 @@ def test_swimming():
     frame = make_frame()
 
     # swimming: left wrist right of right wrist
+    lm[shoulder_left].y = lm[shoulder_right].y = 0.5
+    lm[eye_left].y = lm[eye_right].y = 0.5
+    lm[wrist_left].y = lm[wrist_right].y = 0.5
     lm[wrist_left].x = 0.6
     lm[wrist_right].x = 0.5
 
