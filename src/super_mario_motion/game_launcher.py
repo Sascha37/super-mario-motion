@@ -4,8 +4,8 @@ from pathlib import Path
 
 module_log_prefix ="[Launcher]"
 
-config_retroarch_path = r"/mnt/files/SteamLibrary/steamapps/common/RetroArchh/"
-config_rom_path = f"/mnt/files/roms/nes/Super Mario Bros. (World).ness"
+config_retroarch_path = "/Users/timobarton/Library/Application Support/Steam/steamapps/common/RetroArch"
+config_rom_path = f"/Users/timobarton/Library/Application Support/Steam/steamapps/common/RetroArch/downloads/Super Mario Bros. (World).nes"
 
 retroarch_path = Path(config_retroarch_path)
 rom_path = Path(config_rom_path)
@@ -30,7 +30,7 @@ def get_command(platform):
             exe = retroarch_path / "retroarch.sh"
             core = retroarch_path / "cores" / "fceumm_libretro.so"
         case "darwin":
-            exe = retroarch_path / "retroarch"
+            exe = retroarch_path / "RetroArch.app" / "Contents" / "MacOS" / "RetroArch"
             core = retroarch_path / "cores" / "fceumm_libretro.dylib"
         case "win32":
             exe = retroarch_path / "retroarch.exe"
