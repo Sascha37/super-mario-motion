@@ -21,7 +21,7 @@ def webcam_is_available():
 def update():
 
     # Write GUI info into state
-    state_manager.set_current_mode(gui.get_active_mode())
+    state_manager.set_current_mode(gui.selected_mode.get())
     state_manager.set_send_permission(gui.send_keystrokes.get())
 
     # Retrieve predicted poses
@@ -42,7 +42,7 @@ def update():
     gui.update_pose_text()
     gui.update_debug_landmarks(state_manager.get_landmark_string())
 
-    print(f"simple: {current_pose}, full-body: {current_pose_full_body}")
+    #print(f"simple: {current_pose}, full-body: {current_pose_full_body}")
 
     gui.window.after(1, update)
 
