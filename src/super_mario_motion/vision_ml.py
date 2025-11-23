@@ -6,6 +6,7 @@ import cv2 as cv
 import mediapipe as mp
 import numpy as np
 from joblib import load
+from sklearn.exceptions import NotFittedError
 
 # we get frames from vision.py
 from . import vision
