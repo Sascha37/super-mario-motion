@@ -387,8 +387,7 @@ def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
 
     array = array[:, ::-1, :]  # flip the camera horizontally only for the user
     # image = ImageTk.PhotoImage(Image.fromarray(array).resize((
-    # webcam_image_width,
-    # webcam_image_height), Image.LANCZOS))
+    # webcam_image_width, webcam_image_height), Image.LANCZOS))
 
     # calculate the source and destination image ratios
     img = Image.fromarray(array)
@@ -654,9 +653,8 @@ def open_browser(path):
 
 
 # gets called by the "Help"-Button, calls open_brower in a seperate thread,
-# so that
-# the main thread does not have to wait for the browser to start up (~5
-# seconds)
+# so that the main thread does not have to wait for the browser to start up
+# (~5 seconds)
 def open_help_menu():
     help_file_path = Path(
         __file__).parent.parent.parent / "docs" / "help" / "help_page.pdf"
@@ -670,9 +668,8 @@ def open_browser(path):
 
 
 # gets called by the "Help"-Button, calls open_browser in a separate thread,
-# so that
-# the main thread does not have to wait for the browser to start up (~5
-# seconds)
+# so that the main thread does not have to wait for the browser to start up
+# (~5 seconds)
 def open_help_menu():
     help_file_path = Path(
         __file__).parent.parent.parent / "docs" / "help" / "help_page.pdf"
