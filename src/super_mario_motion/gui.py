@@ -2,6 +2,7 @@ import platform
 import random
 import sys
 import threading
+import webbrowser
 import tkinter as tk
 import webbrowser
 from datetime import datetime
@@ -28,6 +29,7 @@ button_collect_start, label_collect_status = None, None
 # Webcam preview
 webcam_image_width = 612
 webcam_image_height = 408
+
 
 # Gamepad
 gamepad_image_width = 200
@@ -476,6 +478,27 @@ def apply_mode(mode: str):
         _set_collect_button(starting=False)
         button_collect_start.grid_remove()
 
+# Collecting mode specific functions:
+def _schedule_after(ms, func, *args):
+    aid = window.after(ms, func, *args)
+    after_handles.append(aid)
+    return aid
+
+
+def _cancel_scheduled():
+    while after_handles:
+        aid = after_handles.pop()
+        try:
+            window.after_cancel(aid)
+        except Exception:
+            pass
+
+
+def _set_collect_button(starting: bool):
+    if starting:
+        button_collect_start.config(text="Stop collecting", command=stop_collect_sequence)
+    else:
+        button_collect_start.config(text="Start collecting", command=start_collect_sequence)
 
 # Collecting mode-specific functions:
 def _schedule_after(ms, func, *args):
@@ -591,6 +614,15 @@ def record_collect_pose(pose_name: str, seconds: float, index: int):
     if not collect_stop:
         _schedule_after(500, lambda: run_collect_step(index + 1))
 
+# Takes in a Path and opens this path as a file in the default browser
+def open_browser(path):
+    webbrowser.open_new_tab(path.as_uri())
+
+# gets called by the "Help"-Button, calls open_brower in a seperate thread, so that
+# the main thread does not have to wait for the browser to start up (~5 seconds)
+def open_help_menu():
+    help_file_path = Path(__file__).parent.parent.parent / "docs" / "help" / "help_page.pdf"
+    threading.Thread(target=open_browser, args=(help_file_path,), daemon=True).start()
 
 # Takes in a Path and opens this path as a file in the default browser
 def open_browser(path):

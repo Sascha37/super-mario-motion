@@ -39,7 +39,7 @@ def update():
     gui.update_pose_text()
     gui.update_debug_landmarks(state_manager.get_landmark_string())
 
-    print(f"simple: {current_pose}, full-body: {current_pose_full_body}")
+    #print(f"simple: {current_pose}, full-body: {current_pose_full_body}")
 
     gui.window.after(1, update)
 
