@@ -33,12 +33,13 @@ def input_loop():
     print(Path(__file__).name + " initialized")
     global pose, last_pose, mapping, send_permission, previous_send_permission
     while True:
-        pose = state_manager.get_pose_full_body() if (state_manager.get_current_mode() ==
-                                                      "Full-body") else state_manager.get_pose()
+        pose = state_manager.get_pose_full_body() if (
+                state_manager.get_current_mode() ==
+                "Full-body") else state_manager.get_pose()
         send_permission = state_manager.get_send_permission()
         if send_permission:
-            if not previous_send_permission:  # When send_permission just changed from
-                # False to True
+            if not previous_send_permission:
+                # When send_permission just changed from False to True
                 press_designated_input(pose)
                 last_pose = pose
                 previous_send_permission = True
@@ -46,7 +47,8 @@ def input_loop():
                 release_held_keys()
                 last_pose = pose
                 press_designated_input(pose)
-        elif previous_send_permission:  # When send_permission just changed from True to False
+        elif previous_send_permission:
+            # When send_permission just changed from True to False
             release_held_keys()
             previous_send_permission = False
 

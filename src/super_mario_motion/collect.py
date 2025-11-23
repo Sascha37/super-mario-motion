@@ -7,9 +7,9 @@ import cv2 as cv
 import mediapipe as mp
 import numpy as np
 
+from .pose_features import extract_features
 # TODO: Remove import vision  # use camera from running program
 from .state import StateManager
-from .pose_features import extract_features
 
 # Init StateManager
 state_manger = StateManager()
@@ -17,15 +17,20 @@ state_manger = StateManager()
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--label", required=True, help="z.B. standing, walking_right, ...")
-    ap.add_argument("--seconds", type=float, default=30, help="duration of recording")
+    ap.add_argument("--label", required=True,
+                    help="z.B. standing, walking_right, ...")
+    ap.add_argument("--seconds", type=float, default=30,
+                    help="duration of recording")
     ap.add_argument("--csv", default="pose_samples.csv")
-    ap.add_argument("--fps", type=float, default=20.0, help="goal-sampling rate")
+    ap.add_argument("--fps", type=float, default=20.0,
+                    help="goal-sampling rate")
 
-    ap.add_argument("--source", choices=["auto", "vision", "camera"], default="auto",
+    ap.add_argument("--source", choices=["auto", "vision", "camera"],
+                    default="auto",
                     help="Frame-Source: 'auto' try vision first, else camera.")
     ap.add_argument("--camera-index", type=int, default=0,
-                    help="OpenCV camera-index (for source=camera or auto-fallback).")
+                    help="OpenCV camera-index (for source=camera or "
+                         "auto-fallback).")
 
     args = ap.parse_args()
 
@@ -34,7 +39,8 @@ def main():
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     print(
-        f"[collect] start recording: label={args.label}, {args.seconds}s, source={args.source} → "
+        f"[collect] start recording: label={args.label}, {args.seconds}s, "
+        f"source={args.source} → "
         f"{out_path}")
 
     t_end = time.time() + args.seconds
@@ -45,7 +51,8 @@ def main():
     if args.source == "camera":
         cam = cv.VideoCapture(args.camera_index)
         if not cam.isOpened():
-            raise IOError(f"[collect] Could not open camera {args.camera_index}.")
+            raise IOError(
+                f"[collect] Could not open camera {args.camera_index}.")
 
     with mp_pose.Pose() as pose, \
             open(out_path, "a", newline="") as f:
@@ -63,7 +70,9 @@ def main():
                 if cam is None:
                     cam = cv.VideoCapture(args.camera_index)
                     if not cam.isOpened():
-                        print(f"[collect] WARN: camera {args.camera_index} not available.")
+                        print(
+                            f"[collect] WARN: camera {args.camera_index} not "
+                            f"available.")
                         time.sleep(0.05)
                         continue
                 ok, bgr = cam.read()
@@ -82,7 +91,8 @@ def main():
                 continue
 
             lm = res.pose_landmarks.landmark
-            lm_arr = np.array([[p.x, p.y, p.z, p.visibility] for p in lm], dtype=np.float32)
+            lm_arr = np.array([[p.x, p.y, p.z, p.visibility] for p in lm],
+                              dtype=np.float32)
             feat = extract_features(lm_arr)
 
             writer.writerow([args.label] + [f"{x:.6f}" for x in feat.tolist()])

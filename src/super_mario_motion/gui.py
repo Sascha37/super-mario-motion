@@ -662,21 +662,6 @@ def open_help_menu():
                      daemon=True).start()
 
 
-# Takes in a Path and opens this path as a file in the default browser
-def open_browser(path):
-    webbrowser.open_new_tab(path.as_uri())
-
-
-# gets called by the "Help"-Button, calls open_browser in a separate thread,
-# so that the main thread does not have to wait for the browser to start up
-# (~5 seconds)
-def open_help_menu():
-    help_file_path = Path(
-        __file__).parent.parent.parent / "docs" / "help" / "help_page.pdf"
-    threading.Thread(target=open_browser, args=(help_file_path,),
-                     daemon=True).start()
-
-
 # gets called by the "Start Game"-Button
 def start_game_button_action():
     threading.Thread(target=game_launcher.launch_game, daemon=True).start()

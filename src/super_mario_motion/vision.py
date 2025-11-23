@@ -77,14 +77,15 @@ def detect_pose_simple(frame_, lm):
 
     # define common coordinates
     shoulder_width = distance(shoulder_left_xy, shoulder_right_xy)
-    shoulder_left_y, shoulder_right_y = shoulder_left_xy[1], shoulder_right_xy[1]
+    shoulder_left_y, shoulder_right_y = (shoulder_left_xy[1],
+                                         shoulder_right_xy[1])
     eye_left_y, eye_right_y = eye_left_xy[1], eye_right_xy[1]
     wrist_left_x, wrist_left_y = wrist_left_xy
     wrist_right_x, wrist_right_y = wrist_right_xy
     wrist_dist = distance(wrist_left_xy, wrist_right_xy)
     hands_below_shoulders = (
-            wrist_left_y > shoulder_left_y and wrist_right_y > shoulder_right_y
-        )
+            wrist_left_y > shoulder_left_y
+            and wrist_right_y > shoulder_right_y)
 
     # throwing: hands near each other
     throwing = wrist_dist < shoulder_width * 0.75 and not hands_below_shoulders
@@ -98,7 +99,8 @@ def detect_pose_simple(frame_, lm):
     running_right = wrist_right_y < eye_right_y
 
     # jumping: both arms above shoulders
-    jumping = (running_right or walking_right) and (running_left or walking_left)
+    jumping = (running_right or walking_right) and (
+            running_left or walking_left)
 
     # crouching: hands near each other and below shoulders
     crouching = wrist_dist < shoulder_width * 0.75 and hands_below_shoulders
@@ -153,7 +155,8 @@ def cam_loop():
                 # Draw an image of only the skeleton
                 skeleton_only_frame = np.zeros_like(frame)
                 mpDrawing.draw_landmarks(
-                    skeleton_only_frame, results.pose_landmarks, mpPose.POSE_CONNECTIONS
+                    skeleton_only_frame, results.pose_landmarks,
+                    mpPose.POSE_CONNECTIONS
                     )
 
                 # Simple pose detection
@@ -167,7 +170,8 @@ def cam_loop():
                 # Saves all Landmark cords into a string
                 lm_string = ""
                 for x in range(33):
-                    lm_string += str(x) + str(landmark_coords(frame, lm[x])) + " "
+                    lm_string += str(x) + str(
+                        landmark_coords(frame, lm[x])) + " "
                     if (x + 1) % 4 == 0:
                         lm_string += "\n"
                 state_manager.set_landmark_string(lm_string)

@@ -49,7 +49,8 @@ def load_csv(csv_path: Path):
 
 def main():
     # if not CSV_PATH.exists():
-    #    raise FileNotFoundError(f"{CSV_PATH} not found. Collect data first with collect.py.")
+    #    raise FileNotFoundError(f"{CSV_PATH} not found. Collect data first
+    #    with collect.py.")
     training_csv = combine_run_csvs()
     x, y = load_csv(training_csv)
     s_train, s_test, y_train, y_test = train_test_split(
@@ -58,7 +59,8 @@ def main():
 
     pipe = Pipeline([
         ("scaler", StandardScaler()),
-        ("pca", PCA(n_components=0.95, svd_solver="full")),  # optional, can be removed
+        ("pca", PCA(n_components=0.95, svd_solver="full")),
+        # optional, can be removed
         ("clf", SVC(probability=True))
         ])
 
@@ -68,7 +70,8 @@ def main():
         "clf__gamma": ["scale", "auto"]
         }
 
-    gs = GridSearchCV(pipe, grid, cv=5, n_jobs=-1, scoring="f1_weighted", verbose=1)
+    gs = GridSearchCV(pipe, grid, cv=5, n_jobs=-1, scoring="f1_weighted",
+                      verbose=1)
     gs.fit(s_train, y_train)
 
     print("Best params:", gs.best_params_)
