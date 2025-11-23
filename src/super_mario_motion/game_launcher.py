@@ -1,16 +1,22 @@
 import subprocess
-from sys import platform
 from pathlib import Path
+from sys import platform
 
-module_log_prefix ="[Launcher]"
+exe, core = None, None
 
-config_retroarch_path = "/Users/timobarton/Library/Application Support/Steam/steamapps/common/RetroArch"
-config_rom_path = f"/Users/timobarton/Library/Application Support/Steam/steamapps/common/RetroArch/downloads/Super Mario Bros. (World).nes"
+module_log_prefix = "[Launcher]"
+
+config_retroarch_path = ("/Users/timobarton/Library/Application "
+                         "Support/Steam/steamapps/common/RetroArch")
+config_rom_path = (f"/Users/timobarton/Library/Application "
+                   f"Support/Steam/steamapps/common/RetroArch/downloads/Super Mario Bros. ("
+                   f"World).nes")
 
 retroarch_path = Path(config_retroarch_path)
 rom_path = Path(config_rom_path)
 
 all_paths_valid = True
+
 
 def validate_path(path):
     global all_paths_valid
@@ -21,11 +27,14 @@ def validate_path(path):
     else:
         print(f"{module_log_prefix} {path}, Path/File found.")
 
+
 validate_path(rom_path)
 validate_path(retroarch_path)
 
-def get_command(platform):
-    match platform:
+
+def get_command(platform_):
+    global exe, core
+    match platform_:
         case "linux":
             exe = retroarch_path / "retroarch.sh"
             core = retroarch_path / "cores" / "fceumm_libretro.so"
@@ -36,18 +45,21 @@ def get_command(platform):
             exe = retroarch_path / "retroarch.exe"
             core = retroarch_path / "cores" / "fceumm_libretro.dll"
         case _:
-            raise ValueError(f"{module_log_prefix} Unknown platform: {platform}")
+            raise ValueError(f"{module_log_prefix} Unknown platform: {platform_}")
 
     return [
-            str(exe),
-            "-L",
-            str(core),
-            str(rom_path)
-            ]
+        str(exe),
+        "-L",
+        str(core),
+        str(rom_path)
+        ]
+
 
 def launch_game():
     if not all_paths_valid:
-        print(f"{module_log_prefix} Could not start the game. Invalid paths set. Please edit the config.")
+        print(
+            f"{module_log_prefix} Could not start the game. Invalid paths set. Please edit the "
+            f"config.")
         return
     try:
         subprocess.run(get_command(platform), cwd=str(retroarch_path), check=True)

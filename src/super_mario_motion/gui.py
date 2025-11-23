@@ -4,16 +4,27 @@ import sys
 import threading
 import webbrowser
 import tkinter as tk
-import game_launcher #from . import game_launcher
+import webbrowser
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk
 
+from . import game_launcher  # from . import game_launcher
 from PIL import Image, ImageTk
 
 from . import collect
 
 pose = ""
+
+array = None
+window = None
+frame_bottom_left, frame_bottom_right = None, None
+label_webcam = None
+selected_preview, selected_mode = None, None
+allow_debug_info, send_keystrokes, checkbox_toggle_inputs = None, None, None
+(label_virtual_gamepad_visualizer, label_pose_visualizer, label_current_pose,
+ label_debug_landmarks) = None, None, None, None
+button_collect_start, label_collect_status = None, None
 
 # Webcam preview
 webcam_image_width = 612
@@ -68,6 +79,7 @@ collecting = False
 collect_stop = False
 after_handles = []
 
+
 # Function gets called once in main.py once the program starts
 def init():
     global window
@@ -82,7 +94,7 @@ def init():
     window = tk.Tk()
     window.title('Super Mario Motion')
     window.minsize(window_width, window_height)
-  #  window.maxsize(window_width, window_height)
+    #  window.maxsize(window_width, window_height)
     window.configure(background=color_background)
 
     # always open the gui in the center of the screen
@@ -141,7 +153,7 @@ def init():
     frame_bottom_left.columnconfigure(1, weight=1)
     frame_bottom_left.grid(row=1,
                            column=0,
-                           padx=(horizontal_padding,0),
+                           padx=(horizontal_padding, 0),
                            pady=frame_padding_y,
                            sticky="nw")
 
@@ -150,7 +162,7 @@ def init():
         frame_bottom_left,
         text="Launch Game",
         command=start_game_button_action,
-        style = "Custom.TButton"
+        style="Custom.TButton"
         )
 
     button_launch_game.grid(
@@ -158,13 +170,12 @@ def init():
         column=0,
         sticky="nsew")
 
-
     # Button "Help"
     button_help = ttk.Button(
         frame_bottom_left,
         text="Help",
         command=open_help_menu,
-        style = "Custom.TButton"
+        style="Custom.TButton"
         )
 
     button_help.grid(
@@ -213,14 +224,13 @@ def init():
                     foreground="white"
                     )
     style.map("Custom.TButton",
-              background = [("active", "white"), ("pressed", "white")],
-              foreground = [("active", "black"), ("pressed", "black")]
+              background=[("active", "white"), ("pressed", "white")],
+              foreground=[("active", "black"), ("pressed", "black")]
               )
 
     # Custom ttk Style for Separator
     style.configure("Custom.TSeparator",
                     background="black")
-
 
     # This is needed to deselect the text inside of a ttk Combobox
     def clear_combobox_selection(event):
@@ -267,20 +277,10 @@ def init():
     # Debug Info Checkbox
     global allow_debug_info
     allow_debug_info = tk.IntVar(value=0)
-    checkbox_debug_info = tk.Checkbutton(
-        frame_bottom_left,
-        text='Debug Info',
-        bg=color_dark_widget,
-        fg=color_white,
-        selectcolor=color_background,
-        highlightthickness=0,
-        bd=0,
-        variable=allow_debug_info,
-        onvalue=1,
-        offvalue=0,
-        width=20,
-        height=2
-        )
+    checkbox_debug_info = tk.Checkbutton(frame_bottom_left, text='Debug Info',
+                                         bg=color_dark_widget, fg=color_white,
+                                         selectcolor=color_background, highlightthickness=0, bd=0,
+                                         variable=allow_debug_info, width=20, height=2)
     checkbox_debug_info.grid(row=4,
                              column=0,
                              columnspan=2,
@@ -289,20 +289,10 @@ def init():
     # Send Inputs Checkbox
     global send_keystrokes, checkbox_toggle_inputs
     send_keystrokes = tk.IntVar()
-    checkbox_toggle_inputs = tk.Checkbutton(
-        frame_bottom_left,
-        text='Send Inputs',
-        bg=color_dark_widget,
-        fg=color_white,
-        selectcolor=color_background,
-        highlightthickness=0,
-        bd=0,
-        variable=send_keystrokes,
-        onvalue=1,
-        offvalue=0,
-        width=20,
-        height=2
-        )
+    checkbox_toggle_inputs = tk.Checkbutton(frame_bottom_left, text='Send Inputs',
+                                            bg=color_dark_widget, fg=color_white,
+                                            selectcolor=color_background, highlightthickness=0,
+                                            bd=0, variable=send_keystrokes, width=20, height=2)
     checkbox_toggle_inputs.grid(row=5,
                                 column=0,
                                 columnspan=2,
@@ -312,7 +302,7 @@ def init():
     frame_bottom_right = tk.Frame(window, bg=color_dark_widget)
     frame_bottom_right.grid(row=1,
                             column=1,
-                            padx=(0,horizontal_padding),
+                            padx=(0, horizontal_padding),
                             pady=frame_padding_y,
                             sticky="ne")
 
@@ -340,26 +330,14 @@ def init():
 
     # debug text
     global label_debug_landmarks
-    label_debug_landmarks = tk.Label(
-        frame_bottom_right,
-        bg=color_dark_widget,
-        fg=color_white,
-        width=60,
-        height=10,
-        text="",
-        font=("Consolas", 6)
-        )
+    label_debug_landmarks = tk.Label(frame_bottom_right, bg=color_dark_widget, fg=color_white,
+                                     width=60, height=10, font=("Consolas", 6))
     label_debug_landmarks.grid(row=2, column=0, columnspan=2)
 
     # Text Label for the collection status, visible during collect mode
     global label_collect_status, button_collect_start
-    label_collect_status = tk.Label(
-        window,
-        bg=color_background,
-        fg=color_white,
-        text="",
-        font=("Consolas", 25)
-        )
+    label_collect_status = tk.Label(window, bg=color_background, fg=color_white,
+                                    font=("Consolas", 25))
     label_collect_status.grid(row=2, column=0, columnspan=2, pady=(20, 0))
     label_collect_status.grid_remove()
 
@@ -368,7 +346,7 @@ def init():
         window,
         text="Start collecting",
         command=start_collect_sequence,
-        style = "Custom.TButton"
+        style="Custom.TButton"
         )
     button_collect_start.grid(row=3, column=0, columnspan=2, pady=(10, 0))
     button_collect_start.grid_remove()
@@ -378,6 +356,7 @@ def init():
 
 # set_webcam_image and set_pose_image are supposed to be called in the update-loop in main.py
 def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
+    global array
     match selected_preview.get():
         case "Webcam":
             array = webcam
@@ -457,6 +436,7 @@ def update_pose_image():
     label_pose_visualizer.config(image=window.image_pose)
     label_pose_visualizer.image = window.image_pose
 
+
 def update_pose_text():
     label_current_pose.config(text="Current pose:" + pose)
 
@@ -519,6 +499,29 @@ def _set_collect_button(starting: bool):
         button_collect_start.config(text="Stop collecting", command=stop_collect_sequence)
     else:
         button_collect_start.config(text="Start collecting", command=start_collect_sequence)
+
+# Collecting mode-specific functions:
+def _schedule_after(ms, func, *args):
+    aid = window.after(ms, func, *args)
+    after_handles.append(aid)
+    return aid
+
+
+def _cancel_scheduled():
+    while after_handles:
+        aid = after_handles.pop()
+        try:
+            window.after_cancel(aid)
+        except tk.TclError:
+            pass
+
+
+def _set_collect_button(starting: bool):
+    if starting:
+        button_collect_start.config(text="Stop collecting", command=stop_collect_sequence)
+    else:
+        button_collect_start.config(text="Start collecting", command=start_collect_sequence)
+
 
 def start_collect_sequence():
     global collecting, collect_stop, current_run_csv, collection_order
@@ -620,6 +623,18 @@ def open_browser(path):
 def open_help_menu():
     help_file_path = Path(__file__).parent.parent.parent / "docs" / "help" / "help_page.pdf"
     threading.Thread(target=open_browser, args=(help_file_path,), daemon=True).start()
+
+# Takes in a Path and opens this path as a file in the default browser
+def open_browser(path):
+    webbrowser.open_new_tab(path.as_uri())
+
+
+# gets called by the "Help"-Button, calls open_browser in a separate thread, so that
+# the main thread does not have to wait for the browser to start up (~5 seconds)
+def open_help_menu():
+    help_file_path = Path(__file__).parent.parent.parent / "docs" / "help" / "help_page.pdf"
+    threading.Thread(target=open_browser, args=(help_file_path,), daemon=True).start()
+
 
 # gets called by the "Start Game"-Button
 def start_game_button_action():
