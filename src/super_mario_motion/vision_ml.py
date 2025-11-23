@@ -30,7 +30,8 @@ def init():
     global _thread, _exit, _model
     _exit = False
     # Path
-    model_path = Path(__file__).parent.parent.parent / "data" / "pose_model.joblib"
+    model_path = (
+            Path(__file__).parent.parent.parent / "data" / "pose_model.joblib")
     # load model
     try:
         _model = load(model_path)
@@ -65,11 +66,13 @@ def _worker():
 
             # Skeleton-Overlay
             skel = np.zeros_like(bgr)
-            mpDrawing.draw_landmarks(skel, res.pose_landmarks, mpPose.POSE_CONNECTIONS)
+            mpDrawing.draw_landmarks(skel, res.pose_landmarks,
+                                     mpPose.POSE_CONNECTIONS)
             _skeleton_frame = skel
 
             lm = res.pose_landmarks.landmark
-            lm_arr = np.array([[p.x, p.y, p.z, p.visibility] for p in lm], dtype=np.float32)
+            lm_arr = np.array([[p.x, p.y, p.z, p.visibility] for p in lm],
+                              dtype=np.float32)
             feat = extract_features(lm_arr)
 
             label = None
