@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from tkinter import ttk
 
-import game_launcher  # from . import game_launcher
+from . import game_launcher  # from . import game_launcher
 from PIL import Image, ImageTk
 
 from . import collect

@@ -18,7 +18,7 @@ def webcam_is_available():
 def update():
 
     # Write GUI info into state
-    state_manager.set_current_mode(gui.get_active_mode())
+    state_manager.set_current_mode(gui.selected_mode.get())
     state_manager.set_send_permission(gui.send_keystrokes.get())
 
     # Retrieve predicted poses
