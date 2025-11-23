@@ -4,5 +4,5 @@ venv/
 env/
 # Ignore Python Cache
 __pycache__/
-# Ignore machine learning data
-data/
+# Ignore machine learning model
+data/pose_model.joblib
