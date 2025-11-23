@@ -4,7 +4,7 @@ import sys
 import threading
 import webbrowser
 import tkinter as tk
-import game_launcher #from . import game_launcher
+from . import game_launcher
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk
