@@ -1,5 +1,6 @@
 import threading
 import time
+from collections import deque
 from pathlib import Path
 
 import cv2 as cv
@@ -84,6 +85,7 @@ def _worker():
                     label = None
 
             if label is not None:
+                _smooth = deque(maxlen=7)
                 _smooth.append(label)
                 vals, counts = np.unique(list(_smooth), return_counts=True)
                 _current_pose = vals[np.argmax(counts)]
