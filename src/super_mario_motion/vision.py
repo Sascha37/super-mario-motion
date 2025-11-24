@@ -52,7 +52,7 @@ def landmark_coords(image, lm):
 
 
 def init():
-    global cam, rgb, frame
+    global cam, rgb, frame, thread
     cam = cv.VideoCapture(0)
     if not cam.isOpened():
         raise IOError("Cannot open camera")
@@ -65,13 +65,12 @@ def stop_cam():
     global _exit, thread, cam
     _exit = True
 
-
-if thread is not None:
-    thread.join(timeout=0.5)
-    thread = None
-if cam is not None:
-    cam.release()
-    cam = None
+    if thread is not None:
+        thread.join(timeout=0.5)
+        thread = None
+    if cam is not None:
+        cam.release()
+        cam = None
 
 
 def detect_pose_simple(frame_, lm):
