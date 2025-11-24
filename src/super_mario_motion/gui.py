@@ -5,13 +5,14 @@ import sys
 import threading
 import tkinter as tk
 import webbrowser
+import cv2
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk
 
 from PIL import Image, ImageTk
 
-from . import collect, game_launcher  # from . import game_launcher
+from . import collect, game_launcher, vision, vision_ml
 
 pose = ""
 
@@ -95,6 +96,8 @@ def init():
     window.minsize(window_width, window_height)
     #  window.maxsize(window_width, window_height)
     window.configure(background=color_background)
+
+    window.protocol("WM_DELETE_WINDOW", close)
 
     # always open the gui in the center of the screen
     system = platform.system()
@@ -665,3 +668,17 @@ def open_help_menu():
 # gets called by the "Start Game"-Button
 def start_game_button_action():
     threading.Thread(target=game_launcher.launch_game, daemon=True).start()
+
+
+def close():
+    try:
+        vision_ml.stop()
+    except (RuntimeError, AttributeError, cv2.error) as e:
+        print("ML shutdown warning:", e)
+
+    try:
+        vision.stop_cam()
+    except (RuntimeError, AttributeError, cv2.error) as e:
+        print("Camera shutdown warning:", e)
+
+    window.destroy()

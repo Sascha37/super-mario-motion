@@ -19,6 +19,8 @@ current_pose = "standing"
 cam = None
 rgb = None
 frame = None
+_exit = False
+thread = None
 
 mpPose = mp.solutions.pose
 mpDrawing = mp.solutions.drawing_utils
@@ -50,13 +52,25 @@ def landmark_coords(image, lm):
 
 
 def init():
-    global cam, rgb, frame
+    global cam, rgb, frame, thread
     cam = cv.VideoCapture(0)
     if not cam.isOpened():
         raise IOError("Cannot open camera")
     print("cam opened")
     thread = threading.Thread(target=cam_loop, daemon=True)
     thread.start()
+
+
+def stop_cam():
+    global _exit, thread, cam
+    _exit = True
+
+    if thread is not None:
+        thread.join(timeout=0.5)
+        thread = None
+    if cam is not None:
+        cam.release()
+        cam = None
 
 
 def detect_pose_simple(frame_, lm):
@@ -137,7 +151,7 @@ def cam_loop():
     global frame, rgb, cam, current_pose, skeleton_only_frame, lm_string
     with mpPose.Pose() as pose:
         print(Path(__file__).name + " initialized")
-        while cam.isOpened():
+        while not _exit and cam.isOpened():
             ret, image = cam.read()
             if not ret:
                 break
