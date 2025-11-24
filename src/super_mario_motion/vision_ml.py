@@ -45,7 +45,7 @@ def init():
 
 
 def _worker():
-    global _current_pose, _raw_frame, _skeleton_frame
+    global _current_pose, _raw_frame, _skeleton_frame, _exit
     with mpPose.Pose() as pose:
         print(Path(__file__).name + " initialized (passive)")
         while not _exit:
