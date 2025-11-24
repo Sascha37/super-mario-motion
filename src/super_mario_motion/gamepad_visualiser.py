@@ -1,0 +1,95 @@
+from pathlib import Path
+from typing import Iterable, List
+
+from PIL import Image, ImageDraw
+
+GAMEPAD_PATH = Path(__file__).parent / "images" / "gamepad.png"
+
+BUTTON_POSITIONS = {
+    "DPAD_UP": (0.22, 0.28, 0.06),
+    "DPAD_DOWN": (0.22, 0.73, 0.06),
+    "DPAD_LEFT": (0.11, 0.5, 0.06),
+    "DPAD_RIGHT": (0.33, 0.5, 0.06),
+
+    "SELECT": (0.49, 0.76, 0.06),
+    "START": (0.63, 0.76, 0.06),
+
+    "A": (0.78, 0.55, 0.06),
+    "B": (0.87, 0.38, 0.06),
+    }
+
+base_image: Image.Image | None = None
+last_orientation: str = "right"
+
+
+def get_base_image() -> Image.Image:
+    global base_image
+    if base_image is None:
+        base_image = Image.open(GAMEPAD_PATH).convert("RGBA")
+    return base_image
+
+
+def pose_to_buttons(pose: str) -> List[str]:
+    global last_orientation
+    match pose:
+        case "standing":
+            return []
+        case "walking_right":
+            last_orientation = "right"
+            return ["DPAD_RIGHT"]
+        case "walking_left":
+            last_orientation = "left"
+            return ["DPAD_LEFT"]
+        case "running_right":
+            last_orientation = "right"
+            return ["DPAD_RIGHT", "B"]
+        case "running_left":
+            last_orientation = "left"
+            return ["DPAD_LEFT", "B"]
+        case "crouching":
+            return ["DPAD_DOWN"]
+        case "throwing":
+            return ["B"]
+        case "jumping":
+            return ["A", "DPAD_RIGHT" if last_orientation == "right" else "DPAD_LEFT"]
+        case _:
+            return []
+
+
+def draw_highlight_overlay(base_size: tuple[int, int], pressed: Iterable[str]) -> Image.Image:
+    w, h = base_size
+    overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+
+    for btn in pressed:
+        if btn not in BUTTON_POSITIONS:
+            continue
+        x_r, y_r, r_r = BUTTON_POSITIONS[btn]
+        cx, cy = int(w * x_r), int(h * y_r)
+        r = int(min(w, h) * r_r)
+
+        if btn.startswith("DPAD"):
+            color = (66, 135, 245, 180)
+        elif btn in ("A", "B"):
+            color = (235, 64, 52, 200)
+        else:
+            color = (255, 215, 0, 180)
+
+        bbox = (cx - r, cy - r, cx + r, cy + r)
+        draw.rectangle(bbox, fill=color, outline=(0, 0, 0, 220), width=2)
+
+    return overlay
+
+
+def create_gamepad_image(pose: str, send_active: bool = True,
+                         base_image: Image.Image | None = None) -> Image.Image:
+    base = (base_image.convert("RGBA") if base_image is not None else get_base_image())
+    img = base.copy()
+
+    if send_active:
+        pressed = pose_to_buttons(pose)
+        if pressed:
+            overlay = draw_highlight_overlay(img.size, pressed)
+            img = Image.alpha_composite(img, overlay)
+
+    return img.convert("RGB")

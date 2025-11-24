@@ -415,7 +415,7 @@ def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
 
 
 def set_gamepad_image(updated_gamepad_image):
-    if gamepad_image is None:
+    if updated_gamepad_image is None:
         return
     image = ImageTk.PhotoImage(
         updated_gamepad_image.resize(

@@ -1,6 +1,6 @@
 import cv2 as cv
 
-from . import gui, input, vision, vision_ml
+from . import gui, input, vision, vision_ml, gamepad_visualiser
 from .state import StateManager
 
 
@@ -38,6 +38,18 @@ def update():
     gui.update_pose_image()
     gui.update_pose_text()
     gui.update_debug_landmarks(state_manager.get_landmark_string())
+
+    # Update virtual gamepad visualizer
+    pose_for_gamepad = (
+        current_pose_full_body
+        if state_manager.get_current_mode() == "Full-body"
+        else current_pose
+    )
+    send_active = state_manager.get_send_permission()
+    gamepad_img = gamepad_visualiser.create_gamepad_image(
+        pose_for_gamepad, send_active=send_active
+        )
+    gui.set_gamepad_image(gamepad_img)
 
     # print(f"simple: {current_pose}, full-body: {current_pose_full_body}")
 
