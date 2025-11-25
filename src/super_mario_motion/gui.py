@@ -38,7 +38,8 @@ gamepad_image_height = 100
 color_background = '#202326'
 color_dark_widget = '#141618'
 color_white = '#FFFFFF'
-
+color_disabled_background = '#444444'
+color_disabled_text = '#888888'
 # Filepaths for images that are being used on init
 path_data_folder = Path(__file__).parent / "images"
 path_image_webcam_sample = path_data_folder / 'webcam_sample.jpg'
@@ -175,6 +176,8 @@ def init():
         column=0,
         sticky="nsew")
 
+    button_launch_game.state(["disabled"])
+
     # Button "Help"
     button_help = ttk.Button(
         frame_bottom_left,
@@ -229,8 +232,19 @@ def init():
                     foreground="white"
                     )
     style.map("Custom.TButton",
-              background=[("active", "white"), ("pressed", "white")],
-              foreground=[("active", "black"), ("pressed", "black")]
+              background=[
+                  ("active", "white"),
+                  ("pressed", "white"),
+                  ("disabled", color_disabled_background),
+                  ],
+              foreground=[
+                  ("active", "black"),
+                  ("pressed", "black"),
+                  ("disabled", color_disabled_text)
+                  ],
+              embossed=[
+                  ("disabled", 0)
+                  ]
               )
 
     # Custom ttk Style for Separator

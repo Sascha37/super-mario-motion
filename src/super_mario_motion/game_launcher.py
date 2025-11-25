@@ -34,6 +34,8 @@ def validate_path(path):
 validate_path(rom_path)
 validate_path(retroarch_path)
 
+def get_paths_valid():
+    return all_paths_valid
 
 def get_command(platform_):
     global exe, core
