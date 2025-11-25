@@ -176,7 +176,11 @@ def init():
         column=0,
         sticky="nsew")
 
-    button_launch_game.state(["disabled"])
+    # This button will be disabled if the paths
+    # defined in game_launcher are invalid
+    if not game_launcher.all_paths_valid:
+        button_launch_game.state(["disabled"])
+
 
     # Button "Help"
     button_help = ttk.Button(
