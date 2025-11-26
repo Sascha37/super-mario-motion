@@ -1,9 +1,12 @@
+import sys, os
 from pathlib import Path
 from typing import Iterable, List
 
 from PIL import Image, ImageDraw
 
-GAMEPAD_PATH = Path(__file__).parent / "images" / "gamepad.png"
+from super_mario_motion import path_helper as ph
+
+GAMEPAD_PATH = ph.resource_path(os.path.join("images", "gamepad.png"))
 
 BUTTON_POSITIONS = {
     "DPAD_UP": (0.22, 0.28, 0.06),

@@ -2,6 +2,7 @@ import getpass
 import platform
 import random
 import sys
+import os
 import threading
 import tkinter as tk
 import webbrowser
@@ -13,6 +14,7 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 
 from super_mario_motion import collect, game_launcher, vision, vision_ml
+from super_mario_motion import path_helper as ph
 
 pose = ""
 
@@ -41,10 +43,9 @@ color_white = '#FFFFFF'
 color_disabled_background = '#444444'
 color_disabled_text = '#888888'
 # Filepaths for images that are being used on init
-path_data_folder = Path(__file__).parent / "images"
-path_image_webcam_sample = path_data_folder / 'webcam_sample.jpg'
-path_image_pose_default = path_data_folder / 'unknown.png'
-path_image_gamepad = path_data_folder / 'gamepad.png'
+path_image_webcam_sample = ph.resource_path(os.path.join("images","webcam_sample.jpg"))
+path_image_pose_default = ph.resource_path(os.path.join("images", "unknown.png"))
+path_image_gamepad = ph.resource_path(os.path.join("images","gamepad.png"))
 
 # Paddings
 label_webcam_top_padding = 20
@@ -459,7 +460,7 @@ def update_pose_image():
     if pose in valid_poses:
         try:
             window.image_pose = ImageTk.PhotoImage(
-                Image.open(path_data_folder / (pose + '.png')).resize(
+                Image.open(ph.resource_path(os.path.join("images", pose+".png"))).resize(
                     (100, 100), Image.LANCZOS)
                 )
         except FileNotFoundError:
