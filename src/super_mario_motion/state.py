@@ -1,3 +1,12 @@
+"""Central shared state container for the application.
+
+StateManager stores pose predictions, mode settings, image frames, landmark
+strings and send-permission flags as class-level attributes. GUI, vision,
+vision_ML and input modules all read/write to this manager, providing a simple
+synchronized state interface without requiring instance passing.
+"""
+
+
 class StateManager:
     # Init default values
     pose = "default"

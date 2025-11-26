@@ -30,6 +30,16 @@ def init():
 
 
 def input_loop():
+    """Continuously read pose/state and send corresponding key events.
+
+    Logic:
+      * Read current pose (simple or full-body depending on mode).
+      * Read send_permission from StateManager.
+      * On send_permission rising edge: send input for current pose.
+      * On pose change while permission is active: release previous keys,
+        send input for new pose.
+      * On send_permission falling edge: release all currently held keys.
+    """
     print(Path(__file__).name + " initialized")
     global pose, last_pose, mapping, send_permission, previous_send_permission
     while True:
@@ -56,6 +66,15 @@ def input_loop():
 
 
 def press_designated_input(pose_):
+    """Send key presses according to the given pose label.
+
+    This function both triggers momentary actions (jump, throw) and sets
+    up continuous key holds (walking/running/crouching), which are
+    tracked in `currently_held_keys`.
+
+    Args:
+        pose_: Pose label (e.g. 'walking_right', 'jumping').
+    """
     global currently_held_keys, last_orientation
     match pose_:
         case "standing":
