@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 from joblib import load
+from sklearn.exceptions import NotFittedError
 
 from .pose_features import extract_features
 # we get frames from vision.py
@@ -53,7 +54,7 @@ def _worker():
 
         try:
             feat = extract_features(lm_arr)
-        except Exception:
+        except (ValueError, TypeError):
             time.sleep(0.01)
             continue
 
@@ -63,7 +64,7 @@ def _worker():
 
         try:
             x = feat.reshape(1, -1)
-        except Exception:
+        except ValueError:
             time.sleep(0.01)
             continue
 
@@ -71,7 +72,7 @@ def _worker():
         if _model is not None:
             try:
                 label = _model.predict(x)[0]
-            except Exception:
+            except (ValueError, TypeError, NotFittedError):
                 label = None
 
         if label is not None:
