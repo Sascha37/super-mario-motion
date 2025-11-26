@@ -6,12 +6,13 @@ exe, core = None, None
 
 module_log_prefix = "[Launcher]"
 
-config_retroarch_path = ("/Users/timobarton/Library/Application "
-                         "Support/Steam/steamapps/common/RetroArch")
-config_rom_path = (f"/Users/timobarton/Library/Application "
-                   f"Support/Steam/steamapps/common/RetroArch/downloads"
-                   f"/Super Mario Bros. ("
-                   f"World).nes")
+config_retroarch_path = (
+    "/mnt/files/SteamLibrary/steamapps/common/RetroArch/"
+    )
+
+config_rom_path = (
+    f"/mnt/files/roms/nes/Super Mario Bros. (World).nes"
+    )
 
 retroarch_path = Path(config_retroarch_path)
 rom_path = Path(config_rom_path)
@@ -33,7 +34,6 @@ def validate_path(path):
 
 validate_path(rom_path)
 validate_path(retroarch_path)
-
 
 def get_command(platform_):
     global exe, core
