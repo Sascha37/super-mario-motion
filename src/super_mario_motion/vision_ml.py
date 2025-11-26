@@ -5,11 +5,9 @@ from pathlib import Path
 
 import numpy as np
 from joblib import load
-from sklearn.exceptions import NotFittedError
 
-# we get frames from vision.py
-from . import vision
 from .pose_features import extract_features
+# we get frames from vision.py
 from .state import StateManager
 
 state_manager = StateManager()
@@ -24,8 +22,9 @@ def init():
     global _thread, _exit, _model
     _exit = False
     # Path
-    model_path = (
-            Path(__file__).parent.parent.parent / "data" / "pose_model.joblib")
+    model_path = Path(
+        __file__
+        ).parent.parent.parent / "data" / "pose_model.joblib"
     # load model
     try:
         _model = load(model_path)
@@ -40,34 +39,49 @@ def init():
 
 def _worker():
     global _current_pose, _exit
-    _smooth = deque(maxlen=7)
-    with mpPose.Pose() as pose:
-        print(Path(__file__).name + " initialized (passive)")
-        while not _exit:
 
-            # latest landmark from vision
-            lm_arr = state_manager.get_pose_landmarks()
+    print(Path(__file__).name + " initialized (passive)")
 
-            if lm_arr is None:
-                time.sleep(0.005)
-                continue
+    smooth = deque(maxlen=7)
 
-            label = None
-            if _model is not None:
-                x = feat.reshape(1, -1)
-                try:
-                    label = _model.predict(x)[0]
-                except (ValueError, TypeError, NotFittedError):
-                    label = None
+    while not _exit:
+        lm_arr = state_manager.get_pose_landmarks()
 
-            if label is not None:
-                _smooth.append(label)
-                vals, counts = np.unique(list(_smooth), return_counts=True)
-                _current_pose = vals[np.argmax(counts)]
+        if lm_arr is None:
+            time.sleep(0.01)
+            continue
 
-                state_manager.set_pose_full_body(_current_pose)
+        try:
+            feat = extract_features(lm_arr)
+        except Exception:
+            time.sleep(0.01)
+            continue
 
-            time.sleep(0.001)
+        if feat is None:
+            time.sleep(0.01)
+            continue
+
+        try:
+            x = feat.reshape(1, -1)
+        except Exception:
+            time.sleep(0.01)
+            continue
+
+        label = None
+        if _model is not None:
+            try:
+                label = _model.predict(x)[0]
+            except Exception:
+                label = None
+
+        if label is not None:
+            smooth.append(label)
+            vals, counts = np.unique(list(smooth), return_counts=True)
+            _current_pose = vals[np.argmax(counts)]
+
+            state_manager.set_pose_full_body(_current_pose)
+
+        time.sleep(0.001)
 
 
 def stop():
