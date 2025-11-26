@@ -15,6 +15,14 @@ def _mid(a, b):
 
 
 def _angle(a, b, c):
+    """Compute the angle (in degrees) at point b given three points a–b–c.
+
+    Args:
+        a, b, c: NumPy arrays representing 2D or 3D points.
+
+    Returns:
+        float: Angle at point b in degrees.
+    """
     ba, bc = a - b, c - b
     length_product = (np.linalg.norm(ba) * np.linalg.norm(bc)) + 1e-6
     angle_cosine = np.dot(ba, bc) / length_product
@@ -22,6 +30,24 @@ def _angle(a, b, c):
 
 
 def extract_features(lm_arr: np.ndarray) -> np.ndarray:
+    """Extract a feature vector from full pose landmark data.
+
+    Processing steps:
+      * Use only x,y coordinates and center them at the mid-hip.
+      * Normalize by torso length (distance from mid-hip to mid-shoulder).
+      * Compute joint angles for elbows and knees.
+      * Compute selected pairwise distances (shoulders, hips, wrists, ankles,
+        shoulders–hips).
+      * Append landmark visibility values.
+
+    Args:
+        lm_arr: Array of shape (N, 4) with [x, y, z, visibility] for each
+            landmark (MediaPipe pose format).
+
+    Returns:
+        np.ndarray: 1D feature vector concatenating:
+            [xy_flattened, angles, distances, visibility].
+    """
     xy = lm_arr[:, :2].copy()
     mid_hip = _mid(xy[hip_left], xy[hip_right])
     xy -= mid_hip
