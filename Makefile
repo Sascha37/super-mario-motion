@@ -20,4 +20,4 @@ test: venv
 
 # Builds project into a single binary
 build: venv
-	pyinstaller main.spec
+	pyinstaller ./src/super_mario_motion.spec
