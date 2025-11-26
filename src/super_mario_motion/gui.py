@@ -399,7 +399,7 @@ def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
     """Update the webcam preview image according to the selected preview mode.
 
     The input images are numpy arrays; this function mirrors the image for the
-    user, letterboxes it to the fixed preview size and updates the label.
+    user, letterboxes it to the fixed preview size, and updates the label.
     """
     global array
     match selected_preview.get():
