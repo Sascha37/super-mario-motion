@@ -1,7 +1,7 @@
 import numpy as np
 
-from super_mario_motion.vision import detect_pose_simple, eye_left, shoulder_left, \
-    wrist_left, wrist_right
+from super_mario_motion.vision import detect_pose_simple, eye_left, \
+    eye_right, shoulder_left, shoulder_right, wrist_left, wrist_right
 
 
 class DummyLm:
@@ -41,6 +41,7 @@ def test_jumping():
     lm[shoulder_right].y = 0.6
     lm[wrist_left].y = 0.5
     lm[wrist_right].y = 0.5
+    lm[eye_left].y = lm[eye_right].y = 0.4
 
     label = detect_pose_simple(frame, lm)
     assert label == "jumping"
@@ -54,6 +55,7 @@ def test_walking_left():
     lm[shoulder_left].y = 0.6
     lm[wrist_left].y = 0.5
     lm[eye_left].y = 0.4
+    lm[wrist_right].y = 0.7
 
     label = detect_pose_simple(frame, lm)
     assert label == "walking_left"
@@ -67,9 +69,10 @@ def test_walking_right():
     lm[shoulder_right].y = 0.6
     lm[wrist_right].y = 0.5
     lm[eye_right].y = 0.4
+    lm[wrist_left].y = 0.7
 
     label = detect_pose_simple(frame, lm)
-    assert label == "walking_left"
+    assert label == "walking_right"
 
 
 def test_running_left():
@@ -91,16 +94,16 @@ def test_running_right():
     lm[wrist_right].y = 0.3  # hand above eye
 
     label = detect_pose_simple(frame, lm)
-    assert label == "running_left"
+    assert label == "running_right"
 
 
 def test_throwing():
     lm = make_landmarks()
     frame = make_frame()
 
-    # throwing: wrists close, not below shoulders
-    lm[wrist_left].x = 0.48
-    lm[wrist_right].x = 0.52
+    # throwing: wrists close, above shoulders
+    lm[wrist_left].x = 0.52
+    lm[wrist_right].x = 0.48
     lm[shoulder_left].y = 0.6
     lm[wrist_left].y = 0.4  # above shoulder
     lm[wrist_right].y = 0.4
@@ -113,13 +116,13 @@ def test_crouching():
     lm = make_landmarks()
     frame = make_frame()
 
-    # crouching: wrists close + below shoulders
+    # crouching: wrists close and below shoulders
     lm[shoulder_left].y = 0.4
     lm[wrist_left].y = 0.7
     lm[wrist_right].y = 0.7
 
-    lm[wrist_left].x = 0.49
-    lm[wrist_right].x = 0.51
+    lm[wrist_left].x = 0.52
+    lm[wrist_right].x = 0.48
 
     label = detect_pose_simple(frame, lm)
     assert label == "crouching"
@@ -130,11 +133,8 @@ def test_swimming():
     frame = make_frame()
 
     # swimming: left wrist right of right wrist
-    lm[shoulder_left].y = lm[shoulder_right].y = 0.5
-    lm[eye_left].y = lm[eye_right].y = 0.5
-    lm[wrist_left].y = lm[wrist_right].y = 0.5
-    lm[wrist_left].x = 0.6
-    lm[wrist_right].x = 0.5
+    lm[wrist_left].x = 0.5
+    lm[wrist_right].x = 0.6
 
     label = detect_pose_simple(frame, lm)
     assert label == "swimming"
