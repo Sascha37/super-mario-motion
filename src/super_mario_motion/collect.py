@@ -7,9 +7,9 @@ import cv2 as cv
 import mediapipe as mp
 import numpy as np
 
-from .pose_features import extract_features
-# TODO: Remove import vision  # use camera from running program
-from .state import StateManager
+from super_mario_motion.pose_features import extract_features
+
+from super_mario_motion.state import StateManager
 
 # Init StateManager
 state_manger = StateManager()

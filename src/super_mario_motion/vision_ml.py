@@ -7,9 +7,9 @@ import numpy as np
 from joblib import load
 from sklearn.exceptions import NotFittedError
 
-from .pose_features import extract_features
+from super_mario_motion.pose_features import extract_features
 # we get frames from vision.py
-from .state import StateManager
+from super_mario_motion.state import StateManager
 
 state_manager = StateManager()
 

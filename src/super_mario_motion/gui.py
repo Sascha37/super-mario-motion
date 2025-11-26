@@ -12,7 +12,7 @@ from tkinter import ttk
 
 from PIL import Image, ImageTk
 
-from . import collect, game_launcher, vision, vision_ml
+from super_mario_motion import collect, game_launcher, vision, vision_ml
 
 pose = ""
 

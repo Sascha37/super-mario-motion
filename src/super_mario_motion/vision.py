@@ -6,7 +6,7 @@ import cv2 as cv
 import mediapipe as mp
 import numpy as np
 
-from .state import StateManager
+from super_mario_motion.state import StateManager
 
 # globals
 lm_string = None

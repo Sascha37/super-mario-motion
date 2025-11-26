@@ -1,7 +1,7 @@
 import cv2 as cv
 
-from . import gui, input, vision, vision_ml, gamepad_visualiser
-from .state import StateManager
+from super_mario_motion import gui, input, vision, vision_ml, gamepad_visualiser
+from super_mario_motion.state import StateManager
 
 
 # Checks if a webcam is available
