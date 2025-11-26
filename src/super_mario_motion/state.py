@@ -13,6 +13,8 @@ class StateManager:
 
     gui_current_mode = "Simple"
 
+    pose_landmarks = None
+
     # Getter
     @classmethod
     def get_pose(cls):
@@ -46,6 +48,10 @@ class StateManager:
     def get_current_mode(cls):
         return cls.gui_current_mode
 
+    @classmethod
+    def get_pose_landmarks(cls):
+        return cls.pose_landmarks
+
     # Setter
     @classmethod
     def set_pose(cls, new_pose):
@@ -73,3 +79,7 @@ class StateManager:
     @classmethod
     def set_current_mode(cls, new_mode):
         cls.gui_current_mode = new_mode
+
+    @classmethod
+    def set_pose_landmarks(cls, new_landmarks):
+        cls.pose_landmarks = new_landmarks

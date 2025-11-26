@@ -176,6 +176,13 @@ def cam_loop():
                 # Simple pose detection
                 lm = results.pose_landmarks.landmark
 
+                # save landmarks to state
+                lm_arr = np.array(
+                    [[p.x, p.y, p.z, p.visibility] for p in lm],
+                    dtype=np.float32
+                    )
+                state_manager.set_pose_landmarks(lm_arr)
+
                 # get current pose via helper method
                 current_pose = detect_pose_simple(frame, lm)
 
