@@ -3,36 +3,29 @@ import time
 from collections import deque
 from pathlib import Path
 
-import cv2 as cv
-import mediapipe as mp
 import numpy as np
 from joblib import load
 from sklearn.exceptions import NotFittedError
 
-# we get frames from vision.py
-from . import vision
 from .pose_features import extract_features
+# we get frames from vision.py
 from .state import StateManager
 
 state_manager = StateManager()
 
 _current_pose = "standing"
-_raw_frame = None
-_skeleton_frame = None
 _exit = False
 _thread = None
 _model = None
-
-mpPose = mp.solutions.pose
-mpDrawing = mp.solutions.drawing_utils
 
 
 def init():
     global _thread, _exit, _model
     _exit = False
     # Path
-    model_path = (
-            Path(__file__).parent.parent.parent / "data" / "pose_model.joblib")
+    model_path = Path(
+        __file__
+        ).parent.parent.parent / "data" / "pose_model.joblib"
     # load model
     try:
         _model = load(model_path)
@@ -46,52 +39,50 @@ def init():
 
 
 def _worker():
-    global _current_pose, _raw_frame, _skeleton_frame, _exit
-    with mpPose.Pose() as pose:
-        print(Path(__file__).name + " initialized (passive)")
-        while not _exit:
+    global _current_pose, _exit
 
-            bgr = vision.rgb  # latest raw frame from vision
+    print(Path(__file__).name + " initialized (passive)")
 
-            if bgr is None:
-                time.sleep(0.01)
-                continue
+    smooth = deque(maxlen=7)
 
-            _raw_frame = bgr
-            rgb = cv.cvtColor(bgr, cv.COLOR_BGR2RGB)
-            res = pose.process(rgb)
+    while not _exit:
+        lm_arr = state_manager.get_pose_landmarks()
 
-            if not res.pose_landmarks:
-                time.sleep(0.005)
-                continue
+        if lm_arr is None:
+            time.sleep(0.01)
+            continue
 
-            # Skeleton-Overlay
-            skel = np.zeros_like(bgr)
-            mpDrawing.draw_landmarks(skel, res.pose_landmarks,
-                                     mpPose.POSE_CONNECTIONS)
-            _skeleton_frame = skel
-
-            lm = res.pose_landmarks.landmark
-            lm_arr = np.array([[p.x, p.y, p.z, p.visibility] for p in lm],
-                              dtype=np.float32)
+        try:
             feat = extract_features(lm_arr)
+        except (ValueError, TypeError):
+            time.sleep(0.01)
+            continue
 
-            label = None
-            if _model is not None:
-                x = feat.reshape(1, -1)
-                try:
-                    label = _model.predict(x)[0]
-                except (ValueError, TypeError, NotFittedError):
-                    label = None
+        if feat is None:
+            time.sleep(0.01)
+            continue
 
-            if label is not None:
-                _smooth = deque(maxlen=7)
-                _smooth.append(label)
-                vals, counts = np.unique(list(_smooth), return_counts=True)
-                _current_pose = vals[np.argmax(counts)]
+        try:
+            x = feat.reshape(1, -1)
+        except ValueError:
+            time.sleep(0.01)
+            continue
 
-                state_manager.set_pose_full_body(_current_pose)
-            time.sleep(0.001)
+        label = None
+        if _model is not None:
+            try:
+                label = _model.predict(x)[0]
+            except (ValueError, TypeError, NotFittedError):
+                label = None
+
+        if label is not None:
+            smooth.append(label)
+            vals, counts = np.unique(list(smooth), return_counts=True)
+            _current_pose = vals[np.argmax(counts)]
+
+            state_manager.set_pose_full_body(_current_pose)
+
+        time.sleep(0.001)
 
 
 def stop():
