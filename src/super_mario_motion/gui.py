@@ -5,11 +5,11 @@ import sys
 import threading
 import tkinter as tk
 import webbrowser
-import cv2
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk
 
+import cv2
 from PIL import Image, ImageTk
 
 from . import collect, game_launcher, vision, vision_ml
@@ -82,6 +82,11 @@ after_handles = []
 
 # Function gets called once in main.py once the program starts
 def init():
+    """Initialize the main GUI window and all static widgets.
+
+    This sets up layout, styles, default images, and registers callbacks
+    for mode selection, buttons, and window close events.
+    """
     global window
     global frame_bottom_left, frame_bottom_right
     global label_webcam
@@ -180,7 +185,6 @@ def init():
     # defined in game_launcher are invalid
     if not game_launcher.all_paths_valid:
         button_launch_game.state(["disabled"])
-
 
     # Button "Help"
     button_help = ttk.Button(
@@ -392,6 +396,11 @@ def init():
 # set_webcam_image and set_pose_image are supposed to be called in the
 # update-loop in main.py
 def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
+    """Update the webcam preview image according to the selected preview mode.
+
+    The input images are numpy arrays; this function mirrors the image for the
+    user, letterboxes it to the fixed preview size and updates the label.
+    """
     global array
     match selected_preview.get():
         case "Webcam":
@@ -436,6 +445,8 @@ def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
 
 
 def set_gamepad_image(updated_gamepad_image):
+    """Update the virtual gamepad preview image using the logic of
+    gamepad_visualizer.py."""
     if updated_gamepad_image is None:
         return
     image = ImageTk.PhotoImage(
@@ -451,6 +462,7 @@ def update_pose(new_pose):
 
 
 def update_pose_image():
+    """Update the pose image icon based on the current pose name."""
     valid_poses = [
         "standing", "jumping", "crouching", "throwing",
         "walking_right", "walking_left", "running_right", "running_left",
@@ -486,6 +498,11 @@ def update_debug_landmarks(landmarks):
 
 
 def apply_mode(mode: str):
+    """Switch the UI between play modes and collect mode.
+
+    Args:
+        mode: One of "Simple", "Full-body", "Collect".
+    """
     global label_collect_status, button_collect_start
     global label_virtual_gamepad_visualizer, label_pose_visualizer, \
         label_current_pose
@@ -537,6 +554,11 @@ def _cancel_scheduled():
 
 
 def _set_collect_button(starting: bool):
+    """Configure the collect button text and callback based on state.
+
+    Args:
+        starting: If True, button becomes a “Stop collecting” button.
+    """
     if starting:
         button_collect_start.config(text="Stop collecting",
                                     command=stop_collect_sequence)
@@ -571,6 +593,7 @@ def _set_collect_button(starting: bool):
 
 
 def start_collect_sequence():
+    """Start a full pose collection run with randomized pose order."""
     global collecting, collect_stop, current_run_csv, collection_order
     if collecting:
         return
@@ -601,6 +624,11 @@ def stop_collect_sequence():
 
 
 def run_collect_step(index: int):
+    """Run a single step of the collection sequence.
+
+    Advances through COLLECTION_STEPS (or the randomized order) and
+    triggers countdown and recording for each pose.
+    """
     global collecting, collect_stop, collection_order
     if collect_stop:
         _set_collect_button(starting=False)
@@ -622,6 +650,10 @@ def run_collect_step(index: int):
 
 
 def show_collect_countdown(n: int, pose_name: str, seconds: float, index: int):
+    """Show a countdown before recording a specific pose.
+
+    When countdown reaches zero, starts recording for the given pose.
+    """
     if collect_stop:
         return
     if n == 0:
@@ -652,6 +684,11 @@ def show_recording_countdown(remaining: int, pose_name: str, index: int):
 
 
 def record_collect_pose(pose_name: str, seconds: float, index: int):
+    """Record pose samples for the given duration and schedule next step.
+
+    This function runs in a worker thread and calls collect.main()
+    with appropriate CLI arguments.
+    """
     if collect_stop:
         return
     global current_run_csv
