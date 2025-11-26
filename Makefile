@@ -17,3 +17,7 @@ train: venv
 
 test: venv
 	PYTHONPATH=src $(PYTHON) -m pytest
+
+# Builds project into a single binary
+build: venv
+	pyinstaller main.spec
