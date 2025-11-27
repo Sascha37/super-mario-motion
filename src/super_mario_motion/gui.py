@@ -678,12 +678,18 @@ def open_browser(path):
 # so that the main thread does not have to wait for the browser to start up
 # (~5 seconds)
 def open_help_menu():
-    help_file_path = Path(
-        __file__).parent.parent.parent / "docs" / "help" / "help_page.pdf"
+    if hasattr(sys, "_MEIPASS"):
+        help_path = os.path.join("help","help_page.pdf")
+    else:
+        help_path = os.path.join("..","..","docs","help","help_page.pdf")
+
+    help_file_path = Path(ph.resource_path(
+        help_path
+        ))
     threading.Thread(target=open_browser, args=(help_file_path,),
                      daemon=True).start()
 
-
+#os.path.join("images","webcam_sample.jpg")
 # gets called by the "Start Game"-Button
 def start_game_button_action():
     threading.Thread(target=game_launcher.launch_game, daemon=True).start()
