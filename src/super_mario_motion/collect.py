@@ -16,6 +16,33 @@ state_manger = StateManager()
 
 
 def main():
+    """Run pose sample collection as a CLI program.
+
+    Command line arguments:
+        --label (str, required):
+            Class label for all collected samples
+            (e.g. standing, walking_right, ...).
+        --seconds (float, default=30):
+            Duration of the recording in seconds.
+        --csv (str, default="pose_samples.csv"):
+            Name of the CSV file (stored under ./data/).
+        --fps (float, default=20.0):
+            Target sampling rate for saving feature rows.
+        --source ({"auto", "vision", "camera"}, default="auto"):
+            Source of frames:
+              - "vision": use frames from StateManager / running app
+              - "camera": read directly from an OpenCV camera
+              - "auto": try vision first, fall back to camera.
+        --camera-index (int, default=0):
+            OpenCV camera index for camera / auto-fallback.
+
+    The function captures frames, runs MediaPipe Pose, extracts features
+    via `extract_features` and appends lines of the form:
+
+        label, feat_0, feat_1, ..., feat_N
+
+    to the configured CSV file.
+    """
     ap = argparse.ArgumentParser()
     ap.add_argument("--label", required=True,
                     help="z.B. standing, walking_right, ...")

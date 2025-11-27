@@ -21,6 +21,14 @@ all_paths_valid = True
 
 
 def validate_path(path):
+    """Validate that a given path exists and update the global flag.
+
+    Prints an info message and sets `all_paths_valid = False` if the
+    path does not exist.
+
+    Args:
+        path (Path): File or directory path to validate.
+    """
     global all_paths_valid
 
     if not path.exists():
@@ -35,7 +43,23 @@ def validate_path(path):
 validate_path(rom_path)
 validate_path(retroarch_path)
 
+
 def get_command(platform_):
+    """Build the RetroArch launch command for the given platform.
+
+    Selects the correct executable and NES core depending on the
+    OS platform string and returns a command list usable with
+    `subprocess.run`.
+
+    Args:
+        platform_ (str): Platform identifier (e.g. 'linux', 'darwin', 'win32').
+
+    Returns:
+        list[str]: Command and arguments to launch RetroArch with the ROM.
+
+    Raises:
+        ValueError: If the platform is unknown.
+    """
     global exe, core
     match platform_:
         case "linux":
@@ -61,6 +85,11 @@ def get_command(platform_):
 
 
 def launch_game():
+    """Launch the configured game via RetroArch if all paths are valid.
+
+    Uses `get_command` with the current platform and runs RetroArch
+    via `subprocess.run`. Prints error messages if launch fails.
+    """
     if not all_paths_valid:
         print(
             f"{module_log_prefix} Could not start the game. Invalid paths "

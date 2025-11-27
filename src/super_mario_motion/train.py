@@ -15,6 +15,21 @@ MODEL_PATH = Path(__file__).parent.parent.parent / "data" / "pose_model.joblib"
 
 def combine_run_csvs(output_name: str = "pose_samples_all.csv",
                      pattern: str = "pose_samples_*.csv") -> Path:
+    """Combine multiple collected run CSVs into a single CSV file.
+
+    Existing output file is removed first. Header rows in subsequent files
+    (starting with 'label,') are skipped.
+
+    Args:
+        output_name: Name of the combined CSV file to create.
+        pattern: Glob pattern for input CSVs in the data directory.
+
+    Returns:
+        Path: Full path to the combined CSV file.
+
+    Raises:
+        FileNotFoundError: If no matching input CSV files are found.
+    """
     all_csvs = Path(__file__).parent.parent.parent / "data" / output_name
     if all_csvs.exists():
         (all_csvs.unlink())
@@ -34,6 +49,19 @@ def combine_run_csvs(output_name: str = "pose_samples_all.csv",
 
 
 def load_csv(csv_path: Path):
+    """Load features and labels from a pose-sample CSV file.
+
+    Expects the first column to be the label and the remaining columns to
+    be floating-point feature values.
+
+    Args:
+        csv_path: Path to the CSV file.
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]:
+            x: Feature matrix of shape (n_samples, n_features), dtype float32.
+            y: Label array of shape (n_samples,), dtype object/str.
+    """
     labels, feats = [], []
     with open(csv_path) as f:
         for line in f:
@@ -48,6 +76,17 @@ def load_csv(csv_path: Path):
 
 
 def main():
+    """Train and evaluate the pose classifier, then save the best model.
+
+    Steps:
+      * Combine all run CSV files.
+      * Load feature matrix X and labels y.
+      * Split into train/test sets with stratification.
+      * Build a pipeline: StandardScaler -> PCA (95% var) -> SVC.
+      * Run GridSearchCV over SVC hyperparameters (C, kernel, gamma).
+      * Print best parameters, classification report and confusion matrix.
+      * Save the best estimator to MODEL_PATH.
+    """
     # if not CSV_PATH.exists():
     #    raise FileNotFoundError(f"{CSV_PATH} not found. Collect data first
     #    with collect.py.")

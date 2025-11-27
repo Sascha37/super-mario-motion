@@ -20,6 +20,7 @@ _model = None
 
 
 def init():
+    """Load the ML model and start the passive worker thread."""
     global _thread, _exit, _model
     _exit = False
     # Path
@@ -39,6 +40,17 @@ def init():
 
 
 def _worker():
+    """Continuously classify full-body poses from landmark data.
+
+    Steps:
+      * Read latest landmarks from StateManager.
+      * Extract PCA-scaled feature vector.
+      * Predict pose with loaded SVM model.
+      * Apply majority vote smoothing over recent predictions.
+      * Store smoothed pose in StateManager.
+
+    Runs until `_exit` is set to True.
+    """
     global _current_pose, _exit
 
     print(Path(__file__).name + " initialized (passive)")
@@ -86,6 +98,7 @@ def _worker():
 
 
 def stop():
+    """Stop the classifier worker thread."""
     global _exit, _thread
     _exit = True
     if _thread is not None:

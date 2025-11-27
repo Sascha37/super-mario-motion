@@ -3,9 +3,12 @@ import cv2 as cv
 from super_mario_motion import gui, input, vision, vision_ml, gamepad_visualiser
 from super_mario_motion.state import StateManager
 
-
-# Checks if a webcam is available
 def webcam_is_available():
+    """Check if a webcam is available on index 0.
+
+    Returns:
+        bool: True if a frame can be captured from the webcam, otherwise False.
+    """
     cam = cv.VideoCapture(0)
     if not cam.isOpened():
         return False
@@ -16,6 +19,16 @@ def webcam_is_available():
 
 # Function gets called every millisecond after the mainloop of the tkinter ui
 def update():
+    """Main update loop that synchronizes state, vision and GUI.
+
+    This function:
+      * Writes GUI settings (mode, send inputs) into the StateManager.
+      * Retrieves current pose predictions.
+      * Updates camera images via `vision` and displays them in the GUI.
+      * Updates pose preview image/text/debug info.
+      * Updates the virtual gamepad visualizer.
+      * Reschedules itself with `gui.window.after(1, update)`.
+    """
 
     # Write GUI info into state
     state_manager.set_current_mode(gui.selected_mode.get())
