@@ -3,84 +3,30 @@ import time
 from collections import deque
 from pathlib import Path
 
-import cv2 as cv
-import mediapipe as mp
 import numpy as np
 from joblib import load
+from sklearn.exceptions import NotFittedError
 
+from .pose_features import extract_features
 # we get frames from vision.py
-from . import vision
 from .state import StateManager
 
 state_manager = StateManager()
 
 _current_pose = "standing"
-_raw_frame = None
-_skeleton_frame = None
 _exit = False
 _thread = None
-
-mpPose = mp.solutions.pose
-mpDrawing = mp.solutions.drawing_utils
-
-# Landmarks
-eye_left, eye_right = 2, 5
-shoulder_left, shoulder_right = 11, 12
-elbow_left, elbow_right = 13, 14
-wrist_left, wrist_right = 15, 16
-hip_left, hip_right = 23, 24
-knee_left, knee_right = 25, 26
-ankle_left, ankle_right = 27, 28
-
-_smooth = deque(maxlen=7)
-
 _model = None
 
 
-def _mid(a, b):
-    return (a + b) / 2.0
-
-
-def _angle(a, b, c):
-    ba, bc = a - b, c - b
-    denom = (np.linalg.norm(ba) * np.linalg.norm(bc)) + 1e-6
-    cosang = np.dot(ba, bc) / denom
-    return np.degrees(np.arccos(np.clip(cosang, -1.0, 1.0)))
-
-
-def extract_features_ml(lm_arr: np.ndarray) -> np.ndarray:
-    xy = lm_arr[:, :2].copy()
-    mid_hip = _mid(xy[hip_left], xy[hip_right])
-    xy -= mid_hip
-    mid_sh = _mid(xy[shoulder_left], xy[shoulder_right])
-    torso = np.linalg.norm(mid_sh) + 1e-6
-    xy /= torso
-    angs = np.array([
-        _angle(xy[shoulder_left], xy[elbow_left], xy[wrist_left]),
-        _angle(xy[shoulder_right], xy[elbow_right], xy[wrist_right]),
-        _angle(xy[hip_left], xy[knee_left], xy[ankle_left]),
-        _angle(xy[hip_right], xy[knee_right], xy[ankle_right]),
-        ], dtype=np.float32)
-
-    def dist(i, j): return np.linalg.norm(xy[i] - xy[j])
-
-    dists = np.array([
-        dist(shoulder_left, shoulder_right),
-        dist(hip_left, hip_right),
-        dist(wrist_left, wrist_right),
-        dist(ankle_left, ankle_right),
-        dist(shoulder_left, hip_left),
-        dist(shoulder_right, hip_right),
-        ], dtype=np.float32)
-    vis = lm_arr[:, 3].astype(np.float32)
-    return np.concatenate([xy.flatten(), angs, dists, vis], axis=0)
-
-
 def init():
+    """Load the ML model and start the passive worker thread."""
     global _thread, _exit, _model
     _exit = False
     # Path
-    model_path = Path(__file__).parent.parent.parent / "data" / "pose_model.joblib"
+    model_path = Path(
+        __file__
+        ).parent.parent.parent / "data" / "pose_model.joblib"
     # load model
     try:
         _model = load(model_path)
@@ -94,55 +40,65 @@ def init():
 
 
 def _worker():
-    global _current_pose, _raw_frame, _skeleton_frame
-    with mpPose.Pose(static_image_mode=False, model_complexity=1,
-                     enable_segmentation=False,
-                     min_detection_confidence=0.5,
-                     min_tracking_confidence=0.5) as pose:
-        print(Path(__file__).name + " initialized (passive)")
-        while not _exit:
+    """Continuously classify full-body poses from landmark data.
 
-            bgr = vision.rgb  # latest raw frame from vision
+    Steps:
+      * Read latest landmarks from StateManager.
+      * Extract PCA-scaled feature vector.
+      * Predict pose with loaded SVM model.
+      * Apply majority vote smoothing over recent predictions.
+      * Store smoothed pose in StateManager.
 
-            if bgr is None:
-                time.sleep(0.01)
-                continue
+    Runs until `_exit` is set to True.
+    """
+    global _current_pose, _exit
 
-            _raw_frame = bgr
-            rgb = cv.cvtColor(bgr, cv.COLOR_BGR2RGB)
-            res = pose.process(rgb)
+    print(Path(__file__).name + " initialized (passive)")
 
-            if not res.pose_landmarks:
-                time.sleep(0.005)
-                continue
+    smooth = deque(maxlen=7)
 
-            # Skeleton-Overlay
-            skel = np.zeros_like(bgr)
-            mpDrawing.draw_landmarks(skel, res.pose_landmarks, mpPose.POSE_CONNECTIONS)
-            _skeleton_frame = skel
+    while not _exit:
+        lm_arr = state_manager.get_pose_landmarks()
 
-            lm = res.pose_landmarks.landmark
-            lm_arr = np.array([[p.x, p.y, p.z, p.visibility] for p in lm], dtype=np.float32)
-            feat = extract_features_ml(lm_arr)
+        if lm_arr is None:
+            time.sleep(0.01)
+            continue
 
-            label = None
-            if _model is not None:
-                x = feat.reshape(1, -1)
-                try:
-                    label = _model.predict(x)[0]
-                except Exception as e:
-                    label = None
+        try:
+            feat = extract_features(lm_arr)
+        except (ValueError, TypeError):
+            time.sleep(0.01)
+            continue
 
-            if label is not None:
-                _smooth.append(label)
-                vals, counts = np.unique(list(_smooth), return_counts=True)
-                _current_pose = vals[np.argmax(counts)]
+        if feat is None:
+            time.sleep(0.01)
+            continue
 
-                state_manager.set_pose_full_body(_current_pose)
-            time.sleep(0.001)
+        try:
+            x = feat.reshape(1, -1)
+        except ValueError:
+            time.sleep(0.01)
+            continue
+
+        label = None
+        if _model is not None:
+            try:
+                label = _model.predict(x)[0]
+            except (ValueError, TypeError, NotFittedError):
+                label = None
+
+        if label is not None:
+            smooth.append(label)
+            vals, counts = np.unique(list(smooth), return_counts=True)
+            _current_pose = vals[np.argmax(counts)]
+
+            state_manager.set_pose_full_body(_current_pose)
+
+        time.sleep(0.001)
 
 
 def stop():
+    """Stop the classifier worker thread."""
     global _exit, _thread
     _exit = True
     if _thread is not None:

@@ -1,14 +1,15 @@
 import cv2 as cv
 
-from . import gui
-from . import input
-from . import vision
-from . import vision_ml
+from . import gamepad_visualiser, gui, input, vision, vision_ml
 from .state import StateManager
 
 
-# Checks if a webcam is available
 def webcam_is_available():
+    """Check if a webcam is available on index 0.
+
+    Returns:
+        bool: True if a frame can be captured from the webcam, otherwise False.
+    """
     cam = cv.VideoCapture(0)
     if not cam.isOpened():
         return False
@@ -19,9 +20,19 @@ def webcam_is_available():
 
 # Function gets called every millisecond after the mainloop of the tkinter ui
 def update():
+    """Main update loop that synchronizes state, vision and GUI.
+
+    This function:
+      * Writes GUI settings (mode, send inputs) into the StateManager.
+      * Retrieves current pose predictions.
+      * Updates camera images via `vision` and displays them in the GUI.
+      * Updates pose preview image/text/debug info.
+      * Updates the virtual gamepad visualizer.
+      * Reschedules itself with `gui.window.after(1, update)`.
+    """
 
     # Write GUI info into state
-    state_manager.set_current_mode(gui.get_active_mode())
+    state_manager.set_current_mode(gui.selected_mode.get())
     state_manager.set_send_permission(gui.send_keystrokes.get())
 
     # Retrieve predicted poses
@@ -42,7 +53,19 @@ def update():
     gui.update_pose_text()
     gui.update_debug_landmarks(state_manager.get_landmark_string())
 
-    print(f"simple: {current_pose}, full-body: {current_pose_full_body}")
+    # Update virtual gamepad visualizer
+    pose_for_gamepad = (
+        current_pose_full_body
+        if state_manager.get_current_mode() == "Full-body"
+        else current_pose
+    )
+    send_active = state_manager.get_send_permission()
+    gamepad_img = gamepad_visualiser.create_gamepad_image(
+        pose_for_gamepad, send_active=send_active
+        )
+    gui.set_gamepad_image(gamepad_img)
+
+    # print(f"simple: {current_pose}, full-body: {current_pose_full_body}")
 
     gui.window.after(1, update)
 

@@ -9,6 +9,7 @@ import numpy as np
 from .state import StateManager
 
 # globals
+lm_string = None
 skeleton_only_frame = None
 raw_frame = None
 skel_frame = None
@@ -18,6 +19,8 @@ current_pose = "standing"
 cam = None
 rgb = None
 frame = None
+_exit = False
+thread = None
 
 mpPose = mp.solutions.pose
 mpDrawing = mp.solutions.drawing_utils
@@ -43,13 +46,27 @@ ankle_right = 28
 
 
 def landmark_coords(image, lm):
+    """Return pixel coordinates of a landmark in an image.
+
+    Args:
+        image: Numpy array (H, W, C) representing the current frame.
+        lm: MediaPipe landmark object with normalized x/y in [0, 1].
+
+    Returns:
+        tuple[int, int]: (x, y) pixel coordinates of the landmark.
+    """
     h = image.shape[0]
     w = image.shape[1]
     return int(w * lm.x), int(h * lm.y)
 
 
 def init():
-    global cam, rgb, frame
+    """Initialize the webcam and start the camera processing thread.
+
+    Opens the default camera (index 0) and starts `cam_loop` as a daemon
+    thread. Raises an IOError if the camera cannot be opened.
+    """
+    global cam, rgb, frame, thread
     cam = cv.VideoCapture(0)
     if not cam.isOpened():
         raise IOError("Cannot open camera")
@@ -58,10 +75,42 @@ def init():
     thread.start()
 
 
-def detect_pose_simple(frame, lm):
+def stop_cam():
+    global _exit, thread, cam
+    _exit = True
+
+    if thread is not None:
+        thread.join(timeout=0.5)
+        thread = None
+    if cam is not None:
+        cam.release()
+        cam = None
+
+
+def detect_pose_simple(frame_, lm):
+    """Determine a simple pose label from landmark positions.
+
+    Heuristic rules based on relative positions of eyes, shoulders and
+    wrists define these poses:
+      * standing
+      * walking_left / walking_right
+      * running_left / running_right
+      * jumping
+      * crouching
+      * throwing
+      * swimming
+
+    Args:
+        frame_: Current image frame (for coordinate scaling).
+        lm: Sequence of MediaPipe pose landmarks.
+
+    Returns:
+        str: Detected pose label.
+    """
+
     # helper functions for coordinates and distance
     def coordinates(index):
-        return landmark_coords(frame, lm[index])
+        return landmark_coords(frame_, lm[index])
 
     def distance(x, y):
         return math.hypot(y[0] - x[0], y[1] - x[1])
@@ -76,14 +125,15 @@ def detect_pose_simple(frame, lm):
 
     # define common coordinates
     shoulder_width = distance(shoulder_left_xy, shoulder_right_xy)
-    shoulder_left_y, shoulder_right_y = shoulder_left_xy[1], shoulder_right_xy[1]
+    shoulder_left_y, shoulder_right_y = (shoulder_left_xy[1],
+                                         shoulder_right_xy[1])
     eye_left_y, eye_right_y = eye_left_xy[1], eye_right_xy[1]
     wrist_left_x, wrist_left_y = wrist_left_xy
     wrist_right_x, wrist_right_y = wrist_right_xy
     wrist_dist = distance(wrist_left_xy, wrist_right_xy)
     hands_below_shoulders = (
-            wrist_left_y > shoulder_left_y and wrist_right_y > shoulder_right_y
-        )
+            wrist_left_y > shoulder_left_y
+            and wrist_right_y > shoulder_right_y)
 
     # throwing: hands near each other
     throwing = wrist_dist < shoulder_width * 0.75 and not hands_below_shoulders
@@ -97,7 +147,8 @@ def detect_pose_simple(frame, lm):
     running_right = wrist_right_y < eye_right_y
 
     # jumping: both arms above shoulders
-    jumping = (running_right or walking_right) and (running_left or walking_left)
+    jumping = (running_right or walking_right) and (
+            running_left or walking_left)
 
     # crouching: hands near each other and below shoulders
     crouching = wrist_dist < shoulder_width * 0.75 and hands_below_shoulders
@@ -131,15 +182,22 @@ def detect_pose_simple(frame, lm):
 
 
 def cam_loop():
+    """Camera processing loop that runs in a background thread.
+
+    This loop:
+      * Grabs frames from the webcam.
+      * Runs MediaPipe Pose on each frame.
+      * Draws skeleton overlays for full and skeleton-only frames.
+      * Extracts pose landmarks as a NumPy array.
+      * Detects the current simple pose via `detect_pose_simple`.
+      * Updates the StateManager with landmarks, pose and debug strings.
+
+    Loop exits when `_exit` is set to True or the camera is closed.
+    """
     global frame, rgb, cam, current_pose, skeleton_only_frame, lm_string
-    with mpPose.Pose(
-            model_complexity=1,  # uses mid-precision and mid-speed
-            enable_segmentation=False,  # ignores the background
-            min_detection_confidence=0.5,
-            min_tracking_confidence=0.5,
-            ) as pose:
+    with mpPose.Pose() as pose:
         print(Path(__file__).name + " initialized")
-        while cam.isOpened():
+        while not _exit and cam.isOpened():
             ret, image = cam.read()
             if not ret:
                 break
@@ -157,11 +215,19 @@ def cam_loop():
                 # Draw an image of only the skeleton
                 skeleton_only_frame = np.zeros_like(frame)
                 mpDrawing.draw_landmarks(
-                    skeleton_only_frame, results.pose_landmarks, mpPose.POSE_CONNECTIONS
+                    skeleton_only_frame, results.pose_landmarks,
+                    mpPose.POSE_CONNECTIONS
                     )
 
                 # Simple pose detection
                 lm = results.pose_landmarks.landmark
+
+                # save landmarks to state
+                lm_arr = np.array(
+                    [[p.x, p.y, p.z, p.visibility] for p in lm],
+                    dtype=np.float32
+                    )
+                state_manager.set_pose_landmarks(lm_arr)
 
                 # get current pose via helper method
                 current_pose = detect_pose_simple(frame, lm)
@@ -171,7 +237,8 @@ def cam_loop():
                 # Saves all Landmark cords into a string
                 lm_string = ""
                 for x in range(33):
-                    lm_string += str(x) + str(landmark_coords(frame, lm[x])) + " "
+                    lm_string += str(x) + str(
+                        landmark_coords(frame, lm[x])) + " "
                     if (x + 1) % 4 == 0:
                         lm_string += "\n"
                 state_manager.set_landmark_string(lm_string)

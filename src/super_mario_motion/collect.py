@@ -7,72 +7,57 @@ import cv2 as cv
 import mediapipe as mp
 import numpy as np
 
+from .pose_features import extract_features
 # TODO: Remove import vision  # use camera from running program
 from .state import StateManager
 
 # Init StateManager
 state_manger = StateManager()
 
-# Landmarks
-eye_left, eye_right = 2, 5
-shoulder_left, shoulder_right = 11, 12
-elbow_left, elbow_right = 13, 14
-wrist_left, wrist_right = 15, 16
-hip_left, hip_right = 23, 24
-knee_left, knee_right = 25, 26
-ankle_left, ankle_right = 27, 28
-
-
-def _mid(a, b):
-    return (a + b) / 2.0
-
-
-def _angle(a, b, c):
-    ba, bc = a - b, c - b
-    length_product = (np.linalg.norm(ba) * np.linalg.norm(bc)) + 1e-6
-    angle_cosine = np.dot(ba, bc) / length_product
-    return np.degrees(np.arccos(np.clip(angle_cosine, -1.0, 1.0)))
-
-
-def extract_features(lm_arr: np.ndarray) -> np.ndarray:
-    xy = lm_arr[:, :2].copy()
-    mid_hip = _mid(xy[hip_left], xy[hip_right])
-    xy -= mid_hip
-    mid_sh = _mid(xy[shoulder_left], xy[shoulder_right])
-    torso = np.linalg.norm(mid_sh) + 1e-6
-    xy /= torso
-    angles = np.array([
-        _angle(xy[shoulder_left], xy[elbow_left], xy[wrist_left]),
-        _angle(xy[shoulder_right], xy[elbow_right], xy[wrist_right]),
-        _angle(xy[hip_left], xy[knee_left], xy[ankle_left]),
-        _angle(xy[hip_right], xy[knee_right], xy[ankle_right]),
-        ], dtype=np.float32)
-
-    def dist(i, j): return np.linalg.norm(xy[i] - xy[j])
-
-    dists = np.array([
-        dist(shoulder_left, shoulder_right),
-        dist(hip_left, hip_right),
-        dist(wrist_left, wrist_right),
-        dist(ankle_left, ankle_right),
-        dist(shoulder_left, hip_left),
-        dist(shoulder_right, hip_right),
-        ], dtype=np.float32)
-    vis = lm_arr[:, 3].astype(np.float32)
-    return np.concatenate([xy.flatten(), angles, dists, vis], axis=0)
-
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--label", required=True, help="z.B. standing, walking_right, ...")
-    ap.add_argument("--seconds", type=float, default=30, help="duration of recording")
-    ap.add_argument("--csv", default="pose_samples.csv")
-    ap.add_argument("--fps", type=float, default=20.0, help="goal-sampling rate")
+    """Run pose sample collection as a CLI program.
 
-    ap.add_argument("--source", choices=["auto", "vision", "camera"], default="auto",
+    Command line arguments:
+        --label (str, required):
+            Class label for all collected samples
+            (e.g. standing, walking_right, ...).
+        --seconds (float, default=30):
+            Duration of the recording in seconds.
+        --csv (str, default="pose_samples.csv"):
+            Name of the CSV file (stored under ./data/).
+        --fps (float, default=20.0):
+            Target sampling rate for saving feature rows.
+        --source ({"auto", "vision", "camera"}, default="auto"):
+            Source of frames:
+              - "vision": use frames from StateManager / running app
+              - "camera": read directly from an OpenCV camera
+              - "auto": try vision first, fall back to camera.
+        --camera-index (int, default=0):
+            OpenCV camera index for camera / auto-fallback.
+
+    The function captures frames, runs MediaPipe Pose, extracts features
+    via `extract_features` and appends lines of the form:
+
+        label, feat_0, feat_1, ..., feat_N
+
+    to the configured CSV file.
+    """
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--label", required=True,
+                    help="z.B. standing, walking_right, ...")
+    ap.add_argument("--seconds", type=float, default=30,
+                    help="duration of recording")
+    ap.add_argument("--csv", default="pose_samples.csv")
+    ap.add_argument("--fps", type=float, default=20.0,
+                    help="goal-sampling rate")
+
+    ap.add_argument("--source", choices=["auto", "vision", "camera"],
+                    default="auto",
                     help="Frame-Source: 'auto' try vision first, else camera.")
     ap.add_argument("--camera-index", type=int, default=0,
-                    help="OpenCV camera-index (for source=camera or auto-fallback).")
+                    help="OpenCV camera-index (for source=camera or "
+                         "auto-fallback).")
 
     args = ap.parse_args()
 
@@ -81,7 +66,8 @@ def main():
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     print(
-        f"[collect] start recording: label={args.label}, {args.seconds}s, source={args.source} → "
+        f"[collect] start recording: label={args.label}, {args.seconds}s, "
+        f"source={args.source} → "
         f"{out_path}")
 
     t_end = time.time() + args.seconds
@@ -92,12 +78,10 @@ def main():
     if args.source == "camera":
         cam = cv.VideoCapture(args.camera_index)
         if not cam.isOpened():
-            raise IOError(f"[collect] Could not open camera {args.camera_index}.")
+            raise IOError(
+                f"[collect] Could not open camera {args.camera_index}.")
 
-    with mp_pose.Pose(static_image_mode=False, model_complexity=1,
-                      enable_segmentation=False,
-                      min_detection_confidence=0.5,
-                      min_tracking_confidence=0.5) as pose, \
+    with mp_pose.Pose() as pose, \
             open(out_path, "a", newline="") as f:
         writer = csv.writer(f)
 
@@ -113,7 +97,9 @@ def main():
                 if cam is None:
                     cam = cv.VideoCapture(args.camera_index)
                     if not cam.isOpened():
-                        print(f"[collect] WARN: camera {args.camera_index} not available.")
+                        print(
+                            f"[collect] WARN: camera {args.camera_index} not "
+                            f"available.")
                         time.sleep(0.05)
                         continue
                 ok, bgr = cam.read()
@@ -132,7 +118,8 @@ def main():
                 continue
 
             lm = res.pose_landmarks.landmark
-            lm_arr = np.array([[p.x, p.y, p.z, p.visibility] for p in lm], dtype=np.float32)
+            lm_arr = np.array([[p.x, p.y, p.z, p.visibility] for p in lm],
+                              dtype=np.float32)
             feat = extract_features(lm_arr)
 
             writer.writerow([args.label] + [f"{x:.6f}" for x in feat.tolist()])

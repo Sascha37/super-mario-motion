@@ -10,6 +10,8 @@ if sys.platform == 'win32':
 else:
     import pyautogui
 
+mapping = None
+
 # Set initial values
 send_permission = False
 previous_send_permission = False
@@ -28,15 +30,26 @@ def init():
 
 
 def input_loop():
+    """Continuously read pose/state and send corresponding key events.
+
+    Logic:
+      * Read current pose (simple or full-body depending on mode).
+      * Read send_permission from StateManager.
+      * On send_permission rising edge: send input for current pose.
+      * On pose change while permission is active: release previous keys,
+        send input for new pose.
+      * On send_permission falling edge: release all currently held keys.
+    """
     print(Path(__file__).name + " initialized")
     global pose, last_pose, mapping, send_permission, previous_send_permission
     while True:
-        pose = state_manager.get_pose_full_body() if (state_manager.get_current_mode() ==
-                                                      "Full-body") else state_manager.get_pose()
+        pose = state_manager.get_pose_full_body() if (
+                state_manager.get_current_mode() ==
+                "Full-body") else state_manager.get_pose()
         send_permission = state_manager.get_send_permission()
         if send_permission:
-            if not previous_send_permission:  # When send_permission just changed from
-                # False to True
+            if not previous_send_permission:
+                # When send_permission just changed from False to True
                 press_designated_input(pose)
                 last_pose = pose
                 previous_send_permission = True
@@ -44,16 +57,26 @@ def input_loop():
                 release_held_keys()
                 last_pose = pose
                 press_designated_input(pose)
-        elif previous_send_permission:  # When send_permission just changed from True to False
+        elif previous_send_permission:
+            # When send_permission just changed from True to False
             release_held_keys()
             previous_send_permission = False
 
         time.sleep(0.02)
 
 
-def press_designated_input(pose):
+def press_designated_input(pose_):
+    """Send key presses according to the given pose label.
+
+    This function both triggers momentary actions (jump, throw) and sets
+    up continuous key holds (walking/running/crouching), which are
+    tracked in `currently_held_keys`.
+
+    Args:
+        pose_: Pose label (e.g. 'walking_right', 'jumping').
+    """
     global currently_held_keys, last_orientation
-    match pose:
+    match pose_:
         case "standing":
             pass
         case "jumping":
@@ -89,7 +112,7 @@ def press_designated_input(pose):
             pyautogui.keyDown("y")
             pyautogui.keyUp("y")
         case _:
-            print("Input: No input defined for: " + pose)
+            print("Input: No input defined for: " + pose_)
 
 
 def release_held_keys():

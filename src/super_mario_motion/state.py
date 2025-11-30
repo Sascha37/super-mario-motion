@@ -1,3 +1,12 @@
+"""Central shared state container for the application.
+
+StateManager stores pose predictions, mode settings, image frames, landmark
+strings and send-permission flags as class-level attributes. GUI, vision,
+vision_ML and input modules all read/write to this manager, providing a simple
+synchronized state interface without requiring instance passing.
+"""
+
+
 class StateManager:
     # Init default values
     pose = "default"
@@ -12,6 +21,8 @@ class StateManager:
     gui_checkbox_send_permission = False
 
     gui_current_mode = "Simple"
+
+    pose_landmarks = None
 
     # Getter
     @classmethod
@@ -46,6 +57,10 @@ class StateManager:
     def get_current_mode(cls):
         return cls.gui_current_mode
 
+    @classmethod
+    def get_pose_landmarks(cls):
+        return cls.pose_landmarks
+
     # Setter
     @classmethod
     def set_pose(cls, new_pose):
@@ -60,7 +75,8 @@ class StateManager:
         cls.landmark_string = new_landmark_string
 
     @classmethod
-    def set_all_opencv_images(cls, new_webcam, new_webcam_skeleton, new_skeleton_only):
+    def set_all_opencv_images(cls, new_webcam, new_webcam_skeleton,
+                              new_skeleton_only):
         cls.opencv_image_webcam = new_webcam
         cls.opencv_image_webcam_skeleton = new_webcam_skeleton
         cls.opencv_image_skeleton_only = new_skeleton_only
@@ -72,3 +88,7 @@ class StateManager:
     @classmethod
     def set_current_mode(cls, new_mode):
         cls.gui_current_mode = new_mode
+
+    @classmethod
+    def set_pose_landmarks(cls, new_landmarks):
+        cls.pose_landmarks = new_landmarks
