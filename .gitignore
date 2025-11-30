@@ -7,3 +7,6 @@ __pycache__/
 # Ignore machine learning model
 data/pose_model.joblib
 docs/_build/
+# Pyinstaller folders
+build/
+dist/

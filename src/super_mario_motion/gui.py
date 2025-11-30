@@ -2,6 +2,7 @@ import getpass
 import platform
 import random
 import sys
+import os
 import threading
 import tkinter as tk
 import webbrowser
@@ -12,7 +13,9 @@ from tkinter import ttk
 import cv2
 from PIL import Image, ImageTk
 
-from . import collect, game_launcher, vision, vision_ml
+from super_mario_motion import collect, game_launcher, vision, vision_ml
+from super_mario_motion.state import StateManager
+from super_mario_motion import path_helper as ph
 
 pose = ""
 
@@ -41,10 +44,9 @@ color_white = '#FFFFFF'
 color_disabled_background = '#444444'
 color_disabled_text = '#888888'
 # Filepaths for images that are being used on init
-path_data_folder = Path(__file__).parent / "images"
-path_image_webcam_sample = path_data_folder / 'webcam_sample.jpg'
-path_image_pose_default = path_data_folder / 'unknown.png'
-path_image_gamepad = path_data_folder / 'gamepad.png'
+path_image_webcam_sample = ph.resource_path(os.path.join("images","webcam_sample.jpg"))
+path_image_pose_default = ph.resource_path(os.path.join("images", "unknown.png"))
+path_image_gamepad = ph.resource_path(os.path.join("images","gamepad.png"))
 
 # Paddings
 label_webcam_top_padding = 20
@@ -79,6 +81,8 @@ collecting = False
 collect_stop = False
 after_handles = []
 
+# StateManager
+state_manager = StateManager()
 
 # Function gets called once in main.py once the program starts
 def init():
@@ -471,7 +475,7 @@ def update_pose_image():
     if pose in valid_poses:
         try:
             window.image_pose = ImageTk.PhotoImage(
-                Image.open(path_data_folder / (pose + '.png')).resize(
+                Image.open(ph.resource_path(os.path.join("images", pose+".png"))).resize(
                     (100, 100), Image.LANCZOS)
                 )
         except FileNotFoundError:
@@ -603,8 +607,8 @@ def start_collect_sequence():
     # Randomize the order of collection steps for this run
     collection_order = random.sample(COLLECTION_STEPS, len(COLLECTION_STEPS))
 
-    runs_dir = Path(__file__).parent.parent.parent / "data"
-    runs_dir.mkdir(parents=True, exist_ok=True)
+    runs_dir = Path(state_manager.get_data_folder_path())
+
     user = getpass.getuser()
     current_run_csv = str(
         runs_dir / f"pose_samples_{user}_"
@@ -714,12 +718,18 @@ def open_browser(path):
 # so that the main thread does not have to wait for the browser to start up
 # (~5 seconds)
 def open_help_menu():
-    help_file_path = Path(
-        __file__).parent.parent.parent / "docs" / "help" / "help_page.pdf"
+    if state_manager.get_standalone:
+        help_path = os.path.join("help","help_page.pdf")
+    else:
+        help_path = os.path.join("..","..","docs","help","help_page.pdf")
+
+    help_file_path = Path(ph.resource_path(
+        help_path
+        ))
     threading.Thread(target=open_browser, args=(help_file_path,),
                      daemon=True).start()
 
-
+#os.path.join("images","webcam_sample.jpg")
 # gets called by the "Start Game"-Button
 def start_game_button_action():
     threading.Thread(target=game_launcher.launch_game, daemon=True).start()
