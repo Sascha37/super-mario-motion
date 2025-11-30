@@ -4,6 +4,8 @@ venv/
 env/
 # Ignore Python Cache
 __pycache__/
-# Pyinstaller folders
-build/
-dist/
+# Ignore machine learning model
+data/pose_model.joblib
+# sphinx folders
+docs/_build/
+docs/api/

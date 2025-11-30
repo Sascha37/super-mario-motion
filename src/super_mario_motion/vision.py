@@ -92,13 +92,14 @@ def detect_pose_simple(frame_, lm):
 
     Heuristic rules based on relative positions of eyes, shoulders and
     wrists define these poses:
-      * standing
-      * walking_left / walking_right
-      * running_left / running_right
-      * jumping
-      * crouching
-      * throwing
-      * swimming
+
+    * standing
+    * walking_left / walking_right
+    * running_left / running_right
+    * jumping
+    * crouching
+    * throwing
+    * swimming
 
     Args:
         frame_: Current image frame (for coordinate scaling).

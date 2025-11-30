@@ -9,3 +9,5 @@ scikit-learn
 pytest
 pyinstaller
 coverage
+sphinx
+furo
