@@ -8,3 +8,4 @@ joblib
 scikit-learn
 pytest
 pyinstaller
+coverage
