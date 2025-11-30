@@ -6,4 +6,6 @@ env/
 __pycache__/
 # Ignore machine learning model
 data/pose_model.joblib
+# sphinx folders
 docs/_build/
+docs/api
