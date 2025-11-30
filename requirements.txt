@@ -7,6 +7,7 @@ pillow
 joblib
 scikit-learn
 pytest
+pyinstaller
 coverage
 sphinx
 furo

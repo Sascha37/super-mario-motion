@@ -1,0 +1,4 @@
+[run]
+source=.
+[report]
+ignore_errors = true

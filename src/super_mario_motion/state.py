@@ -24,6 +24,10 @@ class StateManager:
 
     pose_landmarks = None
 
+    standalone = False
+
+    data_folder_path = None
+
     # Getter
     @classmethod
     def get_pose(cls):
@@ -61,6 +65,14 @@ class StateManager:
     def get_pose_landmarks(cls):
         return cls.pose_landmarks
 
+    @classmethod
+    def get_standalone(cls):
+        return cls.standalone
+
+    @classmethod
+    def get_data_folder_path(cls):
+        return cls.data_folder_path
+
     # Setter
     @classmethod
     def set_pose(cls, new_pose):
@@ -92,3 +104,11 @@ class StateManager:
     @classmethod
     def set_pose_landmarks(cls, new_landmarks):
         cls.pose_landmarks = new_landmarks
+
+    @classmethod
+    def set_standalone(cls, new_standalone):
+        cls.standalone = new_standalone
+
+    @classmethod
+    def set_data_folder_path(cls, new_data_folder_path):
+        cls.data_folder_path = new_data_folder_path
