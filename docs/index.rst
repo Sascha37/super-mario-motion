@@ -1,19 +1,15 @@
-.. Super Mario Motion documentation master file, created by
-   sphinx-quickstart on Sun Nov 30 12:28:30 2025.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Super Mario Motion documentation
+Super Mario Motion Documentation
 ================================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+Overview
+--------
 
+Super Mario Motion is a pose-controlled interface for *Super Mario Bros.*.
+It uses MediaPipe Pose, feature extraction, classical ML, and a Tkinter GUI
+to allow users to control the game through body movements.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Content:
+   :caption: Contents:
 
-   api/super_mario_motion
-
+   api/index

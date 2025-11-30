@@ -17,7 +17,19 @@ author = 'Sascha Wulle, Silas Jirikovsky, Timo Barton'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon",]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.autosummary",
+    ]
+autosummary_generate = True
+autodoc_member_order = "bysource"
+
+add_module_names = False
+autodoc_typehints = "description"
+
+html_theme = "furo"
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
