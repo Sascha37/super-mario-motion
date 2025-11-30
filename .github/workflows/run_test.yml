@@ -30,7 +30,7 @@ jobs:
         run: coverage erase
       - name: Test with pytest
         run: |
-          coverage run -m pytest  -v -s
+          coverage run --rcfile=.coveragerc -m pytest  -v -s
       - name: Generate Coverage Report
         run: |
           coverage report -m
