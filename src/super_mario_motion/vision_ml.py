@@ -1,5 +1,6 @@
 import threading
 import time
+import os
 from collections import deque
 from pathlib import Path
 
@@ -10,6 +11,7 @@ from sklearn.exceptions import NotFittedError
 from super_mario_motion.pose_features import extract_features
 # we get frames from vision.py
 from super_mario_motion.state import StateManager
+from super_mario_motion import path_helper as ph
 
 state_manager = StateManager()
 
@@ -23,17 +25,25 @@ def init():
     """Load the ML model and start the passive worker thread."""
     global _thread, _exit, _model
     _exit = False
-    # Path
-    model_path = Path(
-        __file__
-        ).parent.parent.parent / "data" / "pose_model.joblib"
-    # load model
+
+    # Try to load external model
     try:
+        model_path =Path(
+            state_manager.get_data_folder_path()
+            ) / "pose_model.joblib"
         _model = load(model_path)
-        print(f"[vision_ml]: model loaded ({Path(model_path).name})")
+        print(f"[vision_ml] external model loaded ({model_path})")
     except Exception as e:
-        _model = None
-        print("[vision_ml]: could not load default model:", e)
+        print(f"[vision_ml] could not load external model at: {model_path}")
+        # Try to load internal fallback model
+        try:
+            model_path = ph.resource_path(
+                os.path.join("data","pose_model.joblib"))
+            _model = load(model_path)
+            print(f"[vision_ml] fallback model loaded ({model_path})")
+        except Exception as e:
+            _model = None
+            print("[vision_ml] could not load fallback model:", e)
 
     _thread = threading.Thread(target=_worker, daemon=True)
     _thread.start()

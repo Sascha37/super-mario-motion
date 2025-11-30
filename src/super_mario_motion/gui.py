@@ -607,8 +607,8 @@ def start_collect_sequence():
     # Randomize the order of collection steps for this run
     collection_order = random.sample(COLLECTION_STEPS, len(COLLECTION_STEPS))
 
-    runs_dir = Path(__file__).parent.parent.parent / "data"
-    runs_dir.mkdir(parents=True, exist_ok=True)
+    runs_dir = Path(state_manager.get_data_folder_path())
+
     user = getpass.getuser()
     current_run_csv = str(
         runs_dir / f"pose_samples_{user}_"

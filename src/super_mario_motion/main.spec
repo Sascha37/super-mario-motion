@@ -13,13 +13,20 @@ datas = [
     #images
     (os.path.join(cwd,'src','super_mario_motion', 'images'), 'images'),
     #help doc
-    (os.path.join(cwd,'docs','help'), 'help')
+    (os.path.join(cwd,'docs','help'), 'help'),
     #default fallback joblib
-    (os.path.join(cwd,'docs'), 'data')
+    (os.path.join(cwd,'src','super_mario_motion', 'data'), 'data')
 ]
 
 hiddenimports = [
     'PIL._tkinter_finder',
+    "sklearn",
+    "sklearn.pipeline",
+    "sklearn.preprocessing",
+    "sklearn.metrics",
+    "sklearn.utils",
+    "sklearn.utils._joblib",
+    "sklearn.base"
 ]
 
 a = Analysis(
@@ -44,7 +51,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='main',
+    name='supermariomotion',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
