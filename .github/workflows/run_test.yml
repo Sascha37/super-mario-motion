@@ -27,7 +27,7 @@ jobs:
           ruff check . --output-format=github --target-version=py312
         continue-on-error: true
       - name: Remove old coverage files
-        run: rm -f .coverage
+        run: coverage erase
       - name: Test with pytest
         run: |
           coverage run -m pytest  -v -s
