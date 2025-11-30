@@ -111,6 +111,12 @@ def press_designated_input(pose_):
         case "throwing":
             pyautogui.keyDown("y")
             pyautogui.keyUp("y")
+        case "swimming":
+            pyautogui.keyDown("x")
+            pyautogui.keyDown(last_orientation)
+            time.sleep(0.1)
+            pyautogui.keyUp(last_orientation)
+            pyautogui.keyUp("x")
         case _:
             print("Input: No input defined for: " + pose_)
 
