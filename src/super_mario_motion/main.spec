@@ -14,6 +14,8 @@ datas = [
     (os.path.join(cwd,'src','super_mario_motion', 'images'), 'images'),
     #help doc
     (os.path.join(cwd,'docs','help'), 'help')
+    #default fallback joblib
+    (os.path.join(cwd,'docs'), 'data')
 ]
 
 hiddenimports = [

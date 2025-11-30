@@ -14,6 +14,7 @@ import cv2
 from PIL import Image, ImageTk
 
 from super_mario_motion import collect, game_launcher, vision, vision_ml
+from super_mario_motion.state import StateManager
 from super_mario_motion import path_helper as ph
 
 pose = ""
@@ -80,6 +81,8 @@ collecting = False
 collect_stop = False
 after_handles = []
 
+# StateManager
+state_manager = StateManager()
 
 # Function gets called once in main.py once the program starts
 def init():
@@ -715,7 +718,7 @@ def open_browser(path):
 # so that the main thread does not have to wait for the browser to start up
 # (~5 seconds)
 def open_help_menu():
-    if hasattr(sys, "_MEIPASS"):
+    if state_manager.get_standalone:
         help_path = os.path.join("help","help_page.pdf")
     else:
         help_path = os.path.join("..","..","docs","help","help_page.pdf")

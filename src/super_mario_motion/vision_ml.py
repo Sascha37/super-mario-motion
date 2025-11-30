@@ -30,10 +30,10 @@ def init():
     # load model
     try:
         _model = load(model_path)
-        print(f"vision_ml: model loaded ({Path(model_path).name})")
+        print(f"[vision_ml]: model loaded ({Path(model_path).name})")
     except Exception as e:
         _model = None
-        print("vision_ml: could not load model:", e)
+        print("[vision_ml]: could not load default model:", e)
 
     _thread = threading.Thread(target=_worker, daemon=True)
     _thread.start()

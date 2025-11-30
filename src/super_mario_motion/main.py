@@ -1,6 +1,8 @@
 import cv2 as cv
+import sys
 
 from super_mario_motion import gui, input, vision, vision_ml, gamepad_visualiser
+from super_mario_motion import user_data
 from super_mario_motion.state import StateManager
 
 def webcam_is_available():
@@ -77,6 +79,12 @@ if __name__ == "__main__":
         print("Super Mario Motion started")
 
         state_manager = StateManager()
+
+        if hasattr(sys, "_MEIPASS"):
+            print("[SMM] Opened in standalone executable mode")
+            state_manager.set_standalone(True)
+
+        user_data.init()
 
         vision.init()
         vision_ml.init()
