@@ -11,7 +11,7 @@ config_retroarch_path = (
     )
 
 config_rom_path = (
-    f"/mnt/files/roms/nes/Super Mario Bros. (World).nes"
+    r"/mnt/files/roms/nes/Super Mario Bros. (World).nes"
     )
 
 retroarch_path = Path(config_retroarch_path)
