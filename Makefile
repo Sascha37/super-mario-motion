@@ -19,6 +19,5 @@ test: venv
 	PYTHONPATH=src $(PYTHON) -m pytest
 
 doc:
-	sphinx-build -b html docs docs/_build/html
 	sphinx-apidoc -f -o docs/api src/super_mario_motion
 	sphinx-build -b html docs docs/_build/html
