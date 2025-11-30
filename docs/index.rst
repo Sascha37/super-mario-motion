@@ -12,4 +12,4 @@ to allow users to control the game through body movements.
    :maxdepth: 2
    :caption: Contents:
 
-   api/index
+   api/modules

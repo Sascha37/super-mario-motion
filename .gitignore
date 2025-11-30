@@ -8,4 +8,4 @@ __pycache__/
 data/pose_model.joblib
 # sphinx folders
 docs/_build/
-docs/api
+docs/api/
