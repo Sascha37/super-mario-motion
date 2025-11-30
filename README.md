@@ -1,4 +1,4 @@
-# Super Mario Motion ![GitHub License](https://img.shields.io/github/license/Sascha37/super-mario-motion) ![GitHub last commit](https://img.shields.io/github/last-commit/Sascha37/super-mario-motion)
+# Super Mario Motion ![GitHub License](https://img.shields.io/github/license/Sascha37/super-mario-motion) ![GitHub last commit](https://img.shields.io/github/last-commit/Sascha37/super-mario-motion) [![Run Unit Test via Pytest](https://github.com/Sascha37/super-mario-motion/actions/workflows/run_test.yml/badge.svg)](https://github.com/Sascha37/super-mario-motion/actions/workflows/run_test.yml)
 An application written in Python that uses OpenCV alongside MediaPipe to translate your movements, captured by your webcam, into inputs for *Super Mario Bros. 1*.
 
 This software is designed to be used alongside an NES emulator running the original Super Mario Bros. game.
