@@ -13,8 +13,10 @@ CSV_PATH = Path(__file__).parent.parent.parent / "data" / "pose_samples.csv"
 MODEL_PATH = Path(__file__).parent.parent.parent / "data" / "pose_model.joblib"
 
 
-def combine_run_csvs(output_name: str = "pose_samples_all.csv",
-                     pattern: str = "pose_samples_*.csv") -> Path:
+def combine_run_csvs(
+        output_name: str = "pose_samples_all.csv",
+        pattern: str = "pose_samples_*.csv"
+        ) -> Path:
     """Combine multiple collected run CSVs into a single CSV file.
 
     Existing output file is removed first. Header rows in subsequent files
@@ -96,12 +98,14 @@ def main():
         x, y, test_size=0.2, stratify=y, random_state=42
         )
 
-    pipe = Pipeline([
-        ("scaler", StandardScaler()),
-        ("pca", PCA(n_components=0.95, svd_solver="full")),
-        # optional, can be removed
-        ("clf", SVC(probability=True))
-        ])
+    pipe = Pipeline(
+        [
+            ("scaler", StandardScaler()),
+            ("pca", PCA(n_components=0.95, svd_solver="full")),
+            # optional, can be removed
+            ("clf", SVC(probability=True))
+            ]
+        )
 
     grid = {
         "clf__C": [0.5, 1, 2, 5],
@@ -109,8 +113,10 @@ def main():
         "clf__gamma": ["scale", "auto"]
         }
 
-    gs = GridSearchCV(pipe, grid, cv=5, n_jobs=-1, scoring="f1_weighted",
-                      verbose=1)
+    gs = GridSearchCV(
+        pipe, grid, cv=5, n_jobs=-1, scoring="f1_weighted",
+        verbose=1
+        )
     gs.fit(s_train, y_train)
 
     print("Best params:", gs.best_params_)

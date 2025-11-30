@@ -54,22 +54,26 @@ def extract_features(lm_arr: np.ndarray) -> np.ndarray:
     mid_sh = _mid(xy[shoulder_left], xy[shoulder_right])
     torso = np.linalg.norm(mid_sh) + 1e-6
     xy /= torso
-    angles = np.array([
-        _angle(xy[shoulder_left], xy[elbow_left], xy[wrist_left]),
-        _angle(xy[shoulder_right], xy[elbow_right], xy[wrist_right]),
-        _angle(xy[hip_left], xy[knee_left], xy[ankle_left]),
-        _angle(xy[hip_right], xy[knee_right], xy[ankle_right]),
-        ], dtype=np.float32)
+    angles = np.array(
+        [
+            _angle(xy[shoulder_left], xy[elbow_left], xy[wrist_left]),
+            _angle(xy[shoulder_right], xy[elbow_right], xy[wrist_right]),
+            _angle(xy[hip_left], xy[knee_left], xy[ankle_left]),
+            _angle(xy[hip_right], xy[knee_right], xy[ankle_right]),
+            ], dtype=np.float32
+        )
 
     def dist(i, j): return np.linalg.norm(xy[i] - xy[j])
 
-    dists = np.array([
-        dist(shoulder_left, shoulder_right),
-        dist(hip_left, hip_right),
-        dist(wrist_left, wrist_right),
-        dist(ankle_left, ankle_right),
-        dist(shoulder_left, hip_left),
-        dist(shoulder_right, hip_right),
-        ], dtype=np.float32)
+    dists = np.array(
+        [
+            dist(shoulder_left, shoulder_right),
+            dist(hip_left, hip_right),
+            dist(wrist_left, wrist_right),
+            dist(ankle_left, ankle_right),
+            dist(shoulder_left, hip_left),
+            dist(shoulder_right, hip_right),
+            ], dtype=np.float32
+        )
     vis = lm_arr[:, 3].astype(np.float32)
     return np.concatenate([xy.flatten(), angles, dists, vis], axis=0)

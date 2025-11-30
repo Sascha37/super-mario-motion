@@ -1,5 +1,4 @@
-import sys, os
-from pathlib import Path
+import os
 from typing import Iterable, List
 
 from PIL import Image, ImageDraw
@@ -77,8 +76,10 @@ def pose_to_buttons(pose: str) -> List[str]:
             return []
 
 
-def draw_highlight_overlay(base_size: tuple[int, int],
-                           pressed: Iterable[str]) -> Image.Image:
+def draw_highlight_overlay(
+        base_size: tuple[int, int],
+        pressed: Iterable[str]
+        ) -> Image.Image:
     """Create an RGBA overlay that highlights pressed buttons.
 
     Args:
@@ -112,22 +113,25 @@ def draw_highlight_overlay(base_size: tuple[int, int],
     return overlay
 
 
-def create_gamepad_image(pose: str, send_active: bool = True,
-                         base_image: Image.Image | None = None) -> Image.Image:
+def create_gamepad_image(
+        pose: str, send_active: bool = True,
+        base_image_: Image.Image | None = None
+        ) -> Image.Image:
     """Create a gamepad image with highlighted buttons for a given pose.
 
     Args:
         pose: Pose label that will be mapped to button presses.
         send_active: If False, no buttons are highlighted even if the pose
             would trigger them.
-        base_image: Optional base image to draw on. If None, the default
+        base_image_: Optional base image to draw on. If None, the default
             gamepad image from disk is used.
 
     Returns:
         Image.Image: Final RGB image of the gamepad with highlights.
     """
-    base = (base_image.convert(
-        "RGBA") if base_image is not None else get_base_image())
+    base = (base_image_.convert(
+        "RGBA"
+        ) if base_image_ is not None else get_base_image())
     img = base.copy()
 
     if send_active:

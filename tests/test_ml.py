@@ -1,6 +1,7 @@
-import numpy as np
 import csv
 from pathlib import Path
+
+import numpy as np
 import pytest
 
 from super_mario_motion.collect import extract_features
@@ -33,7 +34,9 @@ def test_training_csv_integrity():
             reader = csv.reader(f)
             for row in reader:
                 # Row length check
-                assert len(row) == 110, f"Invalid row length in {file}: {len(row)}"
+                assert len(
+                    row
+                    ) == 110, f"Invalid row length in {file}: {len(row)}"
 
                 # Label check
                 label = row[0]
@@ -43,7 +46,9 @@ def test_training_csv_integrity():
                 features = np.array(row[1:], dtype=np.float32)
 
                 # All values are finite
-                assert np.all(np.isfinite(features)), f"Non-finite values in {file}"
+                assert np.all(
+                    np.isfinite(features)
+                    ), f"Non-finite values in {file}"
 
                 # Features are numeric
                 assert features.dtype == np.float32

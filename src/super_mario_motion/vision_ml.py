@@ -3,6 +3,7 @@ import time
 import os
 from collections import deque
 from pathlib import Path
+from pickle import UnpicklingError
 
 import numpy as np
 from joblib import load
@@ -19,26 +20,27 @@ _current_pose = "standing"
 _exit = False
 _thread = None
 _model = None
+model_path = None
 
 
 def init():
     """Load the ML model and start the passive worker thread."""
-    global _thread, _exit, _model
+    global _thread, _exit, _model, model_path
     _exit = False
 
     # Try to load external model
     try:
-        model_path =Path(
+        model_path = Path(
             state_manager.get_data_folder_path()
             ) / "pose_model.joblib"
         _model = load(model_path)
         print(f"[vision_ml] external model loaded ({model_path})")
-    except Exception as e:
+    except (FileNotFoundError, OSError, EOFError, UnpicklingError):
         print(f"[vision_ml] could not load external model at: {model_path}")
         # Try to load internal fallback model
         try:
             model_path = ph.resource_path(
-                os.path.join("data","pose_model.joblib"))
+                os.path.join("data", "pose_model.joblib"))
             _model = load(model_path)
             print(f"[vision_ml] fallback model loaded ({model_path})")
         except Exception as e:
@@ -53,7 +55,7 @@ def _worker():
     """Continuously classify full-body poses from landmark data.
 
     Steps:
-      * Read latest landmarks from StateManager.
+      * Read the latest landmarks from StateManager.
       * Extract PCA-scaled feature vector.
       * Predict pose with loaded SVM model.
       * Apply majority vote smoothing over recent predictions.
