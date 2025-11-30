@@ -1,22 +1,23 @@
 # -*- mode: python ; coding: utf-8 -*-
-import mediapipe as mp
 import os
-from PyInstaller.utils.hooks import collect_data_files
+
+import mediapipe as mp
 
 # Path to mediapipe module
 mediapipe_path = os.path.dirname(mp.__file__)
 cwd = os.getcwd()
 
 datas = [
-    #mediapipe modules
-    (os.path.join(mediapipe_path, 'modules'), os.path.join('mediapipe', 'modules')),
-    #images
-    (os.path.join(cwd,'src','super_mario_motion', 'images'), 'images'),
-    #help doc
-    (os.path.join(cwd,'docs','help'), 'help'),
-    #default fallback joblib
-    (os.path.join(cwd,'src','super_mario_motion', 'data'), 'data')
-]
+    # mediapipe modules
+    (os.path.join(mediapipe_path, 'modules'),
+     os.path.join('mediapipe', 'modules')),
+    # images
+    (os.path.join(cwd, 'src', 'super_mario_motion', 'images'), 'images'),
+    # help doc
+    (os.path.join(cwd, 'docs', 'help'), 'help'),
+    # default fallback joblib
+    (os.path.join(cwd, 'src', 'super_mario_motion', 'data'), 'data')
+    ]
 
 hiddenimports = [
     'PIL._tkinter_finder',
@@ -27,7 +28,7 @@ hiddenimports = [
     "sklearn.utils",
     "sklearn.utils._joblib",
     "sklearn.base"
-]
+    ]
 
 a = Analysis(
     ['main.py'],
@@ -41,7 +42,7 @@ a = Analysis(
     excludes=[],
     noarchive=False,
     optimize=0,
-)
+    )
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=None)
 
@@ -64,4 +65,4 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-)
+    )

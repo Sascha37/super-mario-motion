@@ -238,7 +238,8 @@ def cam_loop():
                 lm_string = ""
                 for x in range(33):
                     lm_string += str(x) + str(
-                        landmark_coords(frame, lm[x])) + " "
+                        landmark_coords(frame, lm[x])
+                        ) + " "
                     if (x + 1) % 4 == 0:
                         lm_string += "\n"
                 state_manager.set_landmark_string(lm_string)

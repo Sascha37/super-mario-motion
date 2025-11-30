@@ -1,9 +1,11 @@
-import cv2 as cv
 import sys
 
-from super_mario_motion import gui, input, vision, vision_ml, gamepad_visualiser
-from super_mario_motion import user_data
+import cv2 as cv
+
+from super_mario_motion import gamepad_visualiser, gui, input, user_data, \
+    vision, vision_ml
 from super_mario_motion.state import StateManager
+
 
 def webcam_is_available():
     """Check if a webcam is available on index 0.
@@ -59,7 +61,7 @@ def update():
         current_pose_full_body
         if state_manager.get_current_mode() == "Full-body"
         else current_pose
-    )
+        )
     send_active = state_manager.get_send_permission()
     gamepad_img = gamepad_visualiser.create_gamepad_image(
         pose_for_gamepad, send_active=send_active
