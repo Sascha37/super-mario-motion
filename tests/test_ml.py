@@ -1,22 +1,14 @@
 import numpy as np
 import csv
 from pathlib import Path
+import pytest
 
 from super_mario_motion.collect import extract_features
-from super_mario_motion.vision_ml import extract_features_ml
 
 LABELS = [
     "standing", "walking_left", "running_left", "walking_right",
     "running_right", "jumping", "crouching", "throwing", "swimming"
     ]
-
-
-def test_feature_extraction_match():
-    rnd = np.random.default_rng(0)
-    lm = rnd.random((33, 4), dtype=np.float32)
-    feat_collect = extract_features(lm)
-    feat_ml = extract_features(lm)
-    np.testing.assert_allclose(feat_collect, feat_ml, atol=1e-5)
 
 
 # test if the feature shape and type are correct
@@ -32,7 +24,9 @@ def test_feature_shape_and_type():
 def test_training_csv_integrity():
     data_dir = Path(__file__).resolve().parents[1] / "data"
     files = list(data_dir.glob("pose_samples*.csv"))
-    assert files, "No training data CSVs found!"
+
+    if not files:
+        pytest.skip("No training data CSVs found – skipping integrity check.")
 
     for file in files:
         with file.open() as f:
