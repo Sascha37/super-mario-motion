@@ -13,7 +13,7 @@ def init():
     # Get path to the data folder relative to os
     def get_data_path(platform):
         match platform:
-            case "win32":
+            case "windows":
                 return os.path.join(os.getenv("APPDATA"), "SuperMarioMotion")
             case "darwin":
                 return os.path.expanduser("~/Library/Application Support/SuperMarioMotion")
