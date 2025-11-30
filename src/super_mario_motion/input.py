@@ -2,6 +2,7 @@ import sys
 import threading
 import time
 from pathlib import Path
+from typing import Dict, List, Set
 
 from .state import StateManager
 
@@ -18,15 +19,59 @@ previous_send_permission = False
 last_pose = "standing"
 pose = "standing"
 
-currently_held_keys = []
+currently_held_keys: Set[str] = set()
 last_orientation = "right"
 
 state_manager = StateManager()
 
+_exit = False
+_thread = None
+
+# abstract buttons
+BUTTON_LEFT = "LEFT"
+BUTTON_RIGHT = "RIGHT"
+BUTTON_JUMP = "JUMP"
+BUTTON_DOWN = "DOWN"
+BUTTON_RUN = "RUN"
+BUTTON_ACTION = "ACTION"
+
+
+# game specific mapping
+GAME_KEY_BINDINGS: Dict[str, str] = {
+    BUTTON_LEFT: "left",
+    BUTTON_RIGHT: "right",
+    BUTTON_JUMP: "x",
+    BUTTON_DOWN: "down",
+    BUTTON_RUN: "y",
+    BUTTON_ACTION: "y",
+    }
+
+# pose to hold buttons mapping
+POSE_HOLD_BUTTONS: Dict[str, List[str]] = {
+    "standing": [],
+    "running_right": [BUTTON_RIGHT, BUTTON_RUN],
+    "running_left": [BUTTON_LEFT, BUTTON_RUN],
+    "walking_right": [BUTTON_RIGHT],
+    "walking_left": [BUTTON_LEFT],
+    "crouching": [BUTTON_DOWN],
+    }
+
+# pose to momentary press button mapping
+POSE_PRESS_BUTTONS: Dict[str, List[str]] = {
+    "throwing": [BUTTON_ACTION],
+    "swimming": [BUTTON_JUMP],
+    }
+
+
+def buttons_to_keys(buttons: List[str]) -> List[str]:
+    return [GAME_KEY_BINDINGS[i] for i in buttons if i in GAME_KEY_BINDINGS]
+
 
 def init():
-    thread = threading.Thread(target=input_loop, daemon=True)
-    thread.start()
+    global _thread, _exit
+    _exit = False
+    _thread = threading.Thread(target=input_loop, daemon=True)
+    _thread.start()
 
 
 def input_loop():
