@@ -19,9 +19,8 @@ test: venv
 	PYTHONPATH=src $(PYTHON) -m pytest
 
 doc: venv
-	. venv/bin/activate && \
-	sphinx-apidoc -f -o docs/api src/super_mario_motion && \
-	sphinx-build -b html docs docs/_build/html
+	$(PYTHON) -m sphinx.ext.apidoc -f -o docs/api src/super_mario_motion
+	$(PYTHON) -m sphinx -b html docs docs/_build/html
 
 # Builds project into a single binary
 pyinstaller: venv
