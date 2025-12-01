@@ -1,6 +1,9 @@
 import subprocess
 from pathlib import Path
 from sys import platform
+import webbrowser
+
+from .state import StateManager
 
 exe, core = None, None
 
@@ -8,11 +11,11 @@ module_log_prefix = "[Launcher]"
 
 config_retroarch_path = (
     "/mnt/files/SteamLibrary/steamapps/common/RetroArch/"
-    )
+)
 
 config_rom_path = (
     f"/mnt/files/roms/nes/Super Mario Bros. (World).nes"
-    )
+)
 
 retroarch_path = Path(config_retroarch_path)
 rom_path = Path(config_rom_path)
@@ -34,6 +37,7 @@ def validate_path(path):
 
 validate_path(rom_path)
 validate_path(retroarch_path)
+
 
 def get_command(platform_):
     global exe, core
@@ -61,6 +65,11 @@ def get_command(platform_):
 
 
 def launch_game():
+    scheme = StateManager.get_control_scheme()
+    if scheme == "supermarioplay (Web)":
+        webbrowser.open("https://supermarioplay.com")
+        return
+
     if not all_paths_valid:
         print(
             f"{module_log_prefix} Could not start the game. Invalid paths "

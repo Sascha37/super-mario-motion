@@ -20,7 +20,7 @@ array = None
 window = None
 frame_bottom_left, frame_bottom_right = None, None
 label_webcam = None
-selected_preview, selected_mode = None, None
+selected_preview, selected_mode, selected_control_scheme = None, None, None
 allow_debug_info, send_keystrokes, checkbox_toggle_inputs = None, None, None
 (label_virtual_gamepad_visualizer, label_pose_visualizer, label_current_pose,
  label_debug_landmarks) = None, None, None, None
@@ -85,7 +85,7 @@ def init():
     global window
     global frame_bottom_left, frame_bottom_right
     global label_webcam
-    global selected_preview, selected_mode
+    global selected_preview, selected_mode, selected_control_scheme
     global allow_debug_info, send_keystrokes, checkbox_toggle_inputs
     global label_virtual_gamepad_visualizer, label_pose_visualizer, \
         label_current_pose, \
@@ -176,12 +176,6 @@ def init():
         column=0,
         sticky="nsew")
 
-    # This button will be disabled if the paths
-    # defined in game_launcher are invalid
-    if not game_launcher.all_paths_valid:
-        button_launch_game.state(["disabled"])
-
-
     # Button "Help"
     button_help = ttk.Button(
         frame_bottom_left,
@@ -259,6 +253,13 @@ def init():
     def clear_combobox_selection(event):
         event.widget.selection_clear()
 
+    def update_launch_button_state():
+        scheme = selected_control_scheme.get()
+        if scheme == "Original (RetroArch)" and not game_launcher.all_paths_valid:
+            button_launch_game.state(["disabled"])
+        else:
+            button_launch_game.state(["!disabled"])
+
     # Preview Combobox
     global selected_preview
     selected_preview = tk.StringVar()
@@ -299,6 +300,32 @@ def init():
     option_menu_mode.current(0)
     option_menu_mode.grid(row=3, column=1)
 
+    # Control Scheme Label
+    global selected_control_scheme
+    label_control_scheme = tk.Label(frame_bottom_left, bg=color_dark_widget,
+                                    fg=color_white, text="Game:")
+    label_control_scheme.grid(row=4, column=0)
+
+    # Control Scheme Combobox
+    selected_control_scheme = tk.StringVar()
+    option_menu_control_scheme = ttk.Combobox(
+        frame_bottom_left,
+        textvariable=selected_control_scheme,
+        state="readonly",
+        style="Custom.TCombobox"
+        )
+
+    def on_control_scheme_change(event):
+        clear_combobox_selection(event)
+        update_launch_button_state()
+
+    option_menu_control_scheme.bind("<<ComboboxSelected>>", on_control_scheme_change)
+    option_menu_control_scheme['values'] = ["Original (RetroArch)", "supermarioplay (Web)", "Custom"]
+    option_menu_control_scheme.current(0)
+    option_menu_control_scheme.grid(row=4, column=1)
+
+    update_launch_button_state()
+
     # Debug Info Checkbox
     global allow_debug_info
     allow_debug_info = tk.IntVar(value=0)
@@ -308,7 +335,7 @@ def init():
                                          highlightthickness=0, bd=0,
                                          variable=allow_debug_info, width=20,
                                          height=2)
-    checkbox_debug_info.grid(row=4,
+    checkbox_debug_info.grid(row=5,
                              column=0,
                              columnspan=2,
                              sticky="ew")
@@ -324,7 +351,7 @@ def init():
                                             highlightthickness=0,
                                             bd=0, variable=send_keystrokes,
                                             width=20, height=2)
-    checkbox_toggle_inputs.grid(row=5,
+    checkbox_toggle_inputs.grid(row=6,
                                 column=0,
                                 columnspan=2,
                                 sticky="ew")

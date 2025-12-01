@@ -12,6 +12,8 @@ class StateManager:
     gui_checkbox_send_permission = False
 
     gui_current_mode = "Simple"
+    gui_control_scheme = "Original (RetroArch)"
+    custom_key_mapping = {}
 
     # Getter
     @classmethod
@@ -46,6 +48,14 @@ class StateManager:
     def get_current_mode(cls):
         return cls.gui_current_mode
 
+    @classmethod
+    def get_control_scheme(cls):
+        return cls.gui_control_scheme
+
+    @classmethod
+    def get_custom_key_mapping(cls):
+        return cls.custom_key_mapping
+
     # Setter
     @classmethod
     def set_pose(cls, new_pose):
@@ -73,3 +83,11 @@ class StateManager:
     @classmethod
     def set_current_mode(cls, new_mode):
         cls.gui_current_mode = new_mode
+
+    @classmethod
+    def set_control_scheme(cls, new_scheme):
+        cls.gui_control_scheme = new_scheme
+
+    @classmethod
+    def set_custom_key_mapping(cls, new_mapping):
+        cls.custom_key_mapping = new_mapping
