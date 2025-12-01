@@ -1,11 +1,8 @@
+import json
 import subprocess
 import webbrowser
-import json
-import os
 from pathlib import Path
 from sys import platform
-
-from fontTools.varLib.iup import iup_delta
 
 from super_mario_motion.state import StateManager
 
@@ -16,17 +13,17 @@ module_log_prefix = "[Launcher]"
 config_retroarch_path = (
     json.loads(Path("config.json").read_text())[
         "emu-path"]
-    )
+)
 
 config_rom_path = (
     json.loads(Path("config.json").read_text())[
         "rom-path"]
-    )
+)
 
 config_custom_path = (
     json.loads(Path("config.json").read_text())[
         "custom-game-path"]
-    )
+)
 
 retroarch_path = Path(config_retroarch_path)
 rom_path = Path(config_rom_path)
@@ -136,4 +133,3 @@ def launch_game():
             subprocess.run(custom_path, check=True)
         except subprocess.CalledProcessError:
             print(f"{module_log_prefix} Failed to open the custom game.")
-
