@@ -1,4 +1,7 @@
 {
+  "emu-path": "",
+  "rom-path": "",
+  "custom-game-path": "",
   "custom_key_mapping": {
     "jump": "space",
     "run_throw": "shift",

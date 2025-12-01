@@ -1,7 +1,9 @@
 import subprocess
+import webbrowser
 from pathlib import Path
 from sys import platform
-import webbrowser
+
+from fontTools.varLib.iup import iup_delta
 
 from super_mario_motion.state import StateManager
 
@@ -10,15 +12,23 @@ exe, core = None, None
 module_log_prefix = "[Launcher]"
 
 config_retroarch_path = (
-    "/mnt/files/SteamLibrary/steamapps/common/RetroArch/"
-)
+    json.loads(os.path.join("..", "..", "config.json").read_text())[
+        "emu-path"]
+    )
 
 config_rom_path = (
-    r"/mnt/files/roms/nes/Super Mario Bros. (World).nes"
+    json.loads(os.path.join("..", "..", "config.json").read_text())[
+        "rom-path"]
+    )
+
+config_custom_path = (
+    json.loads(os.path.join("..", "..", "config.json").read_text())[
+        "custom-game-path"]
     )
 
 retroarch_path = Path(config_retroarch_path)
 rom_path = Path(config_rom_path)
+custom_path = Path(config_custom_path)
 
 all_paths_valid = True
 
@@ -99,19 +109,27 @@ def launch_game():
     if scheme == "supermarioplay (Web)":
         webbrowser.open("https://supermarioplay.com")
         return
-      
+
     if not all_paths_valid:
         print(
             f"{module_log_prefix} Could not start the game. Invalid paths "
             f"set. Please edit the config."
             )
         return
-    try:
-        subprocess.run(
-            get_command(platform), cwd=str(retroarch_path),
-            check=True
-            )
-    except subprocess.CalledProcessError:
-        print(f"{module_log_prefix} Failed to open the game.")
-    except FileNotFoundError as e:
-        print(f"{module_log_prefix} Could not find launchable file: {e}")
+    if scheme == "Original (RetroArch)":
+        try:
+            subprocess.run(
+                get_command(platform), cwd=str(retroarch_path),
+                check=True
+                )
+        except subprocess.CalledProcessError:
+            print(f"{module_log_prefix} Failed to open the game.")
+        except FileNotFoundError as e:
+            print(f"{module_log_prefix} Could not find launchable file: {e}")
+
+    if scheme == "Custom (RetroArch)":
+        try:
+            subprocess.run(custom_path, check=True)
+        except subprocess.CalledProcessError:
+            print(f"{module_log_prefix} Failed to open the custom game.")
+
