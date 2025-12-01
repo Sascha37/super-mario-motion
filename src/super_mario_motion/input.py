@@ -148,10 +148,9 @@ def press_designated_input(pose_):
         case "throwing":
             pyautogui.keyDown(run_throw)
             pyautogui.keyUp(run_throw)
-
         case "swimming":
             pyautogui.keyDown(last_orientation)
-            pyautogui.keyDown(last_orientation)
+            pyautogui.keyDown(jump)
             time.sleep(0.05)
             pyautogui.keyUp(last_orientation)
             pyautogui.keyUp(jump)
