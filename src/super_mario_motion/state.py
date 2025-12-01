@@ -64,8 +64,20 @@ class StateManager:
         return cls.gui_current_mode
 
     @classmethod
+    def get_pose_landmarks(cls):
+        return cls.pose_landmarks
+
+    @classmethod
     def get_control_scheme(cls):
         return cls.gui_control_scheme
+
+    @classmethod
+    def get_standalone(cls):
+        return cls.standalone
+
+    @classmethod
+    def get_data_folder_path(cls):
+        return cls.data_folder_path
 
     @classmethod
     def get_custom_key_mapping(cls):
@@ -102,8 +114,20 @@ class StateManager:
         cls.gui_current_mode = new_mode
 
     @classmethod
+    def set_pose_landmarks(cls, new_landmarks):
+        cls.pose_landmarks = new_landmarks
+
+    @classmethod
+    def set_standalone(cls, new_standalone):
+        cls.standalone = new_standalone
+
+    @classmethod
     def set_control_scheme(cls, new_scheme):
         cls.gui_control_scheme = new_scheme
+
+    @classmethod
+    def set_data_folder_path(cls, new_data_folder_path):
+        cls.data_folder_path = new_data_folder_path
 
     @classmethod
     def set_custom_key_mapping(cls, new_mapping):
