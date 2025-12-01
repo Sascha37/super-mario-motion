@@ -67,3 +67,10 @@ exe = EXE(
     entitlements_file=None,
     icon=os.path.join(cwd, 'src', 'super_mario_motion', 'images', 'icon.png'),
     )
+
+app = BUNDLE(
+    exe,
+    name='SuperMarioMotion.app',
+    icon=os.path.join(cwd, 'src', 'super_mario_motion', 'images', 'icon.png'),
+    bundle_identifier=None,
+    )
