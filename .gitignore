@@ -9,3 +9,7 @@ data/pose_model.joblib
 # sphinx folders
 docs/_build/
 docs/api/
+
+.idea
+build/
+dist/
