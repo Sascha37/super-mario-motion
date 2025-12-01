@@ -3,10 +3,6 @@
 PYTHON = ./venv/bin/python3
 PIP = ./venv/bin/pip
 
-UNAME_S := $(shell uname -s)
-
-ICON = src/super_mario_motion/images/icon.png
-
 # Create virtual environment and install dependencies
 venv: requirements.txt
 	python3.12 -m venv venv
