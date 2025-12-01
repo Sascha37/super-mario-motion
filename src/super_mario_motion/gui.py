@@ -52,6 +52,11 @@ path_image_pose_default = ph.resource_path(
     )
 path_image_gamepad = ph.resource_path(os.path.join("images", "gamepad.png"))
 
+# App Icons per platform
+path_icon_windows = ph.resource_path(os.path.join("images", "icon.ico"))
+path_icon_mac = ph.resource_path(os.path.join("images", "icon.icns"))
+path_icon_linux = ph.resource_path(os.path.join("images", "icon.png"))
+
 # Paddings
 label_webcam_top_padding = 20
 edge_padding_default = 20
@@ -116,6 +121,26 @@ def init():
 
     # always open the gui in the center of the screen
     system = platform.system()
+
+    # Set application icon depending on platform
+    try:
+        if system == "Windows":
+            # Windows uses .ico directly
+            window.iconbitmap(path_icon_windows)
+        elif system == "Darwin":
+            # macOS: use .icns via iconphoto
+            icon_img = ImageTk.PhotoImage(Image.open(path_icon_mac))
+            window.iconphoto(True, icon_img)
+            # keep a reference to avoid garbage collection
+            window._icon_img = icon_img
+        else:
+            # Linux / other: prefer PNG
+            icon_img = ImageTk.PhotoImage(Image.open(path_icon_linux))
+            window.iconphoto(True, icon_img)
+            window._icon_img = icon_img
+    except Exception as e:
+        # Fail gracefully if icon cannot be loaded (e.g. file missing)
+        print(f"Icon load warning: {e}")
 
     if system in ("Windows", "Darwin"):  # calculation for Windows and macOS
         window.withdraw()

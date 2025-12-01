@@ -1,5 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
+from PyInstaller.utils.hooks import collect_all
 
 import mediapipe as mp
 
@@ -26,14 +27,19 @@ hiddenimports = [
     "sklearn.preprocessing",
     "sklearn.metrics",
     "sklearn.utils",
-    "sklearn.utils._joblib",
     "sklearn.base"
     ]
+
+numpy_datas, numpy_binaries, numpy_hiddenimports = collect_all("numpy")
+
+datas += numpy_datas
+hiddenimports += numpy_hiddenimports
+binaries = numpy_binaries
 
 a = Analysis(
     ['main.py'],
     pathex=[],
-    binaries=[],
+    binaries=binaries,
     datas=datas,
     hiddenimports=hiddenimports,
     hookspath=[],
@@ -52,17 +58,18 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='supermariomotion',
+    name='SuperMarioMotion',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=os.path.join(cwd, 'src', 'super_mario_motion', 'images', 'icon.png'),
     )
