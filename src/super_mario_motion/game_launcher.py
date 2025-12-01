@@ -1,48 +1,62 @@
+import json
 import subprocess
+import webbrowser
 from pathlib import Path
 from sys import platform
+
+from super_mario_motion.state import StateManager
 
 exe, core = None, None
 
 module_log_prefix = "[Launcher]"
 
 config_retroarch_path = (
-    "/mnt/files/SteamLibrary/steamapps/common/RetroArch/"
-    )
+    json.loads(Path("config.json").read_text())[
+        "emu-path"]
+)
 
 config_rom_path = (
-    r"/mnt/files/roms/nes/Super Mario Bros. (World).nes"
-    )
+    json.loads(Path("config.json").read_text())[
+        "rom-path"]
+)
+
+config_custom_path = (
+    json.loads(Path("config.json").read_text())[
+        "custom-game-path"]
+)
 
 retroarch_path = Path(config_retroarch_path)
 rom_path = Path(config_rom_path)
+custom_path = Path(config_custom_path)
 
-all_paths_valid = True
+retro_paths_valid = True
+custom_path_valid = True
 
 
 def validate_path(path):
     """Validate that a given path exists and update the global flag.
 
-    Prints an info message and sets `all_paths_valid = False` if the
+    Prints an info message and sets `retro_paths_valid = False` if the
     path does not exist.
 
     Args:
         path (Path): File or directory path to validate.
     """
-    global all_paths_valid
+    global retro_paths_valid
 
     if not path.exists():
         print(
             f"{module_log_prefix} {path}, Path/File does not exist, please "
             f"edit the config."
             )
-        all_paths_valid = False
+        return False
     else:
         print(f"{module_log_prefix} {path}, Path/File found.")
+        return True
 
 
-validate_path(rom_path)
-validate_path(retroarch_path)
+retro_paths_valid = validate_path(retroarch_path) and validate_path(rom_path)
+custom_path_valid = validate_path(custom_path)
 
 
 def get_command(platform_):
@@ -92,18 +106,30 @@ def launch_game():
     Uses `get_command` with the current platform and runs RetroArch
     via `subprocess.run`. Prints error messages if launch fails.
     """
-    if not all_paths_valid:
+    scheme = StateManager.get_control_scheme()
+    if scheme == "supermarioplay (Web)":
+        webbrowser.open("https://supermarioplay.com")
+        return
+
+    if not retro_paths_valid and not custom_path_valid:
         print(
             f"{module_log_prefix} Could not start the game. Invalid paths "
             f"set. Please edit the config."
             )
         return
-    try:
-        subprocess.run(
-            get_command(platform), cwd=str(retroarch_path),
-            check=True
-            )
-    except subprocess.CalledProcessError:
-        print(f"{module_log_prefix} Failed to open the game.")
-    except FileNotFoundError as e:
-        print(f"{module_log_prefix} Could not find launchable file: {e}")
+    if scheme == "Original (RetroArch)":
+        try:
+            subprocess.run(
+                get_command(platform), cwd=str(retroarch_path),
+                check=True
+                )
+        except subprocess.CalledProcessError:
+            print(f"{module_log_prefix} Failed to open the game.")
+        except FileNotFoundError as e:
+            print(f"{module_log_prefix} Could not find launchable file: {e}")
+
+    if scheme == "Custom":
+        try:
+            subprocess.run(custom_path, check=True)
+        except subprocess.CalledProcessError:
+            print(f"{module_log_prefix} Failed to open the custom game.")

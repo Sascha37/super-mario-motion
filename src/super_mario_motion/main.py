@@ -36,6 +36,7 @@ def update():
 
     # Write GUI info into state
     state_manager.set_current_mode(gui.selected_mode.get())
+    state_manager.set_control_scheme(gui.selected_control_scheme.get())
     state_manager.set_send_permission(gui.send_keystrokes.get())
 
     # Retrieve predicted poses

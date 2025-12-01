@@ -21,6 +21,8 @@ class StateManager:
     gui_checkbox_send_permission = False
 
     gui_current_mode = "Simple"
+    gui_control_scheme = "Original (RetroArch)"
+    custom_key_mapping = {}
 
     pose_landmarks = None
 
@@ -66,12 +68,20 @@ class StateManager:
         return cls.pose_landmarks
 
     @classmethod
+    def get_control_scheme(cls):
+        return cls.gui_control_scheme
+
+    @classmethod
     def get_standalone(cls):
         return cls.standalone
 
     @classmethod
     def get_data_folder_path(cls):
         return cls.data_folder_path
+
+    @classmethod
+    def get_custom_key_mapping(cls):
+        return cls.custom_key_mapping
 
     # Setter
     @classmethod
@@ -112,5 +122,13 @@ class StateManager:
         cls.standalone = new_standalone
 
     @classmethod
+    def set_control_scheme(cls, new_scheme):
+        cls.gui_control_scheme = new_scheme
+
+    @classmethod
     def set_data_folder_path(cls, new_data_folder_path):
         cls.data_folder_path = new_data_folder_path
+
+    @classmethod
+    def set_custom_key_mapping(cls, new_mapping):
+        cls.custom_key_mapping = new_mapping
