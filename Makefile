@@ -24,4 +24,4 @@ test: venv
 
 # Builds project into a single binary with platform-specific icon
 pyinstaller: venv
-	PYTHONPATH=src $(PYTHON) -m PyInstaller --name SuperMarioMotion --windowed --icon=$(ICON) src/super_mario_motion/main.py
+	$(PYTHON) -m PyInstaller src/super_mario_motion/main.spec
