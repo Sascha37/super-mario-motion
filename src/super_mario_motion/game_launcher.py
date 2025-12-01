@@ -3,7 +3,7 @@ from pathlib import Path
 from sys import platform
 import webbrowser
 
-from .state import StateManager
+from super_mario_motion.state import StateManager
 
 exe, core = None, None
 

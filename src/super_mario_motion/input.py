@@ -2,7 +2,7 @@ import sys
 import threading
 import time
 from pathlib import Path
-from .state import StateManager
+from super_mario_motion.state import StateManager
 
 CONTROL_SCHEMES = {
     "Original (RetroArch)": {
