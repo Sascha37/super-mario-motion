@@ -3,6 +3,10 @@
 PYTHON = ./venv/bin/python3
 PIP = ./venv/bin/pip
 
+UNAME_S := $(shell uname -s)
+
+ICON = src/super_mario_motion/images/icon.png
+
 # Create virtual environment and install dependencies
 venv: requirements.txt
 	python3.12 -m venv venv
@@ -18,6 +22,6 @@ train: venv
 test: venv
 	PYTHONPATH=src $(PYTHON) -m pytest
 
-# Builds project into a single binary
+# Builds project into a single binary with platform-specific icon
 pyinstaller: venv
-	$(PYTHON) -m PyInstaller src/super_mario_motion/main.spec
+	PYTHONPATH=src $(PYTHON) -m PyInstaller --name SuperMarioMotion --windowed --icon=$(ICON) src/super_mario_motion/main.py
