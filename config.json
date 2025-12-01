@@ -1,7 +1,8 @@
 {
-  "emu-path": "",
-  "rom-path": "",
-  "custom-game-path": "",
+  "emu-path": "null",
+  "rom-path": "null",
+  "custom-game-path": "null",
+
   "custom_key_mapping": {
     "jump": "space",
     "run_throw": "shift",

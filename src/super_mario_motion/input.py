@@ -21,7 +21,7 @@ CONTROL_SCHEMES = {
         "right": "right",
         "down": "down",
         },
-    "Custom": json.loads(os.path.join("..", "..", "config.json").read_text())[
+    "Custom": json.loads(Path("config.json").read_text())[
         "custom_key_mapping"]
     }
 

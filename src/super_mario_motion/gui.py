@@ -289,8 +289,9 @@ def init():
 
     def update_launch_button_state():
         scheme = selected_control_scheme.get()
-        if (scheme == "Original (RetroArch)" or scheme == "Custom" and not
-        game_launcher.all_paths_valid):
+        if ((scheme == "Original (RetroArch)" and not
+                game_launcher.retro_paths_valid) or (
+                scheme == "Custom" and not game_launcher.custom_path_valid)):
             button_launch_game.state(["disabled"])
         else:
             button_launch_game.state(["!disabled"])
@@ -356,8 +357,10 @@ def init():
         clear_combobox_selection(event)
         update_launch_button_state()
 
-    option_menu_control_scheme.bind("<<ComboboxSelected>>", on_control_scheme_change)
-    option_menu_control_scheme['values'] = ["Original (RetroArch)", "supermarioplay (Web)",
+    option_menu_control_scheme.bind("<<ComboboxSelected>>",
+                                    on_control_scheme_change)
+    option_menu_control_scheme['values'] = ["Original (RetroArch)",
+                                            "supermarioplay (Web)",
                                             "Custom"]
     option_menu_control_scheme.current(0)
     option_menu_control_scheme.grid(row=4, column=1)
