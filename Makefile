@@ -20,4 +20,4 @@ test: venv
 
 # Builds project into a single binary
 pyinstaller: venv
-	$(PYTHON) -m PyInstaller src/super_mario_motion/main.spec
+	PYTHONPATH=src $(PYTHON) -m PyInstaller src/super_mario_motion/main.spec
