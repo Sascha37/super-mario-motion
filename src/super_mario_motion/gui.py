@@ -1,18 +1,21 @@
 import getpass
+import os
 import platform
 import random
 import sys
 import threading
 import tkinter as tk
 import webbrowser
-import cv2
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk
 
+import cv2
 from PIL import Image, ImageTk
 
-from . import collect, game_launcher, vision, vision_ml
+from super_mario_motion import collect, game_launcher, path_helper as ph, \
+    vision, vision_ml
+from super_mario_motion.state import StateManager
 
 pose = ""
 
@@ -41,10 +44,13 @@ color_white = '#FFFFFF'
 color_disabled_background = '#444444'
 color_disabled_text = '#888888'
 # Filepaths for images that are being used on init
-path_data_folder = Path(__file__).parent / "images"
-path_image_webcam_sample = path_data_folder / 'webcam_sample.jpg'
-path_image_pose_default = path_data_folder / 'unknown.png'
-path_image_gamepad = path_data_folder / 'gamepad.png'
+path_image_webcam_sample = ph.resource_path(
+    os.path.join("images", "webcam_sample.jpg")
+    )
+path_image_pose_default = ph.resource_path(
+    os.path.join("images", "unknown.png")
+    )
+path_image_gamepad = ph.resource_path(os.path.join("images", "gamepad.png"))
 
 # Paddings
 label_webcam_top_padding = 20
@@ -79,9 +85,17 @@ collecting = False
 collect_stop = False
 after_handles = []
 
+# StateManager
+state_manager = StateManager()
+
 
 # Function gets called once in main.py once the program starts
 def init():
+    """Initialize the main GUI window and all static widgets.
+
+    This sets up layout, styles, default images, and registers callbacks
+    for mode selection, buttons, and window close events.
+    """
     global window
     global frame_bottom_left, frame_bottom_right
     global label_webcam
@@ -126,16 +140,20 @@ def init():
         image_webcam_sample = ImageTk.PhotoImage(
             Image.open(path_image_webcam_sample).resize(
                 (webcam_image_width, webcam_image_height),
-                Image.LANCZOS)
+                Image.LANCZOS
+                )
             )
         image_pose = ImageTk.PhotoImage(
-            Image.open(path_image_pose_default).resize((100, 100),
-                                                       Image.LANCZOS)
+            Image.open(path_image_pose_default).resize(
+                (100, 100),
+                Image.LANCZOS
+                )
             )
         image_gamepad = ImageTk.PhotoImage(
             Image.open(path_image_gamepad).resize(
                 (gamepad_image_width, gamepad_image_height),
-                Image.LANCZOS)
+                Image.LANCZOS
+                )
             )
     except FileNotFoundError as e:
         print(f"Error: File not found: {e}")
@@ -157,11 +175,13 @@ def init():
     # Widgets on these rows expand evenly
     frame_bottom_left.columnconfigure(0, weight=1)
     frame_bottom_left.columnconfigure(1, weight=1)
-    frame_bottom_left.grid(row=1,
-                           column=0,
-                           padx=(horizontal_padding, 0),
-                           pady=frame_padding_y,
-                           sticky="nw")
+    frame_bottom_left.grid(
+        row=1,
+        column=0,
+        padx=(horizontal_padding, 0),
+        pady=frame_padding_y,
+        sticky="nw"
+        )
 
     # Button "Launch Game"
     button_launch_game = ttk.Button(
@@ -174,7 +194,8 @@ def init():
     button_launch_game.grid(
         row=0,
         column=0,
-        sticky="nsew")
+        sticky="nsew"
+        )
 
     # Button "Help"
     button_help = ttk.Button(
@@ -187,67 +208,80 @@ def init():
     button_help.grid(
         row=0,
         column=1,
-        sticky="nsew")
+        sticky="nsew"
+        )
 
     # Separator
-    separator = ttk.Separator(frame_bottom_left,
-                              orient=tk.HORIZONTAL,
-                              style="Custom.TSeparator")
+    separator = ttk.Separator(
+        frame_bottom_left,
+        orient=tk.HORIZONTAL,
+        style="Custom.TSeparator"
+        )
     separator.grid(
         row=1,
         column=0,
         columnspan=2,
         stick="ew",
-        pady=30)
+        pady=30
+        )
 
     # Text Label "Preview:"
     label_preview = tk.Label(
         frame_bottom_left,
         bg=color_dark_widget,
         fg=color_white,
-        text="Preview:")
+        text="Preview:"
+        )
     label_preview.grid(
         row=2,
-        column=0)
+        column=0
+        )
 
     # Custom ttk Style for Combobox
     style = ttk.Style()
     style.theme_use('alt')
-    style.configure("Custom.TCombobox",
-                    fieldbackground=color_dark_widget,
-                    background=color_dark_widget,
-                    foreground="white"
-                    )
-    style.map("Custom.TCombobox",
-              fieldbackground=[("readonly", color_dark_widget)],
-              foreground=[("readonly", "white")],
-              background=[("readonly", color_dark_widget)])
+    style.configure(
+        "Custom.TCombobox",
+        fieldbackground=color_dark_widget,
+        background=color_dark_widget,
+        foreground="white"
+        )
+    style.map(
+        "Custom.TCombobox",
+        fieldbackground=[("readonly", color_dark_widget)],
+        foreground=[("readonly", "white")],
+        background=[("readonly", color_dark_widget)]
+        )
 
     # Custom ttk Style for Buttons
-    style.configure("Custom.TButton",
-                    fieldbackground=color_dark_widget,
-                    background=color_dark_widget,
-                    foreground="white"
-                    )
-    style.map("Custom.TButton",
-              background=[
-                  ("active", "white"),
-                  ("pressed", "white"),
-                  ("disabled", color_disabled_background),
-                  ],
-              foreground=[
-                  ("active", "black"),
-                  ("pressed", "black"),
-                  ("disabled", color_disabled_text)
-                  ],
-              embossed=[
-                  ("disabled", 0)
-                  ]
-              )
+    style.configure(
+        "Custom.TButton",
+        fieldbackground=color_dark_widget,
+        background=color_dark_widget,
+        foreground="white"
+        )
+    style.map(
+        "Custom.TButton",
+        background=[
+            ("active", "white"),
+            ("pressed", "white"),
+            ("disabled", color_disabled_background),
+            ],
+        foreground=[
+            ("active", "black"),
+            ("pressed", "black"),
+            ("disabled", color_disabled_text)
+            ],
+        embossed=[
+            ("disabled", 0)
+            ]
+        )
 
     # Custom ttk Style for Separator
-    style.configure("Custom.TSeparator",
-                    background="black")
+    style.configure(
+        "Custom.TSeparator",
+        background="black"
+        )
 
     # This is needed to deselect the text inside of a ttk Combobox
     def clear_combobox_selection(event):
@@ -276,8 +310,10 @@ def init():
     option_menu_preview.grid(row=2, column=1)
 
     # "Mode:" Text Label
-    label_mode = tk.Label(frame_bottom_left, bg=color_dark_widget,
-                          fg=color_white, text="Mode:")
+    label_mode = tk.Label(
+        frame_bottom_left, bg=color_dark_widget,
+        fg=color_white, text="Mode:"
+        )
     label_mode.grid(row=3, column=0)
 
     # Mode Combobox
@@ -358,23 +394,29 @@ def init():
 
     # Frame bottom right
     frame_bottom_right = tk.Frame(window, bg=color_dark_widget)
-    frame_bottom_right.grid(row=1,
-                            column=1,
-                            padx=(0, horizontal_padding),
-                            pady=frame_padding_y,
-                            sticky="ne")
+    frame_bottom_right.grid(
+        row=1,
+        column=1,
+        padx=(0, horizontal_padding),
+        pady=frame_padding_y,
+        sticky="ne"
+        )
 
     # gamepad
     global label_virtual_gamepad_visualizer
-    label_virtual_gamepad_visualizer = tk.Label(frame_bottom_right,
-                                                image=image_gamepad, bd=0)
+    label_virtual_gamepad_visualizer = tk.Label(
+        frame_bottom_right,
+        image=image_gamepad, bd=0
+        )
     label_virtual_gamepad_visualizer.image = image_gamepad
     label_virtual_gamepad_visualizer.grid(row=0, column=0)
 
     # pose image
     global label_pose_visualizer
-    label_pose_visualizer = tk.Label(frame_bottom_right, image=image_pose,
-                                     bd=0)
+    label_pose_visualizer = tk.Label(
+        frame_bottom_right, image=image_pose,
+        bd=0
+        )
     label_pose_visualizer.image = image_pose
     label_pose_visualizer.grid(row=0, column=1)
 
@@ -390,16 +432,20 @@ def init():
 
     # debug text
     global label_debug_landmarks
-    label_debug_landmarks = tk.Label(frame_bottom_right, bg=color_dark_widget,
-                                     fg=color_white,
-                                     width=60, height=10, font=("Consolas", 6))
+    label_debug_landmarks = tk.Label(
+        frame_bottom_right, bg=color_dark_widget,
+        fg=color_white,
+        width=60, height=10, font=("Consolas", 6)
+        )
     label_debug_landmarks.grid(row=2, column=0, columnspan=2)
 
     # Text Label for the collection status, visible during collect mode
     global label_collect_status, button_collect_start
-    label_collect_status = tk.Label(window, bg=color_background,
-                                    fg=color_white,
-                                    font=("Consolas", 25))
+    label_collect_status = tk.Label(
+        window, bg=color_background,
+        fg=color_white,
+        font=("Consolas", 25)
+        )
     label_collect_status.grid(row=2, column=0, columnspan=2, pady=(20, 0))
     label_collect_status.grid_remove()
 
@@ -419,6 +465,11 @@ def init():
 # set_webcam_image and set_pose_image are supposed to be called in the
 # update-loop in main.py
 def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
+    """Update the webcam preview image according to the selected preview mode.
+
+    The input images are numpy arrays; this function mirrors the image for the
+    user, letterboxes it to the fixed preview size, and updates the label.
+    """
     global array
     match selected_preview.get():
         case "Webcam":
@@ -463,11 +514,15 @@ def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
 
 
 def set_gamepad_image(updated_gamepad_image):
+    """Update the virtual gamepad preview image using the logic of
+    gamepad_visualizer.py."""
     if updated_gamepad_image is None:
         return
     image = ImageTk.PhotoImage(
         updated_gamepad_image.resize(
-            (gamepad_image_width, gamepad_image_height), Image.LANCZOS))
+            (gamepad_image_width, gamepad_image_height), Image.LANCZOS
+            )
+        )
     label_virtual_gamepad_visualizer.config(image=image)
     label_virtual_gamepad_visualizer.image = image
 
@@ -478,6 +533,7 @@ def update_pose(new_pose):
 
 
 def update_pose_image():
+    """Update the pose image icon based on the current pose name."""
     valid_poses = [
         "standing", "jumping", "crouching", "throwing",
         "walking_right", "walking_left", "running_right", "running_left",
@@ -486,8 +542,11 @@ def update_pose_image():
     if pose in valid_poses:
         try:
             window.image_pose = ImageTk.PhotoImage(
-                Image.open(path_data_folder / (pose + '.png')).resize(
-                    (100, 100), Image.LANCZOS)
+                Image.open(
+                    ph.resource_path(os.path.join("images", pose + ".png"))
+                    ).resize(
+                    (100, 100), Image.LANCZOS
+                    )
                 )
         except FileNotFoundError:
             print("Error: File not found")
@@ -495,8 +554,10 @@ def update_pose_image():
     else:
         # Display question mark symbol if unknown pose is performed
         window.image_pose = ImageTk.PhotoImage(
-            Image.open(path_image_pose_default).resize((100, 100),
-                                                       Image.LANCZOS)
+            Image.open(path_image_pose_default).resize(
+                (100, 100),
+                Image.LANCZOS
+                )
             )
 
     label_pose_visualizer.config(image=window.image_pose)
@@ -509,10 +570,16 @@ def update_pose_text():
 
 def update_debug_landmarks(landmarks):
     label_debug_landmarks.config(
-        text=landmarks if allow_debug_info.get() else "")
+        text=landmarks if allow_debug_info.get() else ""
+        )
 
 
 def apply_mode(mode: str):
+    """Switch the UI between play modes and collect mode.
+
+    Args:
+        mode: One of "Simple", "Full-body", "Collect".
+    """
     global label_collect_status, button_collect_start
     global label_virtual_gamepad_visualizer, label_pose_visualizer, \
         label_current_pose
@@ -547,29 +614,22 @@ def apply_mode(mode: str):
         button_collect_start.grid_remove()
 
 
-# Collecting mode specific functions:
-def _schedule_after(ms, func, *args):
-    aid = window.after(ms, func, *args)
-    after_handles.append(aid)
-    return aid
-
-
-def _cancel_scheduled():
-    while after_handles:
-        aid = after_handles.pop()
-        try:
-            window.after_cancel(aid)
-        except Exception:
-            pass
-
-
 def _set_collect_button(starting: bool):
+    """Configure the collect button text and callback based on state.
+
+    Args:
+        starting: If True, button becomes a “Stop collecting” button.
+    """
     if starting:
-        button_collect_start.config(text="Stop collecting",
-                                    command=stop_collect_sequence)
+        button_collect_start.config(
+            text="Stop collecting",
+            command=stop_collect_sequence
+            )
     else:
-        button_collect_start.config(text="Start collecting",
-                                    command=start_collect_sequence)
+        button_collect_start.config(
+            text="Start collecting",
+            command=start_collect_sequence
+            )
 
 
 # Collecting mode-specific functions:
@@ -588,16 +648,8 @@ def _cancel_scheduled():
             pass
 
 
-def _set_collect_button(starting: bool):
-    if starting:
-        button_collect_start.config(text="Stop collecting",
-                                    command=stop_collect_sequence)
-    else:
-        button_collect_start.config(text="Start collecting",
-                                    command=start_collect_sequence)
-
-
 def start_collect_sequence():
+    """Start a full pose collection run with randomized pose order."""
     global collecting, collect_stop, current_run_csv, collection_order
     if collecting:
         return
@@ -607,12 +659,13 @@ def start_collect_sequence():
     # Randomize the order of collection steps for this run
     collection_order = random.sample(COLLECTION_STEPS, len(COLLECTION_STEPS))
 
-    runs_dir = Path(__file__).parent.parent.parent / "data"
-    runs_dir.mkdir(parents=True, exist_ok=True)
+    runs_dir = Path(state_manager.get_data_folder_path())
+
     user = getpass.getuser()
     current_run_csv = str(
         runs_dir / f"pose_samples_{user}_"
-                   f"{datetime.now().strftime('%d.%m.%Y_%H.%M')}.csv")
+                   f"{datetime.now().strftime('%d.%m.%Y_%H.%M')}.csv"
+        )
     label_collect_status.config(text="Starting Sequence…")
     _set_collect_button(starting=True)
     run_collect_step(0)
@@ -628,6 +681,11 @@ def stop_collect_sequence():
 
 
 def run_collect_step(index: int):
+    """Run a single step of the collection sequence.
+
+    Advances through COLLECTION_STEPS (or the randomized order) and
+    triggers countdown and recording for each pose.
+    """
     global collecting, collect_stop, collection_order
     if collect_stop:
         _set_collect_button(starting=False)
@@ -649,11 +707,16 @@ def run_collect_step(index: int):
 
 
 def show_collect_countdown(n: int, pose_name: str, seconds: float, index: int):
+    """Show a countdown before recording a specific pose.
+
+    When countdown reaches zero, starts recording for the given pose.
+    """
     if collect_stop:
         return
     if n == 0:
         label_collect_status.config(
-            text=f"Recording: {pose_name} ({int(seconds)}s)")
+            text=f"Recording: {pose_name} ({int(seconds)}s)"
+            )
         if not collect_stop:
             threading.Thread(
                 target=record_collect_pose,
@@ -664,8 +727,10 @@ def show_collect_countdown(n: int, pose_name: str, seconds: float, index: int):
         return
 
     label_collect_status.config(text=f"{pose_name} in {n} …")
-    _schedule_after(1000, show_collect_countdown, n - 1, pose_name, seconds,
-                    index)
+    _schedule_after(
+        1000, show_collect_countdown, n - 1, pose_name, seconds,
+        index
+        )
 
 
 def show_recording_countdown(remaining: int, pose_name: str, index: int):
@@ -674,11 +739,18 @@ def show_recording_countdown(remaining: int, pose_name: str, index: int):
     if remaining <= 0:
         return
     label_collect_status.config(text=f"Recording: {pose_name} ({remaining}s)")
-    _schedule_after(1000, show_recording_countdown, remaining - 1, pose_name,
-                    index)
+    _schedule_after(
+        1000, show_recording_countdown, remaining - 1, pose_name,
+        index
+        )
 
 
 def record_collect_pose(pose_name: str, seconds: float, index: int):
+    """Record pose samples for the given duration and schedule next step.
+
+    This function runs in a worker thread and calls collect.main()
+    with appropriate CLI arguments.
+    """
     if collect_stop:
         return
     global current_run_csv
@@ -700,16 +772,27 @@ def open_browser(path):
     webbrowser.open_new_tab(path.as_uri())
 
 
-# gets called by the "Help"-Button, calls open_brower in a seperate thread,
+# gets called by the "Help"-Button, calls open_browser in a separate thread,
 # so that the main thread does not have to wait for the browser to start up
 # (~5 seconds)
 def open_help_menu():
+    if state_manager.get_standalone:
+        help_path = os.path.join("help", "help_page.pdf")
+    else:
+        help_path = os.path.join("..", "..", "docs", "help", "help_page.pdf")
+
     help_file_path = Path(
-        __file__).parent.parent.parent / "docs" / "help" / "help_page.pdf"
-    threading.Thread(target=open_browser, args=(help_file_path,),
-                     daemon=True).start()
+        ph.resource_path(
+            help_path
+            )
+        )
+    threading.Thread(
+        target=open_browser, args=(help_file_path,),
+        daemon=True
+        ).start()
 
 
+# os.path.join("images","webcam_sample.jpg")
 # gets called by the "Start Game"-Button
 def start_game_button_action():
     threading.Thread(target=game_launcher.launch_game, daemon=True).start()

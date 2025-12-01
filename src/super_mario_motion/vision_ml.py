@@ -1,100 +1,116 @@
 import threading
 import time
+import os
 from collections import deque
 from pathlib import Path
+from pickle import UnpicklingError
 
-import cv2 as cv
-import mediapipe as mp
 import numpy as np
 from joblib import load
 from sklearn.exceptions import NotFittedError
 
+from super_mario_motion.pose_features import extract_features
 # we get frames from vision.py
-from . import vision
-from .pose_features import extract_features
-from .state import StateManager
+from super_mario_motion.state import StateManager
+from super_mario_motion import path_helper as ph
 
 state_manager = StateManager()
 
 _current_pose = "standing"
-_raw_frame = None
-_skeleton_frame = None
 _exit = False
 _thread = None
 _model = None
-
-mpPose = mp.solutions.pose
-mpDrawing = mp.solutions.drawing_utils
+model_path = None
 
 
 def init():
-    global _thread, _exit, _model
+    """Load the ML model and start the passive worker thread."""
+    global _thread, _exit, _model, model_path
     _exit = False
-    # Path
-    model_path = (
-            Path(__file__).parent.parent.parent / "data" / "pose_model.joblib")
-    # load model
+
+    # Try to load external model
     try:
+        model_path = Path(
+            state_manager.get_data_folder_path()
+            ) / "pose_model.joblib"
         _model = load(model_path)
-        print(f"vision_ml: model loaded ({Path(model_path).name})")
-    except Exception as e:
-        _model = None
-        print("vision_ml: could not load model:", e)
+        print(f"[vision_ml] external model loaded ({model_path})")
+    except (FileNotFoundError, OSError, EOFError, UnpicklingError):
+        print(f"[vision_ml] could not load external model at: {model_path}")
+        # Try to load internal fallback model
+        try:
+            model_path = ph.resource_path(
+                os.path.join("data", "pose_model.joblib"))
+            _model = load(model_path)
+            print(f"[vision_ml] fallback model loaded ({model_path})")
+        except Exception as e:
+            _model = None
+            print("[vision_ml] could not load fallback model:", e)
 
     _thread = threading.Thread(target=_worker, daemon=True)
     _thread.start()
 
 
 def _worker():
-    global _current_pose, _raw_frame, _skeleton_frame, _exit
-    with mpPose.Pose() as pose:
-        print(Path(__file__).name + " initialized (passive)")
-        while not _exit:
+    """Continuously classify full-body poses from landmark data.
 
-            bgr = vision.rgb  # latest raw frame from vision
+    Steps:
+      * Read the latest landmarks from StateManager.
+      * Extract PCA-scaled feature vector.
+      * Predict pose with loaded SVM model.
+      * Apply majority vote smoothing over recent predictions.
+      * Store smoothed pose in StateManager.
 
-            if bgr is None:
-                time.sleep(0.01)
-                continue
+    Runs until `_exit` is set to True.
+    """
+    global _current_pose, _exit
 
-            _raw_frame = bgr
-            rgb = cv.cvtColor(bgr, cv.COLOR_BGR2RGB)
-            res = pose.process(rgb)
+    print(Path(__file__).name + " initialized (passive)")
 
-            if not res.pose_landmarks:
-                time.sleep(0.005)
-                continue
+    smooth = deque(maxlen=7)
 
-            # Skeleton-Overlay
-            skel = np.zeros_like(bgr)
-            mpDrawing.draw_landmarks(skel, res.pose_landmarks,
-                                     mpPose.POSE_CONNECTIONS)
-            _skeleton_frame = skel
+    while not _exit:
+        lm_arr = state_manager.get_pose_landmarks()
 
-            lm = res.pose_landmarks.landmark
-            lm_arr = np.array([[p.x, p.y, p.z, p.visibility] for p in lm],
-                              dtype=np.float32)
+        if lm_arr is None:
+            time.sleep(0.01)
+            continue
+
+        try:
             feat = extract_features(lm_arr)
+        except (ValueError, TypeError):
+            time.sleep(0.01)
+            continue
 
-            label = None
-            if _model is not None:
-                x = feat.reshape(1, -1)
-                try:
-                    label = _model.predict(x)[0]
-                except (ValueError, TypeError, NotFittedError):
-                    label = None
+        if feat is None:
+            time.sleep(0.01)
+            continue
 
-            if label is not None:
-                _smooth = deque(maxlen=7)
-                _smooth.append(label)
-                vals, counts = np.unique(list(_smooth), return_counts=True)
-                _current_pose = vals[np.argmax(counts)]
+        try:
+            x = feat.reshape(1, -1)
+        except ValueError:
+            time.sleep(0.01)
+            continue
 
-                state_manager.set_pose_full_body(_current_pose)
-            time.sleep(0.001)
+        label = None
+        if _model is not None:
+            try:
+                label = _model.predict(x)[0]
+            except (ValueError, TypeError, NotFittedError):
+                label = None
+
+        if label is not None:
+            smooth.append(label)
+            vals, counts = np.unique(list(smooth), return_counts=True)
+            _current_pose = vals[np.argmax(counts)]
+
+            state_manager.set_pose_full_body(_current_pose)
+
+        time.sleep(0.001)
 
 
 def stop():
+    """Stop the classifier worker thread."""
     global _exit, _thread
     _exit = True
     if _thread is not None:

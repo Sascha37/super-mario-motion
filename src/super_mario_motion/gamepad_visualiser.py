@@ -1,9 +1,11 @@
-from pathlib import Path
+import os
 from typing import Iterable, List
 
 from PIL import Image, ImageDraw
 
-GAMEPAD_PATH = Path(__file__).parent / "images" / "gamepad.png"
+from super_mario_motion import path_helper as ph
+
+GAMEPAD_PATH = ph.resource_path(os.path.join("images", "gamepad.png"))
 
 BUTTON_POSITIONS = {
     "DPAD_UP": (0.22, 0.28, 0.06),
@@ -23,6 +25,11 @@ last_orientation: str = "right"
 
 
 def get_base_image() -> Image.Image:
+    """Load and cache the base gamepad image.
+
+    Returns:
+        Image.Image: The base RGBA gamepad image.
+    """
     global base_image
     if base_image is None:
         base_image = Image.open(GAMEPAD_PATH).convert("RGBA")
@@ -30,6 +37,17 @@ def get_base_image() -> Image.Image:
 
 
 def pose_to_buttons(pose: str) -> List[str]:
+    """Map a pose label to a list of virtual gamepad buttons.
+
+    The function keeps track of the last left/right orientation to decide
+    in which direction to jump.
+
+    Args:
+        pose: Pose label (e.g. 'standing', 'running_right', 'jumping').
+
+    Returns:
+        list[str]: List of button names that should be considered pressed.
+    """
     global last_orientation
     match pose:
         case "standing":
@@ -51,12 +69,26 @@ def pose_to_buttons(pose: str) -> List[str]:
         case "throwing":
             return ["B"]
         case "jumping":
-            return ["A", "DPAD_RIGHT" if last_orientation == "right" else "DPAD_LEFT"]
+            return ["A",
+                    "DPAD_RIGHT" if last_orientation == "right" else
+                    "DPAD_LEFT"]
         case _:
             return []
 
 
-def draw_highlight_overlay(base_size: tuple[int, int], pressed: Iterable[str]) -> Image.Image:
+def draw_highlight_overlay(
+        base_size: tuple[int, int],
+        pressed: Iterable[str]
+        ) -> Image.Image:
+    """Create an RGBA overlay that highlights pressed buttons.
+
+    Args:
+        base_size: (width, height) of the target gamepad image.
+        pressed: Iterable of button names to highlight.
+
+    Returns:
+        Image.Image: Transparent overlay image with colored highlights.
+    """
     w, h = base_size
     overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
@@ -81,9 +113,25 @@ def draw_highlight_overlay(base_size: tuple[int, int], pressed: Iterable[str]) -
     return overlay
 
 
-def create_gamepad_image(pose: str, send_active: bool = True,
-                         base_image: Image.Image | None = None) -> Image.Image:
-    base = (base_image.convert("RGBA") if base_image is not None else get_base_image())
+def create_gamepad_image(
+        pose: str, send_active: bool = True,
+        base_image_: Image.Image | None = None
+        ) -> Image.Image:
+    """Create a gamepad image with highlighted buttons for a given pose.
+
+    Args:
+        pose: Pose label that will be mapped to button presses.
+        send_active: If False, no buttons are highlighted even if the pose
+            would trigger them.
+        base_image_: Optional base image to draw on. If None, the default
+            gamepad image from disk is used.
+
+    Returns:
+        Image.Image: Final RGB image of the gamepad with highlights.
+    """
+    base = (base_image_.convert(
+        "RGBA"
+        ) if base_image_ is not None else get_base_image())
     img = base.copy()
 
     if send_active:

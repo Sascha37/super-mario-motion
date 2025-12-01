@@ -6,7 +6,7 @@ import cv2 as cv
 import mediapipe as mp
 import numpy as np
 
-from .state import StateManager
+from super_mario_motion.state import StateManager
 
 # globals
 lm_string = None
@@ -46,12 +46,26 @@ ankle_right = 28
 
 
 def landmark_coords(image, lm):
+    """Return pixel coordinates of a landmark in an image.
+
+    Args:
+        image: Numpy array (H, W, C) representing the current frame.
+        lm: MediaPipe landmark object with normalized x/y in [0, 1].
+
+    Returns:
+        tuple[int, int]: (x, y) pixel coordinates of the landmark.
+    """
     h = image.shape[0]
     w = image.shape[1]
     return int(w * lm.x), int(h * lm.y)
 
 
 def init():
+    """Initialize the webcam and start the camera processing thread.
+
+    Opens the default camera (index 0) and starts `cam_loop` as a daemon
+    thread. Raises an IOError if the camera cannot be opened.
+    """
     global cam, rgb, frame, thread
     cam = cv.VideoCapture(0)
     if not cam.isOpened():
@@ -74,6 +88,26 @@ def stop_cam():
 
 
 def detect_pose_simple(frame_, lm):
+    """Determine a simple pose label from landmark positions.
+
+    Heuristic rules based on relative positions of eyes, shoulders and
+    wrists define these poses:
+      * standing
+      * walking_left / walking_right
+      * running_left / running_right
+      * jumping
+      * crouching
+      * throwing
+      * swimming
+
+    Args:
+        frame_: Current image frame (for coordinate scaling).
+        lm: Sequence of MediaPipe pose landmarks.
+
+    Returns:
+        str: Detected pose label.
+    """
+
     # helper functions for coordinates and distance
     def coordinates(index):
         return landmark_coords(frame_, lm[index])
@@ -148,6 +182,18 @@ def detect_pose_simple(frame_, lm):
 
 
 def cam_loop():
+    """Camera processing loop that runs in a background thread.
+
+    This loop:
+      * Grabs frames from the webcam.
+      * Runs MediaPipe Pose on each frame.
+      * Draws skeleton overlays for full and skeleton-only frames.
+      * Extracts pose landmarks as a NumPy array.
+      * Detects the current simple pose via `detect_pose_simple`.
+      * Updates the StateManager with landmarks, pose and debug strings.
+
+    Loop exits when `_exit` is set to True or the camera is closed.
+    """
     global frame, rgb, cam, current_pose, skeleton_only_frame, lm_string
     with mpPose.Pose() as pose:
         print(Path(__file__).name + " initialized")
@@ -176,6 +222,13 @@ def cam_loop():
                 # Simple pose detection
                 lm = results.pose_landmarks.landmark
 
+                # save landmarks to state
+                lm_arr = np.array(
+                    [[p.x, p.y, p.z, p.visibility] for p in lm],
+                    dtype=np.float32
+                    )
+                state_manager.set_pose_landmarks(lm_arr)
+
                 # get current pose via helper method
                 current_pose = detect_pose_simple(frame, lm)
 
@@ -185,7 +238,8 @@ def cam_loop():
                 lm_string = ""
                 for x in range(33):
                     lm_string += str(x) + str(
-                        landmark_coords(frame, lm[x])) + " "
+                        landmark_coords(frame, lm[x])
+                        ) + " "
                     if (x + 1) % 4 == 0:
                         lm_string += "\n"
                 state_manager.set_landmark_string(lm_string)
