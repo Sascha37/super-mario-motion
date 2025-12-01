@@ -1,0 +1,9 @@
+{
+  "custom_key_mapping": {
+    "jump": "space",
+    "run_throw": "shift",
+    "left": "a",
+    "right": "d",
+    "down": "s"
+  }
+}

@@ -1,7 +1,9 @@
+import json
 import sys
 import threading
 import time
 from pathlib import Path
+
 from super_mario_motion.state import StateManager
 
 CONTROL_SCHEMES = {
@@ -19,6 +21,8 @@ CONTROL_SCHEMES = {
         "right": "right",
         "down": "down",
         },
+    "Custom": json.loads(os.path.join("..", "..", "config.json").read_text())[
+        "custom_key_mapping"]
     }
 
 if sys.platform == 'win32':
