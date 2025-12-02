@@ -21,11 +21,9 @@ default_config = {
     }
 }
 
+state_manager = StateManager()
 
 def init():
-
-    state_manager = StateManager()
-
     # Checks the OS of the User
     user_os = (platform.system().lower())
     print(f"{module_prefix} Using {user_os} operating system.")
@@ -72,7 +70,8 @@ def init():
     else:
         with open(config_path, mode="w", encoding="utf-8") as write_file:
             json.dump(default_config, write_file, indent=4)
-
+        print(f"{module_prefix} Config created.")
+    state_manager.set_config_path(config_path)
 
 def create_folder_helper(path):
     try:

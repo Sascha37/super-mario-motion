@@ -6,6 +6,10 @@ from pathlib import Path
 
 from super_mario_motion.state import StateManager
 
+module_prefix = "[Input]"
+
+state_manager = StateManager()
+
 CONTROL_SCHEMES = {
     "Original (RetroArch)": {
         "jump": "x",
@@ -21,8 +25,7 @@ CONTROL_SCHEMES = {
         "right": "right",
         "down": "down",
         },
-    "Custom": json.loads(Path("config.json").read_text())[
-        "custom_key_mapping"]
+    "Custom": {}
     }
 
 if sys.platform == 'win32':
@@ -41,8 +44,6 @@ pose = "standing"
 currently_held_keys = []
 last_orientation = "right"
 
-state_manager = StateManager()
-
 
 def get_current_key_mapping():
     scheme = state_manager.get_control_scheme()
@@ -54,6 +55,16 @@ def get_current_key_mapping():
 
 
 def init():
+    global CONTROL_SCHEMES
+    # Load the scheme of the config
+    config_file = state_manager.get_config_path()
+    try:
+        extracted_mapping = json.loads(Path(config_file).read_text())["custom_key_mapping"]
+        CONTROL_SCHEMES["Custom"] = extracted_mapping
+    except Exception as e:
+        print(f"{module_prefix} Failed reading config: {e}.")
+
+
     thread = threading.Thread(target=input_loop, daemon=True)
     thread.start()
 
@@ -156,7 +167,7 @@ def press_designated_input(pose_):
             pyautogui.keyUp(jump)
 
         case _:
-            print("Input: No input defined for: " + pose_)
+            print(f"{module_prefix} No input defined for: " + pose_)
 
 
 def release_held_keys():
