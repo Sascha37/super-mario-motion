@@ -1,11 +1,14 @@
 .DEFAULT_GOAL := run
 
+# Command name of your systemwide python 3.12 installation
+GLOBAL_PYTHON = python3.12
+
 PYTHON = ./venv/bin/python3
 PIP = ./venv/bin/pip
 
 # Create virtual environment and install dependencies
 venv: requirements.txt
-	python3.12 -m venv venv
+	$(GLOBAL_PYTHON) -m venv venv
 	$(PIP) install -r requirements.txt
 
 # Runs our program, checks if we are in a virtual environment
