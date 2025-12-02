@@ -71,7 +71,7 @@ def update():
 
     # print(f"simple: {current_pose}, full-body: {current_pose_full_body}")
 
-    gui.window.after(1, update)
+    gui.window.after(20, update)
 
 
 if __name__ == "__main__":
