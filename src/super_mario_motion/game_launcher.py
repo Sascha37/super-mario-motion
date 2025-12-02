@@ -6,32 +6,9 @@ from sys import platform
 
 from super_mario_motion.state import StateManager
 
-exe, core = None, None
-
 module_log_prefix = "[Launcher]"
 
-config_retroarch_path = (
-    json.loads(Path("config.json").read_text())[
-        "emu-path"]
-)
-
-config_rom_path = (
-    json.loads(Path("config.json").read_text())[
-        "rom-path"]
-)
-
-config_custom_path = (
-    json.loads(Path("config.json").read_text())[
-        "custom-game-path"]
-)
-
-retroarch_path = Path(config_retroarch_path)
-rom_path = Path(config_rom_path)
-custom_path = Path(config_custom_path)
-
-retro_paths_valid = True
-custom_path_valid = True
-
+exe, core = None, None
 
 def validate_path(path):
     """Validate that a given path exists and update the global flag.
@@ -47,7 +24,7 @@ def validate_path(path):
     if not path.exists():
         print(
             f"{module_log_prefix} {path}, Path/File does not exist, please "
-            f"edit the config."
+            f"edit the config at {config_path}"
             )
         return False
     else:
@@ -55,9 +32,34 @@ def validate_path(path):
         return True
 
 
-retro_paths_valid = validate_path(retroarch_path) and validate_path(rom_path)
-custom_path_valid = validate_path(custom_path)
+def init():
+    global config_retroarch_path, config_rom_path, config_custom_path
+    global retroarch_path, rom_path, custom_path, retro_paths_valid
+    global custom_path_valid, config_path
 
+    config_path = StateManager.get_config_path()
+
+    config_retroarch_path = (
+        json.loads(Path(config_path).read_text())[
+            "emu-path"]
+    )
+
+    config_rom_path = (
+        json.loads(Path(config_path).read_text())[
+            "rom-path"]
+    )
+
+    config_custom_path = (
+        json.loads(Path(config_path).read_text())[
+            "custom-game-path"]
+    )
+
+    retroarch_path = Path(config_retroarch_path)
+    rom_path = Path(config_rom_path)
+    custom_path = Path(config_custom_path)
+
+    retro_paths_valid = validate_path(retroarch_path) and validate_path(rom_path)
+    custom_path_valid = validate_path(custom_path)
 
 def get_command(platform_):
     """Build the RetroArch launch command for the given platform.

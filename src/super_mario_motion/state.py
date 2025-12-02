@@ -30,6 +30,8 @@ class StateManager:
 
     data_folder_path = None
 
+    config_path = None
+
     # Getter
     @classmethod
     def get_pose(cls):
@@ -83,6 +85,10 @@ class StateManager:
     def get_custom_key_mapping(cls):
         return cls.custom_key_mapping
 
+    @classmethod
+    def get_config_path(cls):
+        return cls.config_path
+
     # Setter
     @classmethod
     def set_pose(cls, new_pose):
@@ -132,3 +138,7 @@ class StateManager:
     @classmethod
     def set_custom_key_mapping(cls, new_mapping):
         cls.custom_key_mapping = new_mapping
+
+    @classmethod
+    def set_config_path(cls, new_config_path):
+        cls.config_path = new_config_path

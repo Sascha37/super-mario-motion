@@ -1,14 +1,29 @@
 import os
 import platform
 import sys
+import json
 
 from super_mario_motion.state import StateManager
 
+module_prefix = "[Data]"
+
+default_config = {
+    "emu-path": "null",
+    "rom-path": "null",
+    "custom-game-path": "null",
+
+    "custom_key_mapping": {
+        "jump": "space",
+        "run_throw": "shift",
+        "left": "a",
+        "right": "d",
+        "down": "s"
+    }
+}
+
+state_manager = StateManager()
 
 def init():
-    module_prefix = "[Data]"
-    state_manager = StateManager()
-
     # Checks the OS of the User
     user_os = (platform.system().lower())
     print(f"{module_prefix} Using {user_os} operating system.")
@@ -23,7 +38,7 @@ def init():
                     "~/Library/Application Support/SuperMarioMotion"
                     )
             case "linux":
-                return os.path.expanduser("~/.local/supermariomotion")
+                return os.path.expanduser("~/.local/share/supermariomotion")
             case _:
                 raise Exception(
                     f"{module_prefix} using unsupported OS: {platform_}"
@@ -34,19 +49,37 @@ def init():
 
     # Checks if local directory exists
     if os.path.isdir(data_path):
-        print(f"{module_prefix} Found path")
+        print(f"{module_prefix} Found data path.")
     else:
-        print(
-            f"{module_prefix} Could not find supermariomotion directory. "
-            f"Creating now."
-            )
-        try:
-            os.makedirs(data_path)
-        except OSError as e:
-            print(f"{module_prefix} Failed to create folder: {e}. Exiting "
-                  f"program.")
-            sys.exit(1)
-        print(f"{module_prefix} Created folder {data_path}")
+        create_folder_helper(data_path)
 
     # Set path in global state
     state_manager.set_data_folder_path(data_path)
+
+    # Check if config folder exists, if not create it
+    config_folder_path = os.path.join(data_path, "config")
+    if os.path.isdir(config_folder_path):
+        print(f"{module_prefix} found config folder.")
+    else:
+        create_folder_helper(config_folder_path)
+
+    # Check if config.json exists within the config folder
+    config_path = os.path.join(config_folder_path, "config.json")
+    if os.path.isfile(config_path):
+        print(f"{module_prefix} found config file.")
+    else:
+        with open(config_path, mode="w", encoding="utf-8") as write_file:
+            json.dump(default_config, write_file, indent=4)
+        print(f"{module_prefix} Config created.")
+    state_manager.set_config_path(config_path)
+
+def create_folder_helper(path):
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        print(
+            f"{module_prefix} Failed to create folder: {e}. Exiting "
+            f"program."
+            )
+        sys.exit(1)
+    print(f"{module_prefix} Created folder {path}")
