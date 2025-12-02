@@ -38,7 +38,7 @@ def init():
                     "~/Library/Application Support/SuperMarioMotion"
                     )
             case "linux":
-                return os.path.expanduser("~/.local/supermariomotion")
+                return os.path.expanduser("~/.local/share/supermariomotion")
             case _:
                 raise Exception(
                     f"{module_prefix} using unsupported OS: {platform_}"
