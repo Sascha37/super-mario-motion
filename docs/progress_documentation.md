@@ -167,3 +167,45 @@ This week’s changes once again mostly happened on the backend. We worked on
 - **Two big milestones:**
     - **The game is now playable in `full-body` mode!**
     - **The pose detection logic in `simple-mode` is finished**
+
+---
+
+## Week 8 (18.11.25 - 25.11.25)
+
+For this week, we were making sure that users using our application dont get overwhelmed by
+creating a dedicated help page. Goal for this and the coming weeks are making our code as
+readable and extensible as possible. And on the user side making sure that there is no
+confusion using the program.
+
+- Pytest is now fully implemented in our project
+  - Started developing **additional tests**
+- **Refactored code** to adhere to PEP 8 style guide
+- Added a **batch file to comfortably start the program** from outside of the terminal / IDE on
+  Windows
+- We can now press a button in our app to start the game 
+- Created a **help page** directed at users to learn how to use the application, can be opened
+  from within the app
+- The **virtual gamepad now displays the currently pressed inputs**
+  - Made it easier to sort collected data, also started collecting good permanent data, our
+  goal is that we can ship the application with a working pre trained model
+  
+---
+
+## Week 9 (25.11.25 - 02.12.25)
+
+This week we had a huge stack of tasks that we were sure would take at least more than a week.
+But we managed work through them all. With that our program ist mostly feature complete.
+
+- Pytest is now integrated into **GitHub Actions**
+- **Collected a lot of training data** from multiple different people
+- Finished our input module, by **adding the last pose to button mapping**
+- **Improved performance** by removing duplicate ressource intensive tasks
+- Wrote **docstrings** for each functions, that can be **generated into a docs webpage** using Sphinx
+- Restructured our project that **PyInstaller** could be used to build a standalone
+  **executable file** on Windows, macOS and Linux
+- Our **program now has a json config**, it gets created if it doesn’t exist and stores data that
+  can be kept between different sessions of the program
+- Extended the way we parse inputs by allowing **multiple control schemes**, that can be selected
+  via a dropdown menu
+- It is now possible to **play the game by launching an external website** containing the game
+- **Added an app icon** that displays in the lop left of our UI and taskbar
