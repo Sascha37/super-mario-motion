@@ -59,8 +59,11 @@ def init():
     # Load the scheme of the config
     config_file = state_manager.get_config_path()
     try:
-        extracted_mapping = json.loads(Path(config_file).read_text())["custom_key_mapping"]
+        extracted_mapping = json.loads(
+                Path(config_file).read_text()
+            )["custom_key_mapping"]
         CONTROL_SCHEMES["Custom"] = extracted_mapping
+        print(f"{module_prefix} loaded scheme from config.")
     except Exception as e:
         print(f"{module_prefix} Failed reading config: {e}.")
 

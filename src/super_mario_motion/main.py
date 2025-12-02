@@ -3,7 +3,7 @@ import sys
 import cv2 as cv
 
 from super_mario_motion import gamepad_visualiser, gui, input, user_data, \
-    vision, vision_ml
+    vision, vision_ml, game_launcher
 from super_mario_motion.state import StateManager
 
 
@@ -88,7 +88,7 @@ if __name__ == "__main__":
             state_manager.set_standalone(True)
 
         user_data.init()
-
+        game_launcher.init()
         vision.init()
         vision_ml.init()
         input.init()
