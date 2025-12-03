@@ -5,6 +5,7 @@ import random
 import sys
 import threading
 import tkinter as tk
+import tkinter.font as tkfont
 import webbrowser
 from datetime import datetime
 from pathlib import Path
@@ -22,16 +23,19 @@ pose = ""
 array = None
 window = None
 frame_bottom_left, frame_bottom_right = None, None
+root_frame = None
 label_webcam = None
 selected_preview, selected_mode, selected_control_scheme = None, None, None
 allow_debug_info, send_keystrokes, checkbox_toggle_inputs = None, None, None
 (label_virtual_gamepad_visualizer, label_pose_visualizer, label_current_pose,
  label_debug_landmarks) = None, None, None, None
 button_collect_start, label_collect_status = None, None
+geometry, screen_width, screen_height = None, None, None
 
 # Webcam preview
 webcam_image_width = 612
 webcam_image_height = 408
+collect_scale = 1.6
 
 # Gamepad
 gamepad_image_width = 200
@@ -101,7 +105,7 @@ def init():
     This sets up layout, styles, default images, and registers callbacks
     for mode selection, buttons, and window close events.
     """
-    global window
+    global window, root_frame
     global frame_bottom_left, frame_bottom_right
     global label_webcam
     global selected_preview, selected_mode, selected_control_scheme
@@ -110,14 +114,18 @@ def init():
         label_current_pose, \
         label_debug_landmarks
     global button_collect_start, label_collect_status
+    global geometry, screen_width, screen_height
+    global font_collect_normal, font_collect_large
 
     window = tk.Tk()
     window.title('Super Mario Motion')
     window.minsize(window_width, window_height)
-    #  window.maxsize(window_width, window_height)
+    window.resizable(False, False)
     window.configure(background=color_background)
 
     window.protocol("WM_DELETE_WINDOW", close)
+    root_frame = tk.Frame(window, bg=color_background)
+    root_frame.pack(expand=True)
 
     # always open the gui in the center of the screen
     system = platform.system()
@@ -145,9 +153,11 @@ def init():
     if system in ("Windows", "Darwin"):  # calculation for Windows and macOS
         window.withdraw()
         window.update_idletasks()
+        center_window(window_width, window_height)
 
         screen_width = window.winfo_screenwidth()
         screen_height = window.winfo_screenheight()
+        geometry = f"{window_width}x{window_height}"
         x = (screen_width - window_width) // 2
         y = (screen_height - window_height) // 2
 
@@ -185,7 +195,7 @@ def init():
         sys.exit(1)
 
     # Image Label for the preview of the webcam
-    label_webcam = tk.Label(window, image=image_webcam_sample, bd=0)
+    label_webcam = tk.Label(root_frame, image=image_webcam_sample, bd=0)
     label_webcam.image = image_webcam_sample
     label_webcam.grid(
         row=0,
@@ -196,7 +206,7 @@ def init():
         )
 
     # Frame Bottom Left
-    frame_bottom_left = tk.Frame(window, bg=color_dark_widget)
+    frame_bottom_left = tk.Frame(root_frame, bg=color_dark_widget)
     # Widgets on these rows expand evenly
     frame_bottom_left.columnconfigure(0, weight=1)
     frame_bottom_left.columnconfigure(1, weight=1)
@@ -315,7 +325,7 @@ def init():
     def update_launch_button_state():
         scheme = selected_control_scheme.get()
         if ((scheme == "Original (RetroArch)" and not
-            game_launcher.retro_paths_valid) or (
+        game_launcher.retro_paths_valid) or (
                 scheme == "Custom" and not game_launcher.custom_path_valid)):
             button_launch_game.state(["disabled"])
         else:
@@ -435,7 +445,7 @@ def init():
         )
 
     # Frame bottom right
-    frame_bottom_right = tk.Frame(window, bg=color_dark_widget)
+    frame_bottom_right = tk.Frame(root_frame, bg=color_dark_widget)
     frame_bottom_right.grid(
         row=1,
         column=1,
@@ -483,17 +493,19 @@ def init():
 
     # Text Label for the collection status, visible during collect mode
     global label_collect_status, button_collect_start
+    font_collect_normal = tkfont.Font(family="Consolas", size=25)
+    font_collect_large = tkfont.Font(family="Consolas", size=60)
     label_collect_status = tk.Label(
-        window, bg=color_background,
+        root_frame, bg=color_background,
         fg=color_white,
-        font=("Consolas", 25)
+        font=font_collect_normal
         )
     label_collect_status.grid(row=2, column=0, columnspan=2, pady=(20, 0))
     label_collect_status.grid_remove()
 
     # Start Collecting ttk Button
     button_collect_start = ttk.Button(
-        window,
+        root_frame,
         text="Start collecting",
         command=start_collect_sequence,
         style="Custom.TButton"
@@ -533,7 +545,15 @@ def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
     # calculate the source and destination image ratios
     img = Image.fromarray(array)
     src_w, src_h = img.size
-    dst_w, dst_h = webcam_image_width, webcam_image_height
+    dst_w_base, dst_h_base = webcam_image_width, webcam_image_height
+    if selected_mode is not None and selected_mode.get() == "Collect":
+        scale = collect_scale
+    else:
+        scale = 1.0
+
+    dst_w = int(dst_w_base * scale)
+    dst_h = int(dst_h_base * scale)
+
     src_ratio = src_w / src_h
     dst_ratio = dst_w / dst_h
 
@@ -626,10 +646,14 @@ def apply_mode(mode: str):
     global label_virtual_gamepad_visualizer, label_pose_visualizer, \
         label_current_pose
     global checkbox_toggle_inputs, allow_debug_info, send_keystrokes
+    global geometry
 
     if mode == "Collect":
         allow_debug_info.set(1)
         send_keystrokes.set(0)
+
+        window.geometry(f"{screen_width}x{screen_height}+0+0")
+        label_collect_status.configure(font=font_collect_large)
 
         # Hide widgets that are not relevant
         checkbox_toggle_inputs.grid_remove()
@@ -643,6 +667,11 @@ def apply_mode(mode: str):
         _set_collect_button(starting=False)
 
     else:
+        window.resizable(False, False)
+        center_window(window_width, window_height)
+
+        label_collect_status.configure(font=font_collect_normal)
+
         checkbox_toggle_inputs.grid()
 
         # Display play mode specific widgets
@@ -832,6 +861,14 @@ def open_help_menu():
         target=open_browser, args=(help_file_path,),
         daemon=True
         ).start()
+
+
+def center_window(w, h):
+    sw = window.winfo_screenwidth()
+    sh = window.winfo_screenheight()
+    x = (sw - w) // 2
+    y = (sh - h) // 2
+    window.geometry(f"{w}x{h}+{x}+{y}")
 
 
 # os.path.join("images","webcam_sample.jpg")
