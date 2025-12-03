@@ -661,11 +661,13 @@ def apply_mode(mode: str):
     if mode == "Collect":
         allow_debug_info.set(1)
         send_keystrokes.set(0)
-
-        if geometry_collect is not None:
-            window.resizable(True, True)
-            window.geometry(geometry_collect)
-            window.resizable(False, False)
+        window.resizable(True, True)
+        if platform.system() == "Linux":
+            if geometry_collect is not None:
+                window.geometry(geometry_collect)
+        elif platform.system() != "Linux":
+            window.state("zoomed")
+        window.resizable(False, False)
 
         label_collect_status.configure(font=font_collect_large)
 
