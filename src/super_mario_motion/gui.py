@@ -31,7 +31,7 @@ allow_debug_info, send_keystrokes, checkbox_toggle_inputs = None, None, None
 (label_virtual_gamepad_visualizer, label_pose_visualizer, label_current_pose,
  label_debug_landmarks) = None, None, None, None
 button_collect_start, label_collect_status = None, None
-geometry, screen_width, screen_height = None, None, None
+geometry_normal, geometry_collect, screen_width, screen_height = None, None, None, None
 
 # Webcam preview
 webcam_image_width = 612
@@ -115,7 +115,7 @@ def init():
         label_current_pose, \
         label_debug_landmarks
     global button_collect_start, label_collect_status
-    global geometry, screen_width, screen_height
+    global geometry_normal, geometry_collect, screen_width, screen_height
     global font_collect_normal, font_collect_large
 
     window = tk.Tk()
@@ -158,20 +158,21 @@ def init():
 
         screen_width = window.winfo_screenwidth()
         screen_height = window.winfo_screenheight()
-        geometry = f"{window_width}x{window_height}"
+        geometry_collect = f"{screen_width}x{screen_height}+0+0"
         x = (screen_width - window_width) // 2
         y = (screen_height - window_height) // 2
+        geometry_normal = f"{window_width}x{window_height}+{x}+{y}"
 
-        window.geometry(f"{window_width}x{window_height}+{x}+{y}")
+        window.geometry(geometry_normal)
         window.deiconify()
 
     if system == ("Linux"):
         try:
             cmd = "xrandr | grep ' connected primary' | cut -d' ' -f4"
-            geometry = subprocess.check_output(cmd, shell=True, text=True).strip()
+            geometry_normal = subprocess.check_output(cmd, shell=True, text=True).strip()
         except subprocess.CalledProcessError as e:
             print(f"[GUI] Could not get resolution on Linux {e}")
-            geometry = "1920x1080+0+0"
+            geometry_normal = "1920x1080+0+0"
 
     if system == "Darwin":
         # always open the gui on top of all other windows for macOS
@@ -655,13 +656,17 @@ def apply_mode(mode: str):
     global label_virtual_gamepad_visualizer, label_pose_visualizer, \
         label_current_pose
     global checkbox_toggle_inputs, allow_debug_info, send_keystrokes
-    global geometry
+    global geometry_normal, geometry_collect
 
     if mode == "Collect":
         allow_debug_info.set(1)
         send_keystrokes.set(0)
 
-        window.geometry(f"{geometry}")
+        if geometry_collect is not None:
+            window.resizable(True, True)
+            window.geometry(geometry_collect)
+            window.resizable(False, False)
+
         label_collect_status.configure(font=font_collect_large)
 
         # Hide widgets that are not relevant
@@ -676,11 +681,14 @@ def apply_mode(mode: str):
         _set_collect_button(starting=False)
 
     else:
-        window.resizable(False, False)
         if platform.system() != "Linux":
+            window.resizable(True, True)
+            window.geometry(geometry_normal)
             center_window(window_width, window_height)
         else:
             window.geometry(f"{window_width}x{window_height}")
+
+        window.resizable(False, False)
         label_collect_status.configure(font=font_collect_normal)
 
         checkbox_toggle_inputs.grid()
