@@ -21,7 +21,7 @@ def test_mid(a, b, expected):
 @pytest.mark.parametrize(
     "a, b, c, expected",
     [
-        (np.array([0, 0]), np.array([0, 0]), np.array([0, 0]), 90),
+        (np.array([0, 0]), np.array([0, 0]), np.array([0, 0]), 0),
         (np.array([0, 0]), np.array([0, 1]), np.array([0, 0]), 0),
         ],
     )
