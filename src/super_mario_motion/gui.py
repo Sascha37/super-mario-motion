@@ -36,7 +36,7 @@ geometry_normal, geometry_collect, screen_width, screen_height = None, None, Non
 # Webcam preview
 webcam_image_width = 612
 webcam_image_height = 408
-collect_scale = 1.6
+collect_scale = 1.3
 
 # Gamepad
 gamepad_image_width = 200
