@@ -89,9 +89,9 @@ def main():
       * Print best parameters, classification report and confusion matrix.
       * Save the best estimator to MODEL_PATH.
     """
-    # if not CSV_PATH.exists():
-    #    raise FileNotFoundError(f"{CSV_PATH} not found. Collect data first
-    #    with collect.py.")
+    if not CSV_PATH.exists():
+        raise FileNotFoundError(f"{CSV_PATH} not found. Collect data first"
+                                f" with collect.py.")
     training_csv = combine_run_csvs()
     x, y = load_csv(training_csv)
     s_train, s_test, y_train, y_test = train_test_split(

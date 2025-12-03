@@ -69,8 +69,6 @@ def update():
         )
     gui.set_gamepad_image(gamepad_img)
 
-    # print(f"simple: {current_pose}, full-body: {current_pose_full_body}")
-
     gui.window.after(20, update)
 
 
