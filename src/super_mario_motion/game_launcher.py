@@ -9,11 +9,16 @@ from super_mario_motion.state import StateManager
 module_log_prefix = "[Launcher]"
 
 exe, core = None, None
+retro_paths_valid = None
+config_retroarch_path, config_rom_path, config_custom_path = None, None, None
+retroarch_path, rom_path, custom_path = None, None, None
+custom_path_valid, config_path = None, None
+
 
 def validate_path(path):
     """Validate that a given path exists and update the global flag.
 
-    Prints an info message and sets `retro_paths_valid = False` if the
+    Prints an information message and sets `retro_paths_valid = False` if the
     path does not exist.
 
     Args:
@@ -58,8 +63,11 @@ def init():
     rom_path = Path(config_rom_path)
     custom_path = Path(config_custom_path)
 
-    retro_paths_valid = validate_path(retroarch_path) and validate_path(rom_path)
+    retro_paths_valid = validate_path(retroarch_path) and validate_path(
+        rom_path
+        )
     custom_path_valid = validate_path(custom_path)
+
 
 def get_command(platform_):
     """Build the RetroArch launch command for the given platform.
