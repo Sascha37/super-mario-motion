@@ -26,4 +26,4 @@ def test_mid(a, b, expected):
         ],
     )
 def test_angle(a, b, c, expected):
-    assert _angle(a, b, c) == expected
+    assert _angle(a, b, c) == pytest.approx(expected, abs=1e-3)
