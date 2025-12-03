@@ -315,7 +315,7 @@ def init():
     def update_launch_button_state():
         scheme = selected_control_scheme.get()
         if ((scheme == "Original (RetroArch)" and not
-        game_launcher.retro_paths_valid) or (
+            game_launcher.retro_paths_valid) or (
                 scheme == "Custom" and not game_launcher.custom_path_valid)):
             button_launch_game.state(["disabled"])
         else:

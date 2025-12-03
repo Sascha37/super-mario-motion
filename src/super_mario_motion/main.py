@@ -62,7 +62,7 @@ def update():
         current_pose_full_body
         if state_manager.get_current_mode() == "Full-body"
         else current_pose
-    )
+        )
     send_active = state_manager.get_send_permission()
     gamepad_img = gamepad_visualiser.create_gamepad_image(
         pose_for_gamepad, send_active=send_active

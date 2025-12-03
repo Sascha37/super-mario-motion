@@ -47,17 +47,17 @@ def init():
     config_retroarch_path = (
         json.loads(Path(config_path).read_text())[
             "emu-path"]
-    )
+        )
 
     config_rom_path = (
         json.loads(Path(config_path).read_text())[
             "rom-path"]
-    )
+        )
 
     config_custom_path = (
         json.loads(Path(config_path).read_text())[
             "custom-game-path"]
-    )
+        )
 
     retroarch_path = Path(config_retroarch_path)
     rom_path = Path(config_rom_path)
