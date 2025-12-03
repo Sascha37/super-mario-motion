@@ -1,8 +1,8 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
-from PyInstaller.utils.hooks import collect_all
 
 import mediapipe as mp
+from PyInstaller.utils.hooks import collect_all
 
 # Path to mediapipe module
 mediapipe_path = os.path.dirname(mp.__file__)

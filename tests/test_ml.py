@@ -1,3 +1,10 @@
+"""
+Tests for feature extraction and training CSV integrity.
+
+Verifies feature vector shape/dtype, checks collected CSV files for
+correct row length, valid labels, and finite numeric feature values.
+"""
+
 import csv
 from pathlib import Path
 

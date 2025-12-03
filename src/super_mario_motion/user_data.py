@@ -1,9 +1,18 @@
+"""
+Initialize and manage Super Mario Motion user data and configuration.
+
+Creates a platform-specific data directory, ensures a config subfolder
+and config.json exist (writing defaults if needed), and stores the data
+and config paths in the global StateManager.
+"""
+
+import json
 import os
 import platform
 import sys
-import json
 
 from super_mario_motion.state import StateManager
+
 
 module_prefix = "[Data]"
 
@@ -18,10 +27,11 @@ default_config = {
         "left": "a",
         "right": "d",
         "down": "s"
+        }
     }
-}
 
 state_manager = StateManager()
+
 
 def init():
     # Checks the OS of the User
@@ -72,6 +82,7 @@ def init():
             json.dump(default_config, write_file, indent=4)
         print(f"{module_prefix} Config created.")
     state_manager.set_config_path(config_path)
+
 
 def create_folder_helper(path):
     try:

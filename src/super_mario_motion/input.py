@@ -1,3 +1,11 @@
+"""
+Maps pose labels to keyboard inputs and sends them to the active game.
+
+Loads control schemes (including a custom mapping from config), runs a
+background loop that reads the current pose and send-permission from
+StateManager, and presses/releases keys via pyautogui accordingly.
+"""
+
 import json
 import sys
 import threading
@@ -5,6 +13,7 @@ import time
 from pathlib import Path
 
 from super_mario_motion.state import StateManager
+
 
 module_prefix = "[Input]"
 
@@ -60,13 +69,12 @@ def init():
     config_file = state_manager.get_config_path()
     try:
         extracted_mapping = json.loads(
-                Path(config_file).read_text()
+            Path(config_file).read_text()
             )["custom_key_mapping"]
         CONTROL_SCHEMES["Custom"] = extracted_mapping
         print(f"{module_prefix} loaded scheme from config.")
     except Exception as e:
         print(f"{module_prefix} Failed reading config: {e}.")
-
 
     thread = threading.Thread(target=input_loop, daemon=True)
     thread.start()
@@ -120,12 +128,12 @@ def press_designated_input(pose_):
     """
     global currently_held_keys, last_orientation
 
-    mapping = get_current_key_mapping()
-    jump = mapping["jump"]
-    run_throw = mapping["run_throw"]
-    left = mapping["left"]
-    right = mapping["right"]
-    down = mapping["down"]
+    mapping_ = get_current_key_mapping()
+    jump = mapping_["jump"]
+    run_throw = mapping_["run_throw"]
+    left = mapping_["left"]
+    right = mapping_["right"]
+    down = mapping_["down"]
 
     match pose_:
         case "standing":
