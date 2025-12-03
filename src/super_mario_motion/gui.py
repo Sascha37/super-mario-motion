@@ -825,16 +825,12 @@ def open_browser(path):
 # so that the main thread does not have to wait for the browser to start up
 # (~5 seconds)
 def open_help_menu():
-    if state_manager.get_standalone:
-        help_path = os.path.join("help", "help_page.pdf")
+    if state_manager.get_standalone():
+        help_path = ph.resource_path(os.path.join("help", "help_page.pdf"))
     else:
-        help_path = os.path.join("..", "..", "docs", "help", "help_page.pdf")
+        help_path = os.path.join("docs", "help", "help_page.pdf")
+    help_file_path = Path(help_path).resolve()
 
-    help_file_path = Path(
-        ph.resource_path(
-            help_path
-            )
-        )
     threading.Thread(
         target=open_browser, args=(help_file_path,),
         daemon=True
