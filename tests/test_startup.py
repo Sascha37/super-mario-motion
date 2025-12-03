@@ -12,7 +12,7 @@ This is useful for testing modules that depend on external libraries or
 resources.
 """
 
-from super_mario_motion import collect, game_launcher, gamepad_visualiser, \
+from super_mario_motion import collect, game_launcher, gamepad_visualizer, \
     gui, input as smm_input, main, vision, vision_ml
 
 
@@ -58,13 +58,13 @@ def test_gui(monkeypatch):
     assert hasattr(gui, "init")
 
 
-def test_gamepad_visualiser(monkeypatch):
+def test_gamepad_visualizer(monkeypatch):
     monkeypatch.setattr("PIL.Image.open", lambda *_: None)
 
-    assert hasattr(gamepad_visualiser, "get_base_image")
-    assert hasattr(gamepad_visualiser, "pose_to_buttons")
-    assert hasattr(gamepad_visualiser, "draw_highlight_overlay")
-    assert hasattr(gamepad_visualiser, "create_gamepad_image")
+    assert hasattr(gamepad_visualizer, "get_base_image")
+    assert hasattr(gamepad_visualizer, "pose_to_buttons")
+    assert hasattr(gamepad_visualizer, "draw_highlight_overlay")
+    assert hasattr(gamepad_visualizer, "create_gamepad_image")
 
 
 def test_user_data(monkeypatch, tmp_path):

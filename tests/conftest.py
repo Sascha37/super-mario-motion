@@ -1,6 +1,8 @@
 import sys
 import types
 
+# fake pyautogui for testing purposes, to avoid conflicts with actual
+# pyautogui module in the ci
 fake_pyautogui = types.ModuleType("pyautogui")
 fake_pyautogui.keyDown = lambda *_: None
 fake_pyautogui.keyUp = lambda *_: None
