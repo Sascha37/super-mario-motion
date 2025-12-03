@@ -26,7 +26,7 @@ def main():
     Command line arguments:
         --label (str, required):
             Class label for all collected samples
-            (e.g. standing, walking_right, ...).
+            (e.g., standing, walking_right, ...).
         --seconds (float, default=30):
             Duration of the recording in seconds.
         --csv (str, default="pose_samples.csv"):

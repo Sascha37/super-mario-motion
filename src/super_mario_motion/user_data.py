@@ -1,7 +1,7 @@
+import json
 import os
 import platform
 import sys
-import json
 
 from super_mario_motion.state import StateManager
 
@@ -26,10 +26,11 @@ default_config = {
         "left": "a",
         "right": "d",
         "down": "s"
+        }
     }
-}
 
 state_manager = StateManager()
+
 
 def init():
     # Checks the OS of the User
@@ -80,6 +81,7 @@ def init():
             json.dump(default_config, write_file, indent=4)
         print(f"{module_prefix} Config created.")
     state_manager.set_config_path(config_path)
+
 
 def create_folder_helper(path):
     try:

@@ -23,7 +23,7 @@ def _mid(a, b):
 
 
 def _angle(a, b, c):
-    """Compute the angle (in degrees) at point b given three points a–b–c.
+    """Compute the angle (in degrees) at point b given three points a, b, c.
 
     Args:
         a, b, c: NumPy arrays representing 2D or 3D points.
@@ -45,7 +45,7 @@ def extract_features(lm_arr: np.ndarray) -> np.ndarray:
       * Normalize by torso length (distance from mid-hip to mid-shoulder).
       * Compute joint angles for elbows and knees.
       * Compute selected pairwise distances (shoulders, hips, wrists, ankles,
-        shoulders–hips).
+        shoulders, hips).
       * Append landmark visibility values.
 
     Args:
