@@ -1,3 +1,12 @@
+"""
+Application entry point for Super Mario Motion.
+
+Initializes StateManager, user data, game launcher, vision and ML modules,
+input handling and the Tkinter GUI. Verifies webcam availability and runs
+the main periodic update loop that ties pose prediction, input sending,
+and GUI updates together.
+"""
+
 import sys
 
 import cv2 as cv

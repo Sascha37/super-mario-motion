@@ -1,4 +1,13 @@
+"""
+Compute normalized pose features from MediaPipe landmark arrays.
+
+Provides angle, distance, and normalized coordinate features centered at
+the mid-hip, scaled by torso length, and augmented with joint angles and
+pairwise distances plus visibility values.
+"""
+
 import numpy as np
+
 
 # Landmarks
 eye_left, eye_right = 2, 5

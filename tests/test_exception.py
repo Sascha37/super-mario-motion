@@ -1,3 +1,8 @@
+"""
+Test that the main application script fails with an exception and emits
+a traceback when executed as a subprocess.
+"""
+
 import subprocess
 import sys
 from pathlib import Path

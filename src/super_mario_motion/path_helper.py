@@ -1,9 +1,13 @@
+"""
+Resolve resource file paths for both normal execution and PyInstaller builds.
+Returns absolute paths that work whether files live next to the script or in
+the temporary _MEIPASS directory of a packaged executable.
+"""
+
 import os
 import sys
 
 
-# When it's running as a single file, the executable it points to the _MEIPASS
-# folder
 def resource_path(rel_path):
     if hasattr(sys, '_MEIPASS'):
         # noinspection PyProtectedMember

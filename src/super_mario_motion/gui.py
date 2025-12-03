@@ -1,3 +1,10 @@
+"""
+Creates the Tkinter window, webcam and pose previews, gamepad visualization,
+mode selection (Simple, Full-body, Collect) and control scheme selection.
+Handles automated pose-sample collection runs, help/document opening, and
+launching the configured game or web version.
+"""
+
 import getpass
 import os
 import platform
