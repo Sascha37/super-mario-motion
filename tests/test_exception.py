@@ -3,17 +3,17 @@ import sys
 from pathlib import Path
 
 
-def test_program_throws_exception():
+def test_program_starts_without_crashing():
     script = Path(__file__).parent.parent / "src/super_mario_motion/main.py"
 
-    result = subprocess.run(
-        [sys.executable, str(script)],
-        capture_output=True,
-        text=True
-        )
+    try:
+        subprocess.run(
+            [sys.executable, str(script)],
+            capture_output=True,
+            text=True,
+            timeout=5
+            )
+    except subprocess.TimeoutExpired:
+        return
 
-    # assert that it failed
-    assert result.returncode != 0
-
-    # check error message
-    assert "Traceback" in result.stderr
+    assert False, "Program exited early — likely crashed during startup."
