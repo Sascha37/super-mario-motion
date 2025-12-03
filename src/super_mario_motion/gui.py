@@ -222,9 +222,9 @@ def init():
     frame_bottom_left.grid(
         row=1,
         column=0,
-        padx=(horizontal_padding, 0),
+        padx=(horizontal_padding, 25),
         pady=frame_padding_y,
-        sticky="nw"
+        sticky="ne"
         )
 
     # Button "Launch Game"
@@ -460,7 +460,7 @@ def init():
         column=1,
         padx=(0, horizontal_padding),
         pady=frame_padding_y,
-        sticky="ne"
+        sticky="nw"
         )
 
     # gamepad
