@@ -158,7 +158,6 @@ def init():
 
         screen_width = window.winfo_screenwidth()
         screen_height = window.winfo_screenheight()
-        geometry_collect = f"{screen_width}x{screen_height}+0+0"
         x = (screen_width - window_width) // 2
         y = (screen_height - window_height) // 2
         geometry_normal = f"{window_width}x{window_height}+{x}+{y}"
