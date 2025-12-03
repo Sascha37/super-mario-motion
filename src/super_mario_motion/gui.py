@@ -161,6 +161,7 @@ def init():
         x = (screen_width - window_width) // 2
         y = (screen_height - window_height) // 2
         geometry_normal = f"{window_width}x{window_height}+{x}+{y}"
+        geometry_collect = f"{screen_width}x{screen_height}+0+0"
 
         window.geometry(geometry_normal)
         window.deiconify()
@@ -661,10 +662,10 @@ def apply_mode(mode: str):
         allow_debug_info.set(1)
         send_keystrokes.set(0)
         window.resizable(True, True)
-        if platform.system() == "Linux":
+        if platform.system() != "Darwin":
             if geometry_collect is not None:
                 window.geometry(geometry_collect)
-        elif platform.system() != "Linux":
+        elif platform.system() == "Darwin":
             window.state("zoomed")
         window.resizable(False, False)
 
