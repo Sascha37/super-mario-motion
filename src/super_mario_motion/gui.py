@@ -2,6 +2,7 @@ import getpass
 import os
 import platform
 import random
+import subprocess
 import sys
 import threading
 import tkinter as tk
@@ -163,6 +164,14 @@ def init():
 
         window.geometry(f"{window_width}x{window_height}+{x}+{y}")
         window.deiconify()
+
+    if system == ("Linux"):
+        try:
+            cmd = "xrandr | grep ' connected primary' | cut -d' ' -f4"
+            geometry = subprocess.check_output(cmd, shell=True, text=True).strip()
+        except subprocess.CalledProcessError as e:
+            print(f"[GUI] Could not get resolution on Linux {e}")
+            geometry = "1920x1080+0+0"
 
     if system == "Darwin":
         # always open the gui on top of all other windows for macOS
@@ -652,7 +661,7 @@ def apply_mode(mode: str):
         allow_debug_info.set(1)
         send_keystrokes.set(0)
 
-        window.geometry(f"{screen_width}x{screen_height}+0+0")
+        window.geometry(f"{geometry}")
         label_collect_status.configure(font=font_collect_large)
 
         # Hide widgets that are not relevant
@@ -668,8 +677,10 @@ def apply_mode(mode: str):
 
     else:
         window.resizable(False, False)
-        center_window(window_width, window_height)
-
+        if platform.system() != "Linux":
+            center_window(window_width, window_height)
+        else:
+            window.geometry(f"{window_width}x{window_height}")
         label_collect_status.configure(font=font_collect_normal)
 
         checkbox_toggle_inputs.grid()
