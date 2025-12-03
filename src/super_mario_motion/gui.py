@@ -169,7 +169,7 @@ def init():
     if system == ("Linux"):
         try:
             cmd = "xrandr | grep ' connected primary' | cut -d' ' -f4"
-            geometry_normal = subprocess.check_output(cmd, shell=True, text=True).strip()
+            geometry_collect = subprocess.check_output(cmd, shell=True, text=True).strip()
         except subprocess.CalledProcessError as e:
             print(f"[GUI] Could not get resolution on Linux {e}")
             geometry_normal = "1920x1080+0+0"
