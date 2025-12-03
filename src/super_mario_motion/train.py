@@ -27,7 +27,7 @@ def combine_run_csvs(
         ) -> Path:
     """Combine multiple collected run CSVs into a single CSV file.
 
-    Existing output file is removed first. Header rows in subsequent files
+    Existing output file is removed first. Header rows in the following files
     (starting with 'label,') are skipped.
 
     Args:
@@ -70,7 +70,7 @@ def load_csv(csv_path: Path):
     Returns:
         tuple[np.ndarray, np.ndarray]:
             x: Feature matrix of shape (n_samples, n_features), dtype float32.
-            y: Label array of shape (n_samples,), dtype object/str.
+            y: Label array of shape (n_samples), dtype object/str.
     """
     labels, feats = [], []
     with open(csv_path) as f:

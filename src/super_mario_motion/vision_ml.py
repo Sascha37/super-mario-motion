@@ -1,15 +1,6 @@
-"""
-Full-body pose classification from MediaPipe landmarks using a trained ML model.
-
-Loads an SVM-based pose classifier (external or bundled), runs a passive
-background worker that reads pose landmarks from StateManager, extracts
-features, predicts poses with smoothing, and writes the smoothed full-body
-pose labels back to shared state.
-"""
-
+import os
 import threading
 import time
-import os
 from collections import deque
 from pathlib import Path
 from pickle import UnpicklingError
@@ -18,11 +9,19 @@ import numpy as np
 from joblib import load
 from sklearn.exceptions import NotFittedError
 
-from super_mario_motion.pose_features import extract_features
-# we get frames from vision.py
-from super_mario_motion.state import StateManager
 from super_mario_motion import path_helper as ph
+from super_mario_motion.pose_features import extract_features
+# get frames from vision.py
+from super_mario_motion.state import StateManager
 
+"""
+Full-body pose classification from MediaPipe landmarks using a trained ML model.
+
+Loads an SVM-based pose classifier (external or bundled), runs a passive
+background worker that reads pose landmarks from StateManager, extracts
+features, predicts poses with smoothing, and writes the smoothed full-body
+pose labels back to shared state.
+"""
 
 state_manager = StateManager()
 
@@ -47,10 +46,11 @@ def init():
         print(f"[vision_ml] external model loaded ({model_path})")
     except (FileNotFoundError, OSError, EOFError, UnpicklingError):
         print(f"[vision_ml] could not load external model at: {model_path}")
-        # Try to load internal fallback model
+        # Try to load the internal fallback model
         try:
             model_path = ph.resource_path(
-                os.path.join("data", "pose_model.joblib"))
+                os.path.join("data", "pose_model.joblib")
+                )
             _model = load(model_path)
             print(f"[vision_ml] fallback model loaded ({model_path})")
         except Exception as e:
@@ -67,8 +67,8 @@ def _worker():
     Steps:
       * Read the latest landmarks from StateManager.
       * Extract PCA-scaled feature vector.
-      * Predict pose with loaded SVM model.
-      * Apply majority vote smoothing over recent predictions.
+      * Predict pose with the loaded SVM model.
+      * Apply the majority vote smoothing over recent predictions.
       * Store smoothed pose in StateManager.
 
     Runs until `_exit` is set to True.

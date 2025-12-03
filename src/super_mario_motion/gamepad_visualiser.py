@@ -129,7 +129,7 @@ def create_gamepad_image(
     Args:
         pose: Pose label that will be mapped to button presses.
         send_active: If False, no buttons are highlighted even if the pose
-            would trigger them.
+            triggers them.
         base_image_: Optional base image to draw on. If None, the default
             gamepad image from disk is used.
 

@@ -129,7 +129,7 @@ def init():
     # always open the gui in the center of the screen
     system = platform.system()
 
-    # Set application icon depending on platform
+    # Set application icon depending on the platform
     try:
         if system == "Windows":
             # Windows uses .ico directly
@@ -146,7 +146,7 @@ def init():
             window.iconphoto(True, icon_img)
             window._icon_img = icon_img
     except Exception as e:
-        # Fail gracefully if icon cannot be loaded (e.g. file missing)
+        # Fail gracefully if icon cannot be loaded (e.g., missing file)
         print(f"Icon load warning: {e}")
 
     if system in ("Windows", "Darwin"):  # calculation for Windows and macOS
@@ -322,7 +322,7 @@ def init():
     def update_launch_button_state():
         scheme = selected_control_scheme.get()
         if ((scheme == "Original (RetroArch)" and not
-                game_launcher.retro_paths_valid) or (
+            game_launcher.retro_paths_valid) or (
                 scheme == "Custom" and not game_launcher.custom_path_valid)):
             button_launch_game.state(["disabled"])
         else:
@@ -372,8 +372,10 @@ def init():
 
     # Control Scheme Label
     global selected_control_scheme
-    label_control_scheme = tk.Label(frame_bottom_left, bg=color_dark_widget,
-                                    fg=color_white, text="Game:")
+    label_control_scheme = tk.Label(
+        frame_bottom_left, bg=color_dark_widget,
+        fg=color_white, text="Game:"
+        )
     label_control_scheme.grid(row=4, column=0)
 
     # Control Scheme Combobox
@@ -389,8 +391,10 @@ def init():
         clear_combobox_selection(event)
         update_launch_button_state()
 
-    option_menu_control_scheme.bind("<<ComboboxSelected>>",
-                                    on_control_scheme_change)
+    option_menu_control_scheme.bind(
+        "<<ComboboxSelected>>",
+        on_control_scheme_change
+        )
     option_menu_control_scheme['values'] = ["Original (RetroArch)",
                                             "supermarioplay (Web)",
                                             "Custom"]
@@ -402,32 +406,40 @@ def init():
     # Debug Info Checkbox
     global allow_debug_info
     allow_debug_info = tk.IntVar(value=0)
-    checkbox_debug_info = tk.Checkbutton(frame_bottom_left, text='Debug Info',
-                                         bg=color_dark_widget, fg=color_white,
-                                         selectcolor=color_background,
-                                         highlightthickness=0, bd=0,
-                                         variable=allow_debug_info, width=20,
-                                         height=2)
-    checkbox_debug_info.grid(row=5,
-                             column=0,
-                             columnspan=2,
-                             sticky="ew")
+    checkbox_debug_info = tk.Checkbutton(
+        frame_bottom_left, text='Debug Info',
+        bg=color_dark_widget, fg=color_white,
+        selectcolor=color_background,
+        highlightthickness=0, bd=0,
+        variable=allow_debug_info, width=20,
+        height=2
+        )
+    checkbox_debug_info.grid(
+        row=5,
+        column=0,
+        columnspan=2,
+        sticky="ew"
+        )
 
     # Send Inputs Checkbox
     global send_keystrokes, checkbox_toggle_inputs
     send_keystrokes = tk.IntVar()
-    checkbox_toggle_inputs = tk.Checkbutton(frame_bottom_left,
-                                            text='Send Inputs',
-                                            bg=color_dark_widget,
-                                            fg=color_white,
-                                            selectcolor=color_background,
-                                            highlightthickness=0,
-                                            bd=0, variable=send_keystrokes,
-                                            width=20, height=2)
-    checkbox_toggle_inputs.grid(row=6,
-                                column=0,
-                                columnspan=2,
-                                sticky="ew")
+    checkbox_toggle_inputs = tk.Checkbutton(
+        frame_bottom_left,
+        text='Send Inputs',
+        bg=color_dark_widget,
+        fg=color_white,
+        selectcolor=color_background,
+        highlightthickness=0,
+        bd=0, variable=send_keystrokes,
+        width=20, height=2
+        )
+    checkbox_toggle_inputs.grid(
+        row=6,
+        column=0,
+        columnspan=2,
+        sticky="ew"
+        )
 
     # Frame bottom right
     frame_bottom_right = tk.Frame(window, bg=color_dark_widget)
