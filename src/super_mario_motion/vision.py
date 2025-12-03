@@ -8,6 +8,15 @@ import numpy as np
 
 from super_mario_motion.state import StateManager
 
+"""
+Webcam and MediaPipe-based pose detection and skeleton rendering.
+
+Captures frames in a background thread, runs MediaPipe Pose, infers a
+simple pose label from landmarks, renders webcam+skeleton frames, and
+stores images, landmarks, pose, and debug strings in the shared
+StateManager.
+"""
+
 # globals
 lm_string = None
 skeleton_only_frame = None

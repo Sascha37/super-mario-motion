@@ -14,6 +14,15 @@ from super_mario_motion.pose_features import extract_features
 from super_mario_motion.state import StateManager
 from super_mario_motion import path_helper as ph
 
+"""
+Full-body pose classification from MediaPipe landmarks using a trained ML model.
+
+Loads an SVM-based pose classifier (external or bundled), runs a passive
+background worker that reads pose landmarks from StateManager, extracts
+features, predicts poses with smoothing, and writes the smoothed full-body
+pose labels back to shared state.
+"""
+
 state_manager = StateManager()
 
 _current_pose = "standing"

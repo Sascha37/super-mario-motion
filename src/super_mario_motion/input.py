@@ -6,6 +6,14 @@ from pathlib import Path
 
 from super_mario_motion.state import StateManager
 
+"""
+Maps pose labels to keyboard inputs and sends them to the active game.
+
+Loads control schemes (including a custom mapping from config), runs a
+background loop that reads the current pose and send-permission from
+StateManager, and presses/releases keys via pyautogui accordingly.
+"""
+
 module_prefix = "[Input]"
 
 state_manager = StateManager()

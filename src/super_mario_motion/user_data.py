@@ -5,6 +5,14 @@ import json
 
 from super_mario_motion.state import StateManager
 
+"""
+Initialize and manage Super Mario Motion user data and configuration.
+
+Creates a platform-specific data directory, ensures a config subfolder
+and config.json exist (writing defaults if needed), and stores the data
+and config paths in the global StateManager.
+"""
+
 module_prefix = "[Data]"
 
 default_config = {

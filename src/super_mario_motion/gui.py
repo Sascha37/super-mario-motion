@@ -17,6 +17,13 @@ from super_mario_motion import collect, game_launcher, path_helper as ph, \
     vision, vision_ml
 from super_mario_motion.state import StateManager
 
+"""
+Creates the Tkinter window, webcam and pose previews, gamepad visualization,
+mode selection (Simple, Full-body, Collect) and control scheme selection.
+Handles automated pose-sample collection runs, help/document opening, and
+launching the configured game or web version.
+"""
+
 pose = ""
 
 array = None
