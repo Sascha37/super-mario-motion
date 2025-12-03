@@ -31,12 +31,13 @@ allow_debug_info, send_keystrokes, checkbox_toggle_inputs = None, None, None
 (label_virtual_gamepad_visualizer, label_pose_visualizer, label_current_pose,
  label_debug_landmarks) = None, None, None, None
 button_collect_start, label_collect_status = None, None
-geometry_normal, geometry_collect, screen_width, screen_height = None, None, None, None
+geometry_normal, geometry_collect, screen_width, screen_height = (None, None,
+                                                                  None, None)
 
 # Webcam preview
 webcam_image_width = 612
 webcam_image_height = 408
-collect_scale = 1.3
+collect_scale = 1.1
 
 # Gamepad
 gamepad_image_width = 200
@@ -169,7 +170,9 @@ def init():
     if system == ("Linux"):
         try:
             cmd = "xrandr | grep ' connected primary' | cut -d' ' -f4"
-            geometry_collect = subprocess.check_output(cmd, shell=True, text=True).strip()
+            geometry_collect = subprocess.check_output(
+                cmd, shell=True, text=True
+                ).strip()
         except subprocess.CalledProcessError as e:
             print(f"[GUI] Could not get resolution on Linux {e}")
             geometry_normal = "1920x1080+0+0"
@@ -335,7 +338,7 @@ def init():
     def update_launch_button_state():
         scheme = selected_control_scheme.get()
         if ((scheme == "Original (RetroArch)" and not
-        game_launcher.retro_paths_valid) or (
+            game_launcher.retro_paths_valid) or (
                 scheme == "Custom" and not game_launcher.custom_path_valid)):
             button_launch_game.state(["disabled"])
         else:
@@ -688,7 +691,8 @@ def apply_mode(mode: str):
             window.geometry(geometry_normal)
             center_window(window_width, window_height)
         else:
-            screen_width_linux, screen_height_linux = geometry_collect.split("+")[0].split("x")
+            screen_width_linux, screen_height_linux = \
+                geometry_collect.split("+")[0].split("x")
             swl = int(screen_width_linux)
             shl = int(screen_height_linux)
             posx = (swl - window_width) // 2
