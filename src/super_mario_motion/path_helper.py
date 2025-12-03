@@ -1,11 +1,11 @@
-import os
-import sys
-
 """
 Resolve resource file paths for both normal execution and PyInstaller builds.
 Returns absolute paths that work whether files live next to the script or in
 the temporary _MEIPASS directory of a packaged executable.
 """
+
+import os
+import sys
 
 
 def resource_path(rel_path):

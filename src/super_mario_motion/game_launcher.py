@@ -1,3 +1,9 @@
+"""
+Utility module for initializing RetroArch paths, validating configuration,
+building platform-specific launch commands, and starting the selected game
+(RetroArch, custom executable, or web version).
+"""
+
 import json
 import subprocess
 import webbrowser
@@ -6,11 +12,6 @@ from sys import platform
 
 from super_mario_motion.state import StateManager
 
-"""
-Utility module for initializing RetroArch paths, validating configuration,
-building platform-specific launch commands, and starting the selected game
-(RetroArch, custom executable, or web version).
-"""
 
 module_log_prefix = "[Launcher]"
 

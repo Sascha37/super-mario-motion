@@ -1,3 +1,11 @@
+"""
+Unit tests for rule-based pose detection.
+
+Constructs synthetic landmark configurations to verify that
+`detect_pose_simple` returns the correct pose labels for standing,
+walking, running, jumping, crouching, throwing, and swimming cases.
+"""
+
 import numpy as np
 
 from super_mario_motion.vision import detect_pose_simple, eye_left, \

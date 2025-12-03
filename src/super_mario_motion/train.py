@@ -1,3 +1,11 @@
+"""
+Train and evaluate the pose classification model from collected CSV data.
+
+Combines multiple run CSVs, loads features/labels, performs a train/test
+split, runs a PCA+SVM pipeline with hyperparameter search, prints metrics,
+and saves the best estimator to disk.
+"""
+
 from pathlib import Path
 
 import numpy as np
@@ -8,14 +16,6 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
-
-"""
-Train and evaluate the pose classification model from collected CSV data.
-
-Combines multiple run CSVs, loads features/labels, performs a train/test
-split, runs a PCA+SVM pipeline with hyperparameter search, prints metrics,
-and saves the best estimator to disk.
-"""
 
 CSV_PATH = Path(__file__).parent.parent.parent / "data" / "pose_samples.csv"
 MODEL_PATH = Path(__file__).parent.parent.parent / "data" / "pose_model.joblib"

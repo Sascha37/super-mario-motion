@@ -1,11 +1,3 @@
-import sys
-
-import cv2 as cv
-
-from super_mario_motion import gamepad_visualiser, gui, input, user_data, \
-    vision, vision_ml, game_launcher
-from super_mario_motion.state import StateManager
-
 """
 Application entry point for Super Mario Motion.
 
@@ -14,6 +6,15 @@ input handling and the Tkinter GUI. Verifies webcam availability and runs
 the main periodic update loop that ties pose prediction, input sending,
 and GUI updates together.
 """
+
+import sys
+
+import cv2 as cv
+
+from super_mario_motion import gamepad_visualiser, gui, input, user_data, \
+    vision, vision_ml, game_launcher
+from super_mario_motion.state import StateManager
+
 
 def webcam_is_available():
     """Check if a webcam is available on index 0.

@@ -1,3 +1,9 @@
+"""
+Collects pose-sample data via MediaPipe Pose and writes feature rows to a CSV file.
+Provides a CLI for selecting label, duration, FPS, frame source (vision or camera),
+and output file. Used to record training data for pose-based models.
+"""
+
 import argparse
 import csv
 import time
@@ -10,11 +16,6 @@ import numpy as np
 from super_mario_motion.pose_features import extract_features
 from super_mario_motion.state import StateManager
 
-"""
-Collects pose-sample data via MediaPipe Pose and writes feature rows to a CSV file.
-Provides a CLI for selecting label, duration, FPS, frame source (vision or camera),
-and output file. Used to record training data for pose-based models.
-"""
 
 # Init StateManager
 state_manger = StateManager()
