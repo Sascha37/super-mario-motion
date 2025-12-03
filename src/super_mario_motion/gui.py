@@ -515,12 +515,12 @@ def init():
 
     # Start Collecting ttk Button
     button_collect_start = ttk.Button(
-        root_frame,
+        frame_bottom_right,
         text="Start collecting",
         command=start_collect_sequence,
         style="Custom.TButton"
         )
-    button_collect_start.grid(row=3, column=0, columnspan=2, pady=(10, 0))
+    button_collect_start.grid(row=0, column=0, columnspan=2, pady=(10, 0))
     button_collect_start.grid_remove()
 
     print(Path(__file__).name + " initialized")
