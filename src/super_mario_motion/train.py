@@ -1,3 +1,11 @@
+"""
+Train and evaluate the pose classification model from collected CSV data.
+
+Combines multiple run CSVs, loads features/labels, performs a train/test
+split, runs a PCA+SVM pipeline with hyperparameter search, prints metrics,
+and saves the best estimator to disk.
+"""
+
 from pathlib import Path
 
 import numpy as np
@@ -19,7 +27,7 @@ def combine_run_csvs(
         ) -> Path:
     """Combine multiple collected run CSVs into a single CSV file.
 
-    Existing output file is removed first. Header rows in subsequent files
+    Existing output file is removed first. Header rows in the following files
     (starting with 'label,') are skipped.
 
     Args:
@@ -62,7 +70,7 @@ def load_csv(csv_path: Path):
     Returns:
         tuple[np.ndarray, np.ndarray]:
             x: Feature matrix of shape (n_samples, n_features), dtype float32.
-            y: Label array of shape (n_samples,), dtype object/str.
+            y: Label array of shape (n_samples), dtype object/str.
     """
     labels, feats = [], []
     with open(csv_path) as f:
@@ -89,9 +97,9 @@ def main():
       * Print best parameters, classification report and confusion matrix.
       * Save the best estimator to MODEL_PATH.
     """
-    # if not CSV_PATH.exists():
-    #    raise FileNotFoundError(f"{CSV_PATH} not found. Collect data first
-    #    with collect.py.")
+    if not CSV_PATH.exists():
+        raise FileNotFoundError(f"{CSV_PATH} not found. Collect data first"
+                                f" with collect.py.")
     training_csv = combine_run_csvs()
     x, y = load_csv(training_csv)
     s_train, s_test, y_train, y_test = train_test_split(

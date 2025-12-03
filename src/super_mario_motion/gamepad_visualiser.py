@@ -1,9 +1,16 @@
+"""
+Utilities for mapping pose labels to virtual gamepad inputs and rendering
+a gamepad image with highlighted buttons. Provides functions to load the
+base controller image, translate poses into button presses, and draw
+visual overlays indicating active inputs.
+"""
 import os
 from typing import Iterable, List
 
 from PIL import Image, ImageDraw
 
 from super_mario_motion import path_helper as ph
+
 
 GAMEPAD_PATH = ph.resource_path(os.path.join("images", "gamepad.png"))
 
@@ -122,7 +129,7 @@ def create_gamepad_image(
     Args:
         pose: Pose label that will be mapped to button presses.
         send_active: If False, no buttons are highlighted even if the pose
-            would trigger them.
+            triggers them.
         base_image_: Optional base image to draw on. If None, the default
             gamepad image from disk is used.
 
