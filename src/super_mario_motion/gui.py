@@ -688,7 +688,6 @@ def apply_mode(mode: str):
             window.geometry(geometry_normal)
             center_window(window_width, window_height)
         else:
-            print(geometry_collect)
             screen_width_linux, screen_height_linux = geometry_collect.split("+")[0].split("x")
             swl = int(screen_width_linux)
             shl = int(screen_height_linux)
