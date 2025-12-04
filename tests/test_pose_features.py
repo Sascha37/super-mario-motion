@@ -45,4 +45,3 @@ def test_extract_features():
     assert feats.ndim == 1
     assert feats.dtype == np.float32
     assert len(feats) > 2*N_LM
-
