@@ -75,7 +75,7 @@ def pose_to_buttons(pose: str) -> List[str]:
             return ["DPAD_DOWN"]
         case "throwing":
             return ["B"]
-        case "jumping":
+        case "jumping" | "swimming":
             return ["A",
                     "DPAD_RIGHT" if last_orientation == "right" else
                     "DPAD_LEFT"]
