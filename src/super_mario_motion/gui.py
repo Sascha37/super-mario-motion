@@ -259,6 +259,20 @@ def init():
         sticky="nsew"
         )
 
+    button_config = ttk.Button(
+        frame_bottom_left,
+        text="edit config",
+        command=open_config,
+        style="Custom.TButton",
+        )
+
+    button_config.grid(
+        row=1,
+        column=0,
+        columnspan=2,
+        sticky="nsew"
+        )
+
     # Separator
     separator = ttk.Separator(
         frame_bottom_left,
@@ -266,7 +280,7 @@ def init():
         style="Custom.TSeparator"
         )
     separator.grid(
-        row=1,
+        row=2,
         column=0,
         columnspan=2,
         stick="ew",
@@ -338,7 +352,7 @@ def init():
     def update_launch_button_state():
         scheme = selected_control_scheme.get()
         if ((scheme == "Original (RetroArch)" and not
-            game_launcher.retro_paths_valid) or (
+        game_launcher.retro_paths_valid) or (
                 scheme == "Custom" and not game_launcher.custom_path_valid)):
             button_launch_game.state(["disabled"])
         else:
@@ -916,6 +930,29 @@ def open_help_menu():
         target=open_browser, args=(help_file_path,),
         daemon=True
         ).start()
+
+
+def open_config():
+    """Open the config file in the system's default editor/viewer.
+
+    Uses os.startfile on Windows, 'open' on macOS, and 'xdg-open' on Linux.
+    The actual editor depends on the user's file associations.
+    """
+    config_path = Path(state_manager.get_config_path())
+
+    def _open():
+        system = platform.system()
+        try:
+            if system == "Windows":
+                os.startfile(str(config_path))
+            elif system == "Darwin":
+                subprocess.Popen(["open", str(config_path)])
+            else:
+                subprocess.Popen(["xdg-open", str(config_path)])
+        except Exception as e:
+            print(f"[GUI] Could not open config: {e}")
+
+    threading.Thread(target=_open, daemon=True).start()
 
 
 def center_window(w, h):
