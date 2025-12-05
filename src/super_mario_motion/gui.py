@@ -117,7 +117,7 @@ def init():
         label_debug_landmarks
     global button_collect_start, label_collect_status
     global geometry_normal, geometry_collect, screen_width, screen_height
-    global font_collect_normal, font_collect_large
+    global font_collect_normal, font_collect_large, window_width, window_height
 
     window = tk.Tk()
     window.title('Super Mario Motion')
@@ -525,6 +525,31 @@ def init():
         )
     button_collect_start.grid(row=0, column=0, columnspan=2, pady=(10, 0))
     button_collect_start.grid_remove()
+
+    if system == "Darwin":
+        # Ensure the window is large enough for all widgets and center it
+        # This is especially important on macOS where controls can be wider
+        window.update_idletasks()
+        required_w = window.winfo_reqwidth()
+        required_h = window.winfo_reqheight()
+
+        final_w = max(window_width, required_w)
+        final_h = max(window_height, required_h)
+
+        # Update globals so other functions (e.g. apply_mode) use the final size
+        window_width = final_w
+        window_height = final_h
+
+        # Recompute geometry_normal centered on the current screen
+        sw = window.winfo_screenwidth()
+        sh = window.winfo_screenheight()
+        x = (sw - final_w) // 2
+        y = (sh - final_h) // 2
+        geometry_normal = f"{final_w}x{final_h}+{x}+{y}"
+
+        window.geometry(geometry_normal)
+        window.minsize(final_w, final_h)
+        window.resizable(False, False)
 
     print(Path(__file__).name + " initialized")
 
