@@ -16,38 +16,34 @@ from super_mario_motion.state import StateManager
 
 module_prefix = "[Data]"
 
-default_config = {
-    "emu-path": "null",
-    "rom-path": "null",
-    "custom-game-path": "null",
-
-    "custom_key_mapping": {
-        "jump": "space",
-        "run_throw": "shift",
-        "left": "a",
-        "right": "d",
-        "down": "s"
-        }
-    }
+default_config = "null"
 
 state_manager = StateManager()
 
 
 def init():
     # Checks the OS of the User
+    global default_config
     user_os = (platform.system().lower())
     print(f"{module_prefix} Using {user_os} operating system.")
 
     # Get path to the data folder relative to os
     def get_data_path(platform_):
+        global default_emu_path,default_rom_path
         match platform_:
             case "windows":
+                default_emu_path = r"C:\Program Files (x86)\SteamLibrary\steamapps\common\RetroArch"
+                default_rom_path = r"C:\Program Files (x86)\SteamLibrary\steamapps\common\RetroArch\downloads\Super Mario Bros. (World).nes"
                 return os.path.join(os.getenv("APPDATA"), "SuperMarioMotion")
             case "darwin":
+                default_emu_path = "/Users/silas/Library/Application Support/Steam/steamapps/common/RetroArch"
+                default_rom_path = "/Users/silas/Library/Application Support/Steam/steamapps/common/RetroArch/downloads/Super Mario Bros. (World).nes"
                 return os.path.expanduser(
                     "~/Library/Application Support/SuperMarioMotion"
                     )
             case "linux":
+                default_emu_path = "~/.steam/root/steamapps/common/RetroArch"
+                default_rom_path = "~/.steam/root/steamapps/common/RetroArch/downloads/Super Mario Bros. (World).nes"
                 return os.path.expanduser("~/.local/share/supermariomotion")
             case _:
                 raise Exception(
@@ -55,6 +51,19 @@ def init():
                     )
 
     data_path = get_data_path(user_os)
+    default_config = {
+        "emu-path": f"{default_emu_path}",
+        "rom-path": f"{default_rom_path}",
+        "custom-game-path": "null",
+
+        "custom_key_mapping": {
+            "jump": "space",
+            "run_throw": "shift",
+            "left": "a",
+            "right": "d",
+            "down": "s"
+            }
+        }
     print(f"{module_prefix} Searching for default path: {data_path}")
 
     # Checks if local directory exists
