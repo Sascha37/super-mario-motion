@@ -231,9 +231,14 @@ def init():
         sticky="ne"
         )
 
+    buttons_frame = tk.Frame(frame_bottom_left, bg=color_dark_widget)
+    buttons_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
+    buttons_frame.columnconfigure(0, weight=1)
+    buttons_frame.columnconfigure(1, weight=1)
+
     # Button "Launch Game"
     button_launch_game = ttk.Button(
-        frame_bottom_left,
+        buttons_frame,
         text="Launch Game",
         command=start_game_button_action,
         style="Custom.TButton"
@@ -247,7 +252,7 @@ def init():
 
     # Button "Help"
     button_help = ttk.Button(
-        frame_bottom_left,
+        buttons_frame,
         text="Help",
         command=open_help_menu,
         style="Custom.TButton"
@@ -260,7 +265,7 @@ def init():
         )
 
     button_config = ttk.Button(
-        frame_bottom_left,
+        buttons_frame,
         text="edit config",
         command=open_config,
         style="Custom.TButton",
@@ -280,7 +285,7 @@ def init():
         style="Custom.TSeparator"
         )
     separator.grid(
-        row=2,
+        row=1,
         column=0,
         columnspan=2,
         stick="ew",
