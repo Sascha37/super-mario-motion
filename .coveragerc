@@ -1,4 +1,14 @@
 [run]
-source=.
+source = super_mario_motion
+omit =
+    */tests/*
+    */venv/*
+    */.venv/*
+    */docs/*
+    */build/*
+    */dist/*
+    */.idea/*
+    */.github/*
+
 [report]
-ignore_errors = true
+ignore_errors = True

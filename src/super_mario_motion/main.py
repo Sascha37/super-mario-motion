@@ -11,7 +11,7 @@ import sys
 
 import cv2 as cv
 
-from super_mario_motion import game_launcher, gamepad_visualiser, gui, input, \
+from super_mario_motion import game_launcher, gamepad_visualizer, gui, input, \
     user_data, vision, vision_ml
 from super_mario_motion.state import StateManager
 
@@ -73,7 +73,7 @@ def update():
         else current_pose
         )
     send_active = state_manager.get_send_permission()
-    gamepad_img = gamepad_visualiser.create_gamepad_image(
+    gamepad_img = gamepad_visualizer.create_gamepad_image(
         pose_for_gamepad, send_active=send_active
         )
     gui.set_gamepad_image(gamepad_img)

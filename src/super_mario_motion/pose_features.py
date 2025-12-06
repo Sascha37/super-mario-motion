@@ -33,9 +33,17 @@ def _angle(a, b, c):
         float: Angle at point b in degrees.
     """
     ba, bc = a - b, c - b
-    length_product = (np.linalg.norm(ba) * np.linalg.norm(bc)) + 1e-6
-    angle_cosine = np.dot(ba, bc) / length_product
-    return np.degrees(np.arccos(np.clip(angle_cosine, -1.0, 1.0)))
+    norm_ba = np.linalg.norm(ba)
+    norm_bc = np.linalg.norm(bc)
+
+    if norm_ba == 0 or norm_bc == 0:
+        return 0.0
+
+    length_prod = norm_ba * norm_bc
+    angle_cosine = np.dot(ba, bc) / length_prod
+    angle_cosine = np.clip(angle_cosine, -1.0, 1.0)
+
+    return float(np.degrees(np.arccos(angle_cosine)))
 
 
 def extract_features(lm_arr: np.ndarray) -> np.ndarray:
