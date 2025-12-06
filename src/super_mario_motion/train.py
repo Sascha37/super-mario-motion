@@ -17,7 +17,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
-CSV_PATH = Path(__file__).parent.parent.parent / "data" / "pose_samples.csv"
+CSV_PATH = Path(__file__).parent.parent.parent / "data"
 MODEL_PATH = Path(__file__).parent.parent.parent / "data" / "pose_model.joblib"
 
 
