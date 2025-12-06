@@ -36,14 +36,14 @@ def init():
                 default_rom_path = r"C:\Program Files (x86)\SteamLibrary\steamapps\common\RetroArch\downloads\Super Mario Bros. (World).nes"
                 return os.path.join(os.getenv("APPDATA"), "SuperMarioMotion")
             case "darwin":
-                default_emu_path = "/Users/silas/Library/Application Support/Steam/steamapps/common/RetroArch"
-                default_rom_path = "/Users/silas/Library/Application Support/Steam/steamapps/common/RetroArch/downloads/Super Mario Bros. (World).nes"
+                default_emu_path = os.path.expanduser("~/Library/Application Support/Steam/steamapps/common/RetroArch")
+                default_rom_path = os.path.expanduser("~/Library/Application Support/Steam/steamapps/common/RetroArch/downloads/Super Mario Bros. (World).nes")
                 return os.path.expanduser(
                     "~/Library/Application Support/SuperMarioMotion"
                     )
             case "linux":
-                default_emu_path = "~/.steam/root/steamapps/common/RetroArch"
-                default_rom_path = "~/.steam/root/steamapps/common/RetroArch/downloads/Super Mario Bros. (World).nes"
+                default_emu_path = os.path.expanduser("~/.steam/root/steamapps/common/RetroArch")
+                default_rom_path = os.path.expanduser("~/.steam/root/steamapps/common/RetroArch/downloads/Super Mario Bros. (World).nes")
                 return os.path.expanduser("~/.local/share/supermariomotion")
             case _:
                 raise Exception(
