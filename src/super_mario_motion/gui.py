@@ -9,9 +9,11 @@ import getpass
 import os
 import platform
 import random
+import subprocess
 import sys
 import threading
 import tkinter as tk
+import tkinter.font as tkfont
 import webbrowser
 from datetime import datetime
 from pathlib import Path
@@ -29,16 +31,20 @@ pose = ""
 array = None
 window = None
 frame_bottom_left, frame_bottom_right = None, None
+root_frame = None
 label_webcam = None
 selected_preview, selected_mode, selected_control_scheme = None, None, None
 allow_debug_info, send_keystrokes, checkbox_toggle_inputs = None, None, None
 (label_virtual_gamepad_visualizer, label_pose_visualizer, label_current_pose,
  label_debug_landmarks) = None, None, None, None
 button_collect_start, label_collect_status = None, None
+geometry_normal, geometry_collect, screen_width, screen_height = (None, None,
+                                                                  None, None)
 
 # Webcam preview
 webcam_image_width = 612
 webcam_image_height = 408
+collect_scale = 1.1
 
 # Gamepad
 gamepad_image_width = 200
@@ -108,7 +114,7 @@ def init():
     This sets up layout, styles, default images, and registers callbacks
     for mode selection, buttons, and window close events.
     """
-    global window
+    global window, root_frame
     global frame_bottom_left, frame_bottom_right
     global label_webcam
     global selected_preview, selected_mode, selected_control_scheme
@@ -117,14 +123,18 @@ def init():
         label_current_pose, \
         label_debug_landmarks
     global button_collect_start, label_collect_status
+    global geometry_normal, geometry_collect, screen_width, screen_height
+    global font_collect_normal, font_collect_large, window_width, window_height
 
     window = tk.Tk()
     window.title('Super Mario Motion')
     window.minsize(window_width, window_height)
-    #  window.maxsize(window_width, window_height)
+    window.resizable(False, False)
     window.configure(background=color_background)
 
     window.protocol("WM_DELETE_WINDOW", close)
+    root_frame = tk.Frame(window, bg=color_background)
+    root_frame.pack(expand=True)
 
     # always open the gui in the center of the screen
     system = platform.system()
@@ -152,14 +162,27 @@ def init():
     if system in ("Windows", "Darwin"):  # calculation for Windows and macOS
         window.withdraw()
         window.update_idletasks()
+        center_window(window_width, window_height)
 
         screen_width = window.winfo_screenwidth()
         screen_height = window.winfo_screenheight()
         x = (screen_width - window_width) // 2
         y = (screen_height - window_height) // 2
+        geometry_normal = f"{window_width}x{window_height}+{x}+{y}"
+        geometry_collect = f"{screen_width}x{screen_height}+0+0"
 
-        window.geometry(f"{window_width}x{window_height}+{x}+{y}")
+        window.geometry(geometry_normal)
         window.deiconify()
+
+    if system == ("Linux"):
+        try:
+            cmd = "xrandr | grep ' connected primary' | cut -d' ' -f4"
+            geometry_collect = subprocess.check_output(
+                cmd, shell=True, text=True
+                ).strip()
+        except subprocess.CalledProcessError as e:
+            print(f"[GUI] Could not get resolution on Linux {e}")
+            geometry_normal = "1920x1080+0+0"
 
     if system == "Darwin":
         # always open the gui on top of all other windows for macOS
@@ -192,7 +215,7 @@ def init():
         sys.exit(1)
 
     # Image Label for the preview of the webcam
-    label_webcam = tk.Label(window, image=image_webcam_sample, bd=0)
+    label_webcam = tk.Label(root_frame, image=image_webcam_sample, bd=0)
     label_webcam.image = image_webcam_sample
     label_webcam.grid(
         row=0,
@@ -203,21 +226,26 @@ def init():
         )
 
     # Frame Bottom Left
-    frame_bottom_left = tk.Frame(window, bg=color_dark_widget)
+    frame_bottom_left = tk.Frame(root_frame, bg=color_dark_widget)
     # Widgets on these rows expand evenly
     frame_bottom_left.columnconfigure(0, weight=1)
     frame_bottom_left.columnconfigure(1, weight=1)
     frame_bottom_left.grid(
         row=1,
         column=0,
-        padx=(horizontal_padding, 0),
+        padx=(horizontal_padding, 25),
         pady=frame_padding_y,
-        sticky="nw"
+        sticky="ne"
         )
+
+    buttons_frame = tk.Frame(frame_bottom_left, bg=color_dark_widget)
+    buttons_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
+    buttons_frame.columnconfigure(0, weight=1)
+    buttons_frame.columnconfigure(1, weight=1)
 
     # Button "Launch Game"
     button_launch_game = ttk.Button(
-        frame_bottom_left,
+        buttons_frame,
         text="Launch Game",
         command=start_game_button_action,
         style="Custom.TButton"
@@ -231,7 +259,7 @@ def init():
 
     # Button "Help"
     button_help = ttk.Button(
-        frame_bottom_left,
+        buttons_frame,
         text="Help",
         command=open_help_menu,
         style="Custom.TButton"
@@ -240,6 +268,20 @@ def init():
     button_help.grid(
         row=0,
         column=1,
+        sticky="nsew"
+        )
+
+    button_config = ttk.Button(
+        buttons_frame,
+        text="edit config",
+        command=open_config,
+        style="Custom.TButton",
+        )
+
+    button_config.grid(
+        row=1,
+        column=0,
+        columnspan=2,
         sticky="nsew"
         )
 
@@ -322,7 +364,7 @@ def init():
     def update_launch_button_state():
         scheme = selected_control_scheme.get()
         if ((scheme == "Original (RetroArch)" and not
-            game_launcher.retro_paths_valid) or (
+        game_launcher.retro_paths_valid) or (
                 scheme == "Custom" and not game_launcher.custom_path_valid)):
             button_launch_game.state(["disabled"])
         else:
@@ -442,13 +484,13 @@ def init():
         )
 
     # Frame bottom right
-    frame_bottom_right = tk.Frame(window, bg=color_dark_widget)
+    frame_bottom_right = tk.Frame(root_frame, bg=color_dark_widget)
     frame_bottom_right.grid(
         row=1,
         column=1,
         padx=(0, horizontal_padding),
         pady=frame_padding_y,
-        sticky="ne"
+        sticky="nw"
         )
 
     # gamepad
@@ -490,23 +532,51 @@ def init():
 
     # Text Label for the collection status, visible during collect mode
     global label_collect_status, button_collect_start
+    font_collect_normal = tkfont.Font(family="Consolas", size=25)
+    font_collect_large = tkfont.Font(family="Consolas", size=58)
     label_collect_status = tk.Label(
-        window, bg=color_background,
+        root_frame, bg=color_background,
         fg=color_white,
-        font=("Consolas", 25)
+        font=font_collect_normal,
+        width=23
         )
     label_collect_status.grid(row=2, column=0, columnspan=2, pady=(20, 0))
     label_collect_status.grid_remove()
 
     # Start Collecting ttk Button
     button_collect_start = ttk.Button(
-        window,
+        frame_bottom_right,
         text="Start collecting",
         command=start_collect_sequence,
         style="Custom.TButton"
         )
-    button_collect_start.grid(row=3, column=0, columnspan=2, pady=(10, 0))
+    button_collect_start.grid(row=0, column=0, columnspan=2, pady=(10, 0))
     button_collect_start.grid_remove()
+
+    if system == "Darwin":
+        # Ensure the window is large enough for all widgets and center it
+        # This is especially important on macOS where controls can be wider
+        window.update_idletasks()
+        required_w = window.winfo_reqwidth()
+        required_h = window.winfo_reqheight()
+
+        final_w = max(window_width, required_w)
+        final_h = max(window_height, required_h)
+
+        # Update globals so other functions (e.g. apply_mode) use the final size
+        window_width = final_w
+        window_height = final_h
+
+        # Recompute geometry_normal centered on the current screen
+        sw = window.winfo_screenwidth()
+        sh = window.winfo_screenheight()
+        x = (sw - final_w) // 2
+        y = (sh - final_h) // 2
+        geometry_normal = f"{final_w}x{final_h}+{x}+{y}"
+
+        window.geometry(geometry_normal)
+        window.minsize(final_w, final_h)
+        window.resizable(False, False)
 
     print(Path(__file__).name + " initialized")
 
@@ -540,7 +610,15 @@ def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
     # calculate the source and destination image ratios
     img = Image.fromarray(array)
     src_w, src_h = img.size
-    dst_w, dst_h = webcam_image_width, webcam_image_height
+    dst_w_base, dst_h_base = webcam_image_width, webcam_image_height
+    if selected_mode is not None and selected_mode.get() == "Collect":
+        scale = collect_scale
+    else:
+        scale = 1.0
+
+    dst_w = int(dst_w_base * scale)
+    dst_h = int(dst_h_base * scale)
+
     src_ratio = src_w / src_h
     dst_ratio = dst_w / dst_h
 
@@ -633,10 +711,20 @@ def apply_mode(mode: str):
     global label_virtual_gamepad_visualizer, label_pose_visualizer, \
         label_current_pose
     global checkbox_toggle_inputs, allow_debug_info, send_keystrokes
+    global geometry_normal, geometry_collect
 
     if mode == "Collect":
         allow_debug_info.set(1)
         send_keystrokes.set(0)
+        window.resizable(True, True)
+        if platform.system() != "Darwin":
+            if geometry_collect is not None:
+                window.geometry(geometry_collect)
+        elif platform.system() == "Darwin":
+            window.state("zoomed")
+        window.resizable(False, False)
+
+        label_collect_status.configure(font=font_collect_large)
 
         # Hide widgets that are not relevant
         checkbox_toggle_inputs.grid_remove()
@@ -650,6 +738,22 @@ def apply_mode(mode: str):
         _set_collect_button(starting=False)
 
     else:
+        if platform.system() != "Linux":
+            window.resizable(True, True)
+            window.geometry(geometry_normal)
+            center_window(window_width, window_height)
+        else:
+            screen_width_linux, screen_height_linux = \
+                geometry_collect.split("+")[0].split("x")
+            swl = int(screen_width_linux)
+            shl = int(screen_height_linux)
+            posx = (swl - window_width) // 2
+            posy = (shl - window_height) // 2
+            window.geometry(f"{window_width}x{window_height}+{posx}+{posy}")
+
+        window.resizable(False, False)
+        label_collect_status.configure(font=font_collect_normal)
+
         checkbox_toggle_inputs.grid()
 
         # Display play mode specific widgets
@@ -764,7 +868,7 @@ def show_collect_countdown(n: int, pose_name: str, seconds: float, index: int):
         return
     if n == 0:
         label_collect_status.config(
-            text=f"Recording: {pose_name} ({int(seconds)}s)"
+            text=f"Rec: {pose_name} ({int(seconds)}s)"
             )
         if not collect_stop:
             threading.Thread(
@@ -787,7 +891,7 @@ def show_recording_countdown(remaining: int, pose_name: str, index: int):
         return
     if remaining <= 0:
         return
-    label_collect_status.config(text=f"Recording: {pose_name} ({remaining}s)")
+    label_collect_status.config(text=f"Rec: {pose_name} ({remaining}s)")
     _schedule_after(
         1000, show_recording_countdown, remaining - 1, pose_name,
         index
@@ -839,6 +943,37 @@ def open_help_menu():
         target=open_browser, args=(help_file_path,),
         daemon=True
         ).start()
+
+
+def open_config():
+    """Open the config file in the system's default editor/viewer.
+
+    Uses os.startfile on Windows, 'open' on macOS, and 'xdg-open' on Linux.
+    The actual editor depends on the user's file associations.
+    """
+    config_path = Path(state_manager.get_config_path())
+
+    def _open():
+        system = platform.system()
+        try:
+            if system == "Windows":
+                os.startfile(str(config_path))
+            elif system == "Darwin":
+                subprocess.Popen(["open", str(config_path)])
+            else:
+                subprocess.Popen(["xdg-open", str(config_path)])
+        except Exception as e:
+            print(f"[GUI] Could not open config: {e}")
+
+    threading.Thread(target=_open, daemon=True).start()
+
+
+def center_window(w, h):
+    sw = window.winfo_screenwidth()
+    sh = window.winfo_screenheight()
+    x = (sw - w) // 2
+    y = (sh - h) // 2
+    window.geometry(f"{w}x{h}+{x}+{y}")
 
 
 # os.path.join("images","webcam_sample.jpg")
