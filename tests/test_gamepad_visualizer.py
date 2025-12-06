@@ -55,9 +55,7 @@ def test_draw_highlight_overlay():
         )
 
     res_image2 = gv.create_gamepad_image(
-        pose="walking_right",
-        send_active=True,
-        base_image_=image
+        pose="walking_right", base_image_=image
         )
 
     assert image.mode == 'RGBA'

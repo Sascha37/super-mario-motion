@@ -17,7 +17,6 @@ import numpy as np
 
 from super_mario_motion.state import StateManager
 
-
 # globals
 lm_string = None
 skeleton_only_frame = None

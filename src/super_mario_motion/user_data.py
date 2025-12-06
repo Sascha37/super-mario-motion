@@ -13,6 +13,7 @@ import sys
 
 from super_mario_motion.state import StateManager
 
+default_emu_path, default_rom_path = "null", "null"
 
 module_prefix = "[Data]"
 
@@ -23,27 +24,44 @@ state_manager = StateManager()
 
 def init():
     # Checks the OS of the User
-    global default_config
+    global default_config, default_emu_path, default_rom_path
     user_os = (platform.system().lower())
     print(f"{module_prefix} Using {user_os} operating system.")
 
     # Get path to the data folder relative to os
     def get_data_path(platform_):
-        global default_emu_path,default_rom_path
+        global default_emu_path, default_rom_path
         match platform_:
             case "windows":
-                default_emu_path = r"C:\Program Files (x86)\SteamLibrary\steamapps\common\RetroArch"
-                default_rom_path = r"C:\Program Files (x86)\SteamLibrary\steamapps\common\RetroArch\downloads\Super Mario Bros. (World).nes"
+                default_emu_path = (r"C:\Program Files ("
+                                    r"x86)\SteamLibrary\steamapps\common"
+                                    r"\RetroArch")
+                default_rom_path = (r"C:\Program Files ("
+                                    r"x86)\SteamLibrary\steamapps\common"
+                                    r"\RetroArch\downloads\Super Mario Bros. "
+                                    r"(World).nes")
                 return os.path.join(os.getenv("APPDATA"), "SuperMarioMotion")
             case "darwin":
-                default_emu_path = os.path.expanduser("~/Library/Application Support/Steam/steamapps/common/RetroArch")
-                default_rom_path = os.path.expanduser("~/Library/Application Support/Steam/steamapps/common/RetroArch/downloads/Super Mario Bros. (World).nes")
+                default_emu_path = os.path.expanduser(
+                    "~/Library/Application "
+                    "Support/Steam/steamapps/common/RetroArch"
+                    )
+                default_rom_path = os.path.expanduser(
+                    "~/Library/Application "
+                    "Support/Steam/steamapps/common/RetroArch/downloads"
+                    "/Super Mario Bros. (World).nes"
+                    )
                 return os.path.expanduser(
                     "~/Library/Application Support/SuperMarioMotion"
                     )
             case "linux":
-                default_emu_path = os.path.expanduser("~/.steam/root/steamapps/common/RetroArch")
-                default_rom_path = os.path.expanduser("~/.steam/root/steamapps/common/RetroArch/downloads/Super Mario Bros. (World).nes")
+                default_emu_path = os.path.expanduser(
+                    "~/.steam/root/steamapps/common/RetroArch"
+                    )
+                default_rom_path = os.path.expanduser(
+                    "~/.steam/root/steamapps/common/RetroArch/downloads"
+                    "/Super Mario Bros. (World).nes"
+                    )
                 return os.path.expanduser("~/.local/share/supermariomotion")
             case _:
                 raise Exception(

@@ -14,7 +14,6 @@ from pathlib import Path
 
 from super_mario_motion.state import StateManager
 
-
 module_prefix = "[Input]"
 
 state_manager = StateManager()

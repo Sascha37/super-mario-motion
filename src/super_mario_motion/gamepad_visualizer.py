@@ -11,7 +11,6 @@ from PIL import Image, ImageDraw
 
 from super_mario_motion import path_helper as ph
 
-
 GAMEPAD_PATH = ph.resource_path(os.path.join("images", "gamepad.png"))
 
 BUTTON_POSITIONS = {
