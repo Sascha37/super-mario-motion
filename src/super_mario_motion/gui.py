@@ -526,11 +526,12 @@ def init():
     # Text Label for the collection status, visible during collect mode
     global label_collect_status, button_collect_start
     font_collect_normal = tkfont.Font(family="Consolas", size=25)
-    font_collect_large = tkfont.Font(family="Consolas", size=60)
+    font_collect_large = tkfont.Font(family="Consolas", size=58)
     label_collect_status = tk.Label(
         root_frame, bg=color_background,
         fg=color_white,
-        font=font_collect_normal
+        font=font_collect_normal,
+        width=23
         )
     label_collect_status.grid(row=2, column=0, columnspan=2, pady=(20, 0))
     label_collect_status.grid_remove()
@@ -860,7 +861,7 @@ def show_collect_countdown(n: int, pose_name: str, seconds: float, index: int):
         return
     if n == 0:
         label_collect_status.config(
-            text=f"Recording: {pose_name} ({int(seconds)}s)"
+            text=f"Rec: {pose_name} ({int(seconds)}s)"
             )
         if not collect_stop:
             threading.Thread(
@@ -883,7 +884,7 @@ def show_recording_countdown(remaining: int, pose_name: str, index: int):
         return
     if remaining <= 0:
         return
-    label_collect_status.config(text=f"Recording: {pose_name} ({remaining}s)")
+    label_collect_status.config(text=f"Rec: {pose_name} ({remaining}s)")
     _schedule_after(
         1000, show_recording_countdown, remaining - 1, pose_name,
         index
