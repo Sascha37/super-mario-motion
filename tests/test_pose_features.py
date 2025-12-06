@@ -1,7 +1,7 @@
-import pytest
 import numpy as np
+import pytest
 
-from super_mario_motion.pose_features import _mid, _angle, extract_features
+from super_mario_motion.pose_features import _angle, _mid, extract_features
 
 N_LM = 33
 
@@ -44,4 +44,4 @@ def test_extract_features():
 
     assert feats.ndim == 1
     assert feats.dtype == np.float32
-    assert len(feats) > 2*N_LM
+    assert len(feats) > 2 * N_LM

@@ -8,7 +8,6 @@ pairwise distances plus visibility values.
 
 import numpy as np
 
-
 # Landmarks
 eye_left, eye_right = 2, 5
 shoulder_left, shoulder_right = 11, 12

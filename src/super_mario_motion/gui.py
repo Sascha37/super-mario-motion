@@ -40,6 +40,7 @@ allow_debug_info, send_keystrokes, checkbox_toggle_inputs = None, None, None
 button_collect_start, label_collect_status = None, None
 geometry_normal, geometry_collect, screen_width, screen_height = (None, None,
                                                                   None, None)
+font_collect_normal, font_collect_large = None, None
 
 # Webcam preview
 webcam_image_width = 612
@@ -174,7 +175,7 @@ def init():
         window.geometry(geometry_normal)
         window.deiconify()
 
-    if system == ("Linux"):
+    if system == "Linux":
         try:
             cmd = "xrandr | grep ' connected primary' | cut -d' ' -f4"
             geometry_collect = subprocess.check_output(
@@ -364,7 +365,7 @@ def init():
     def update_launch_button_state():
         scheme = selected_control_scheme.get()
         if ((scheme == "Original (RetroArch)" and not
-        game_launcher.retro_paths_valid) or (
+            game_launcher.retro_paths_valid) or (
                 scheme == "Custom" and not game_launcher.custom_path_valid)):
             button_launch_game.state(["disabled"])
         else:
@@ -563,7 +564,8 @@ def init():
         final_w = max(window_width, required_w)
         final_h = max(window_height, required_h)
 
-        # Update globals so other functions (e.g. apply_mode) use the final size
+        # Update globals so other functions (e.g., apply_mode) use the final
+        # size
         window_width = final_w
         window_height = final_h
 

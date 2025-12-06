@@ -1,5 +1,6 @@
 """
-Full-body pose classification from MediaPipe landmarks using a trained ML model.
+Full-body pose classification from MediaPipe landmarks using a trained ML
+model.
 
 Loads an SVM-based pose classifier (external or bundled), runs a passive
 background worker that reads pose landmarks from StateManager, extracts
@@ -22,7 +23,6 @@ from super_mario_motion import path_helper as ph
 from super_mario_motion.pose_features import extract_features
 # get frames from vision.py
 from super_mario_motion.state import StateManager
-
 
 state_manager = StateManager()
 

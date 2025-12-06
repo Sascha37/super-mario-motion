@@ -12,7 +12,6 @@ from sys import platform
 
 from super_mario_motion.state import StateManager
 
-
 module_log_prefix = "[Launcher]"
 
 exe, core = None, None
