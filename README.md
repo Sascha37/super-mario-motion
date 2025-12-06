@@ -7,10 +7,13 @@ This software is designed to be used alongside an NES emulator running the origi
 Bros. game.
 We do not provide the emulator or the game.
 
+If you dont have an emulator, the application also supports sending inputs to a web version of the game.
+
 ## Table of Contents
 
 - [Requirements](#requirements)
-- [How to Run and Edit](#how-to-run-and-edit)
+- [Downloads](#downloads)
+- [Build app and edit source code](#build-app-and-edit-source-code)
     - [On macOS and Linux](#on-macos-and-linux-using-make)
     - [On Windows](#on-windows)
 - [Usage](#usage)
@@ -19,30 +22,45 @@ We do not provide the emulator or the game.
 - [License](#license)
 
 ## Requirements
+### For running the app
+- **Webcam:** Any common USB-Webcam will do, make sure it is connected, otherwise the program will
+  not be able to run
+
+- (Optional) **NES Emulator**: Any of your choice. Recommended: default
+  settings [RetroArch](https://www.retroarch.com/?page=platforms) using FCEUmm core
+- (Optional) **ROM file**: You must provide your own legally obtained NES ROM. This repository does not
+  include or link to any ROMs.
+
+### For building the app
 
 - **Python**: Version 3.12.11
 
 - **Python-modules**: All required modules can be found in
   the [requirements.txt](https://github.com/Sascha37/super-mario-motion/blob/main/requirements.txt)
   file
-- **Webcam:** Any common USB-Webcam will do, make sure it is connected, otherwise the program will
-  not be able to run
-- **NES Emulator**: Any of your choice. Recommended: default
-  settings [RetroArch](https://www.retroarch.com/?page=platforms) using FCEUmm core
-- **ROM file**: You must provide your own legally obtained NES ROM. This repository does not
-  include or link to any ROMs.
 
-## How to Run and Edit
+## Downloads
+Get the latest release of this application here:
+
+https://github.com/Sascha37/super-mario-motion/releases/latest
+
+
+## Build app and edit source code
 
 ### On macOS and Linux (using `make`)
 
-If you just want to run the program:
+If you want to start to work on the app, use:
 
 ```
 git clone https://github.com/Sascha37/super-mario-motion.git
 cd super-mario-motion/
 make run
 ```
+
+- `make run` will start the application
+- `make pyinstaller` will build an executable (for the current os)
+- `make train` builds the ml-model (needs training data)
+- `make test` will run the pytest testsuite
 
 To modify the source code, open the project in your preferred text editor or IDE.
 
@@ -63,12 +81,13 @@ interpreter (3.12.11 or 3.12.10)
 
 ### Quick Start
 
-- Start the program (if you have not already done so and need help, see the previous step).
-- Start the emulator with your game.
-- You can now select, via the dropdown menu, either full body movement or simple movements (
-  designed to be used while sitting on your chair).
-- Inputs can only be sent to the game if the emulator window is in focus and the `Send Inputs`
+- Start the program (either from source code or the standalone application).
+- Select the version of the game you want to play (web or original).
+- Select between `Simple` (designed to be used while sitting) or `Full-body`-mode (designed to be used while standing). 
+- Inputs can only be sent to the game if the window of the game is in focus and the `Send Inputs`
   checkbox has been checked.
+
+**For more information please press the `Help`-Button or [open this file](https://github.com/Sascha37/super-mario-motion/blob/main/docs/help/help_page.pdf)**
 
 <p align="center">
     <img src="docs/screenshots/ss1.png" alt="Screenshot" height="730"/>
