@@ -17,8 +17,18 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
-CSV_PATH = Path(__file__).parent.parent.parent / "data"
-MODEL_PATH = Path(__file__).parent.parent.parent / "data" / "pose_model.joblib"
+from super_mario_motion.state import StateManager
+from super_mario_motion import user_data
+
+# StateManager
+state_manager = StateManager()
+
+user_data.init()
+
+data_path = state_manager.get_data_folder_path()
+
+CSV_PATH = Path(data_path)
+MODEL_PATH = Path(data_path) / "pose_model.joblib"
 
 
 def combine_run_csvs(
@@ -40,10 +50,10 @@ def combine_run_csvs(
     Raises:
         FileNotFoundError: If no matching input CSV files are found.
     """
-    all_csvs = Path(__file__).parent.parent.parent / "data" / output_name
+    all_csvs = Path(data_path) / output_name
     if all_csvs.exists():
         (all_csvs.unlink())
-    data_dir = Path(__file__).parent.parent.parent / "data"
+    data_dir = Path(data_path)
     files = sorted(data_dir.glob(pattern))
     if not files:
         raise FileNotFoundError(f"No collect-files found in {data_dir}.")
