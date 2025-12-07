@@ -7,7 +7,7 @@ This software is designed to be used alongside an NES emulator running the origi
 Bros. game.
 We do not provide the emulator or the game.
 
-If you dont have an emulator, the application also supports sending inputs to a web version of the game.
+If you don't have an emulator, the application also supports sending inputs to a web version of the game.
 
 ## Table of Contents
 
