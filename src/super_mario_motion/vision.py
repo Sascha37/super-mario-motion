@@ -205,7 +205,15 @@ def cam_loop():
     Loop exits when `_exit` is set to True or the camera is closed.
     """
     global frame, rgb, cam, current_pose, skeleton_only_frame, lm_string
-    with mpPose.Pose() as pose:
+    with mpPose.Pose(
+            static_image_mode=False,
+            model_complexity=1,
+            smooth_landmarks=True,
+            enable_segmentation=False,
+            min_detection_confidence=0.3,   # more robust
+            min_tracking_confidence=0.3,    # more robust
+            ) as pose:
+
         print(Path(__file__).name + " initialized")
         while not _exit and cam.isOpened():
             ret, image = cam.read()

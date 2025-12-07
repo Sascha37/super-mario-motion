@@ -100,8 +100,15 @@ def main():
                 f"[collect] Could not open camera {args.camera_index}."
                 )
 
-    with mp_pose.Pose() as pose, \
-            open(out_path, "a", newline="") as f:
+    with mp_pose.Pose(
+            static_image_mode=False,
+            model_complexity=2,     # more accurate, but slower
+            smooth_landmarks=True,
+            enable_segmentation=False,
+            min_detection_confidence=0.4,   # more robust
+            min_tracking_confidence=0.4,    # more robust
+            ) as pose, open(out_path, "a", newline="") as f:
+
         writer = csv.writer(f)
 
         next_t = 0.0
