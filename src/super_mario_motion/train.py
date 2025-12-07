@@ -2,7 +2,7 @@
 Train and evaluate the pose classification model from collected CSV data.
 
 Combines multiple run CSVs, loads features/labels, performs a train/test
-split, runs a PCA+SVM pipeline with hyperparameter search, prints metrics,
+split, runs a PCA+SVM pipeline with hyperparameter search, prints  metrics,
 and saves the best estimator to disk.
 """
 
