@@ -1,6 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
 import sys
+from pathlib import Path
 
 import mediapipe as mp
 from PyInstaller.utils.hooks import collect_all
@@ -46,7 +47,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['matplotlib'],
     noarchive=False,
     optimize=0,
     )
@@ -74,6 +75,9 @@ if sys.platform == "darwin":
         entitlements_file=None,
         icon=os.path.join(cwd, 'src', 'super_mario_motion', 'images', 'icon.png'),
         exclude_binaries=True,
+        info_plist={
+            'NSCameraUsageDescription': 'This application uses the camera for motion tracking.',
+        }
     )
 
     coll = COLLECT(
