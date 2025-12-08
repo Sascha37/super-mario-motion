@@ -54,6 +54,17 @@ ankle_left = 27
 ankle_right = 28
 
 
+# enhance the image for better pose detection
+def enhance_frame(rgb_frame: np.ndarray):
+    """Enhance contrast for better pose detection."""
+    ycrcb = cv.cvtColor(rgb_frame, cv.COLOR_RGB2YCrCb)
+    y, cr, cb = cv.split(ycrcb)
+    clahe = cv.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    y_eq = clahe.apply(y)
+    ycrcb_eq = cv.merge((y_eq, cr, cb))
+    return cv.cvtColor(ycrcb_eq, cv.COLOR_YCrCb2RGB)
+
+
 def landmark_coords(image, lm):
     """Return pixel coordinates of a landmark in an image.
 
@@ -227,6 +238,7 @@ def cam_loop():
                 break
 
             rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+            rgb = enhance_frame(rgb)
             results = pose.process(rgb)
             frame = cv.cvtColor(image, cv.COLOR_RGB2BGR)
 
