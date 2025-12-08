@@ -87,6 +87,12 @@ def _worker():
             time.sleep(0.01)
             continue
 
+        # skip frames with low landmark visibility
+        vis = lm_arr[:, 3]
+        if np.mean(vis) < 0.4:
+            time.sleep(0.01)
+            continue
+
         try:
             feat = extract_features(lm_arr)
         except (ValueError, TypeError):

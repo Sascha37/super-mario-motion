@@ -15,13 +15,11 @@ import cv2 as cv
 import mediapipe as mp
 import numpy as np
 
-from super_mario_motion.pose_features import (
-    extract_features,
-    shoulder_left, shoulder_right,
-    elbow_left, elbow_right,
-    wrist_left, wrist_right,
-    hip_left, hip_right,
-    )
+from super_mario_motion.pose_features import (elbow_left, elbow_right,
+                                              extract_features, hip_left,
+                                              hip_right, shoulder_left,
+                                              shoulder_right, wrist_left,
+                                              wrist_right)
 from super_mario_motion.state import StateManager
 
 # Init StateManager
@@ -135,11 +133,11 @@ def main():
 
     with mp_pose.Pose(
             static_image_mode=False,
-            model_complexity=2,     # more accurate, but slower
+            model_complexity=2,  # more accurate, but slower
             smooth_landmarks=True,
             enable_segmentation=False,
-            min_detection_confidence=0.4,   # more robust
-            min_tracking_confidence=0.4,    # more robust
+            min_detection_confidence=0.4,  # more robust
+            min_tracking_confidence=0.4,  # more robust
             ) as pose, open(out_path, "a", newline="") as f:
 
         writer = csv.writer(f)
