@@ -85,7 +85,7 @@ def _start_heavy_init_async(on_ready):
         try:
             try:
                 gui.window.after(0, lambda: gui.show_startup_overlay(
-                    "Starting camera… If prompted, please allow camera access."
+                    "Starting camera… \n If prompted, please allow camera access."
                 ))
             except Exception:
                 pass
