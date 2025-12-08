@@ -73,3 +73,12 @@ exe = EXE(
     entitlements_file=None,
     icon=os.path.join(cwd, 'src', 'super_mario_motion', 'images', 'icon.png'),
     )
+
+app = BUNDLE(
+    exe,
+    name='SuperMarioMotion.app',
+    icon=os.path.join(cwd, 'src', 'super_mario_motion', 'images', 'icon.png'),
+    info_plist={
+        'NSCameraUsageDescription': 'This application uses the camera for motion tracking.'
+    }
+)
