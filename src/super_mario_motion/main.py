@@ -11,11 +11,11 @@ from appearing to crash while waiting for OS camera permissions.
 import sys
 import threading
 import os
+from pathlib import Path
 
 import cv2 as cv
 
-from super_mario_motion import game_launcher, gamepad_visualizer, gui, input, \
-    user_data, vision, vision_ml
+from super_mario_motion import game_launcher, gamepad_visualizer, gui, user_data
 from super_mario_motion.state import StateManager
 
 
@@ -63,18 +63,64 @@ def _start_heavy_init_async(on_ready):
     def _worker():
         # Initialize heavy modules in the background to keep UI responsive
         errors = []
+        # Ensure Matplotlib (used by MediaPipe drawing_utils) has a writable
+        # config dir to avoid long first-run cache creation delays.
         try:
-            vision.init()
+            mpl_dir = Path.home() / ".super_mario_motion_mpl"
+            mpl_dir.mkdir(parents=True, exist_ok=True)
+            os.environ.setdefault("MPLCONFIGDIR", str(mpl_dir))
+        except Exception:
+            pass
+
+        # Lazy-import heavy modules here to avoid blocking GUI import time.
+        try:
+            import importlib
+            vision = importlib.import_module("super_mario_motion.vision")
+            # expose to this module's globals so `update()` can use it
+            globals()["vision"] = vision
+        except Exception as e:
+            vision = None
+            errors.append(f"Camera module import failed: {e}")
+
+        try:
+            try:
+                gui.window.after(0, lambda: gui.show_startup_overlay(
+                    "Starting camera… If prompted, please allow camera access."
+                ))
+            except Exception:
+                pass
+            if vision is not None:
+                vision.init()
         except Exception as e:
             errors.append(f"Camera init failed: {e}")
 
         try:
+            import importlib
+            vision_ml = importlib.import_module("super_mario_motion.vision_ml")
+            # optional exposure for other modules
+            globals()["vision_ml"] = vision_ml
+            try:
+                gui.window.after(0, lambda: gui.show_startup_overlay(
+                    "Loading pose model…"
+                ))
+            except Exception:
+                pass
             vision_ml.init()
         except Exception as e:
             errors.append(f"ML init failed: {e}")
 
         try:
-            input.init()
+            import importlib
+            input_mod = importlib.import_module("super_mario_motion.input")
+            # optional exposure for completeness
+            globals()["input"] = input_mod
+            try:
+                gui.window.after(0, lambda: gui.show_startup_overlay(
+                    "Starting input module…"
+                ))
+            except Exception:
+                pass
+            input_mod.init()
         except Exception as e:
             errors.append(f"Input init failed: {e}")
 
@@ -111,7 +157,11 @@ def update():
     current_pose_full_body = state_manager.get_pose_full_body()
 
     # Update Images to display in gui.py
-    vision.update_images()
+    try:
+        if 'vision' in globals():
+            vision.update_images()
+    except Exception:
+        pass
     gui.set_webcam_image(*state_manager.get_all_opencv_images())
 
     # Update Pose Preview Indicator in gui.py
@@ -147,6 +197,15 @@ if __name__ == "__main__":
     if hasattr(sys, "_MEIPASS"):
         print("[SMM] Opened in standalone executable mode")
         state_manager.set_standalone(True)
+
+    # Configure Matplotlib cache directory early (used by mediapipe's
+    # drawing_utils) to avoid long font-cache build times on first run.
+    try:
+        mpl_dir = Path.home() / ".super_mario_motion_mpl"
+        mpl_dir.mkdir(parents=True, exist_ok=True)
+        os.environ.setdefault("MPLCONFIGDIR", str(mpl_dir))
+    except Exception:
+        pass
 
     # Lightweight inits first
     user_data.init()

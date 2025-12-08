@@ -22,8 +22,7 @@ from tkinter import ttk
 import cv2
 from PIL import Image, ImageTk
 
-from super_mario_motion import collect, game_launcher, path_helper as ph, \
-    vision, vision_ml
+from super_mario_motion import game_launcher, path_helper as ph
 from super_mario_motion.state import StateManager
 
 pose = ""
@@ -952,6 +951,8 @@ def record_collect_pose(pose_name: str, seconds: float, index: int):
     if collect_stop:
         return
     global current_run_csv
+    # Lazy-import to avoid heavy MediaPipe dependency during app startup.
+    from super_mario_motion import collect as _collect
     sys.argv = [
         "collect.py",
         "--label", pose_name,
@@ -960,7 +961,7 @@ def record_collect_pose(pose_name: str, seconds: float, index: int):
         "--fps", str(FPS),
         "--source", "auto",
         ]
-    collect.main()
+    _collect.main()
     if not collect_stop:
         _schedule_after(500, lambda: run_collect_step(index + 1))
 
@@ -1025,13 +1026,17 @@ def start_game_button_action():
 
 def close():
     try:
+        # Lazy import; may not be loaded yet.
+        from super_mario_motion import vision_ml
         vision_ml.stop()
     except (RuntimeError, AttributeError, cv2.error) as e:
         print("ML shutdown warning:", e)
 
     try:
+        # Lazy import; may not be loaded yet.
+        from super_mario_motion import vision
         vision.stop_cam()
-    except (RuntimeError, AttributeError, cv2.error) as e:
+    except (RuntimeError, AttributeError, cv2.error, ImportError, NameError) as e:
         print("Camera shutdown warning:", e)
 
     window.destroy()

@@ -29,7 +29,13 @@ hiddenimports = [
     "sklearn.preprocessing",
     "sklearn.metrics",
     "sklearn.utils",
-    "sklearn.base"
+    "sklearn.base",
+    # Dynamically imported at runtime to speed up GUI startup
+    "super_mario_motion.input",
+    "super_mario_motion.vision",
+    "super_mario_motion.vision_ml",
+    # Optional: used in Collect mode from the GUI
+    "super_mario_motion.collect",
     ]
 
 numpy_datas, numpy_binaries, numpy_hiddenimports = collect_all("numpy")
@@ -47,7 +53,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['matplotlib'],
+    excludes=[],
     noarchive=False,
     optimize=0,
     )
@@ -64,7 +70,7 @@ if sys.platform == "darwin":
         debug=False,
         bootloader_ignore_signals=False,
         strip=False,
-        upx=True,
+        upx=False,
         upx_exclude=[],
         runtime_tmpdir=None,
         console=False,
@@ -86,7 +92,7 @@ if sys.platform == "darwin":
         a.zipfiles,
         a.datas,
         strip=False,
-        upx=True,
+        upx=False,
         upx_exclude=[],
         name='SuperMarioMotion',
     )
@@ -110,10 +116,10 @@ else:
         debug=False,
         bootloader_ignore_signals=False,
         strip=False,
-        upx=True,
+        upx=False,
         upx_exclude=[],
         runtime_tmpdir=None,
-        console=True,
+        console=False,
         disable_windowed_traceback=False,
         argv_emulation=False,
         target_arch=None,
