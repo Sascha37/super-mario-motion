@@ -238,7 +238,6 @@ def cam_loop():
                 break
 
             rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
-            rgb = enhance_frame(rgb)
             results = pose.process(rgb)
             frame = cv.cvtColor(image, cv.COLOR_RGB2BGR)
 
