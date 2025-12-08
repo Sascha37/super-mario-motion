@@ -1,5 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
+import sys
+from pathlib import Path
 
 import mediapipe as mp
 from PyInstaller.utils.hooks import collect_all
@@ -27,7 +29,13 @@ hiddenimports = [
     "sklearn.preprocessing",
     "sklearn.metrics",
     "sklearn.utils",
-    "sklearn.base"
+    "sklearn.base",
+    # Dynamically imported at runtime to speed up GUI startup
+    "super_mario_motion.input",
+    "super_mario_motion.vision",
+    "super_mario_motion.vision_ml",
+    # Optional: used in Collect mode from the GUI
+    "super_mario_motion.collect",
     ]
 
 numpy_datas, numpy_binaries, numpy_hiddenimports = collect_all("numpy")
@@ -52,24 +60,71 @@ a = Analysis(
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=None)
 
-exe = EXE(
-    pyz,
-    a.scripts,
-    a.binaries,
-    a.datas,
-    [],
-    name='SuperMarioMotion',
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
-    console=False,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-    icon=os.path.join(cwd, 'src', 'super_mario_motion', 'images', 'icon.png'),
+if sys.platform == "darwin":
+    exe = EXE(
+        pyz,
+        a.scripts,
+        [],
+        [],
+        name='SuperMarioMotion',
+        debug=False,
+        bootloader_ignore_signals=False,
+        strip=False,
+        upx=False,
+        upx_exclude=[],
+        runtime_tmpdir=None,
+        console=False,
+        disable_windowed_traceback=False,
+        argv_emulation=False,
+        target_arch=None,
+        codesign_identity=None,
+        entitlements_file=None,
+        icon=os.path.join(cwd, 'src', 'super_mario_motion', 'images', 'icon.png'),
+        exclude_binaries=True,
+        info_plist={
+            'NSCameraUsageDescription': 'This application uses the camera for motion tracking.',
+        }
     )
+
+    coll = COLLECT(
+        exe,
+        a.binaries,
+        a.zipfiles,
+        a.datas,
+        strip=False,
+        upx=False,
+        upx_exclude=[],
+        name='SuperMarioMotion',
+    )
+
+    app = BUNDLE(
+        coll,
+        name='SuperMarioMotion.app',
+        icon=os.path.join(cwd, 'src', 'super_mario_motion', 'images', 'icon.png'),
+        info_plist={
+            'NSCameraUsageDescription': 'This application uses the camera for motion tracking.',
+        },
+    )
+else:
+    exe = EXE(
+        pyz,
+        a.scripts,
+        a.binaries,
+        a.datas,
+        [],
+        name='SuperMarioMotion',
+        debug=False,
+        bootloader_ignore_signals=False,
+        strip=False,
+        upx=False,
+        upx_exclude=[],
+        runtime_tmpdir=None,
+        console=False,
+        disable_windowed_traceback=False,
+        argv_emulation=False,
+        target_arch=None,
+        codesign_identity=None,
+        entitlements_file=None,
+        icon=os.path.join(cwd, 'src', 'super_mario_motion', 'images', 'icon.png'),
+    )
+
