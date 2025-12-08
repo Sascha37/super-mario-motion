@@ -79,6 +79,12 @@ def init():
     cam = cv.VideoCapture(0)
     if not cam.isOpened():
         raise IOError("Cannot open camera")
+
+    # try to enforce a uniform resolution and FPS
+    cam.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
+    cam.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
+    cam.set(cv.CAP_PROP_FPS, 30)
+
     print("cam opened")
     thread = threading.Thread(target=cam_loop, daemon=True)
     thread.start()
