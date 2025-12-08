@@ -22,8 +22,7 @@ from tkinter import ttk
 import cv2
 from PIL import Image, ImageTk
 
-from super_mario_motion import collect, game_launcher, path_helper as ph, \
-    vision, vision_ml
+from super_mario_motion import game_launcher, path_helper as ph
 from super_mario_motion.state import StateManager
 
 pose = ""
@@ -38,6 +37,8 @@ allow_debug_info, send_keystrokes, checkbox_toggle_inputs = None, None, None
 (label_virtual_gamepad_visualizer, label_pose_visualizer, label_current_pose,
  label_debug_landmarks) = None, None, None, None
 button_collect_start, label_collect_status = None, None
+startup_overlay = None
+startup_overlay_label = None
 geometry_normal, geometry_collect, screen_width, screen_height = (None, None,
                                                                   None, None)
 font_collect_normal, font_collect_large = None, None
@@ -583,6 +584,47 @@ def init():
     print(Path(__file__).name + " initialized")
 
 
+def show_startup_overlay(message: str = "Please wait…"):
+    """Show a simple full-window overlay with a message during startup.
+
+    Can be safely called immediately after `init()` and multiple times to
+    update the text. Use `hide_startup_overlay()` to remove it.
+    """
+    global startup_overlay, startup_overlay_label
+    if window is None or root_frame is None:
+        return
+    if startup_overlay is None:
+        startup_overlay = tk.Frame(root_frame, bg=color_background)
+        # cover entire window client area
+        startup_overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
+        startup_overlay_label = tk.Label(
+            startup_overlay,
+            text=message,
+            fg=color_white,
+            bg=color_background,
+            font=("Helvetica", 16, "bold")
+        )
+        startup_overlay_label.place(relx=0.5, rely=0.5, anchor="center")
+    else:
+        try:
+            startup_overlay_label.config(text=message)
+            startup_overlay.lift()
+        except Exception:
+            pass
+
+
+def hide_startup_overlay():
+    """Hide and destroy the startup overlay if it exists."""
+    global startup_overlay, startup_overlay_label
+    if startup_overlay is not None:
+        try:
+            startup_overlay.destroy()
+        except Exception:
+            pass
+    startup_overlay = None
+    startup_overlay_label = None
+
+
 # set_webcam_image and set_pose_image are supposed to be called in the
 # update-loop in main.py
 def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
@@ -909,6 +951,8 @@ def record_collect_pose(pose_name: str, seconds: float, index: int):
     if collect_stop:
         return
     global current_run_csv
+    # Lazy-import to avoid heavy MediaPipe dependency during app startup.
+    from super_mario_motion import collect as _collect
     sys.argv = [
         "collect.py",
         "--label", pose_name,
@@ -917,7 +961,7 @@ def record_collect_pose(pose_name: str, seconds: float, index: int):
         "--fps", str(FPS),
         "--source", "auto",
         ]
-    collect.main()
+    _collect.main()
     if not collect_stop:
         _schedule_after(500, lambda: run_collect_step(index + 1))
 
@@ -982,13 +1026,17 @@ def start_game_button_action():
 
 def close():
     try:
+        # Lazy import; may not be loaded yet.
+        from super_mario_motion import vision_ml
         vision_ml.stop()
     except (RuntimeError, AttributeError, cv2.error) as e:
         print("ML shutdown warning:", e)
 
     try:
+        # Lazy import; may not be loaded yet.
+        from super_mario_motion import vision
         vision.stop_cam()
-    except (RuntimeError, AttributeError, cv2.error) as e:
+    except (RuntimeError, AttributeError, cv2.error, ImportError, NameError) as e:
         print("Camera shutdown warning:", e)
 
     window.destroy()

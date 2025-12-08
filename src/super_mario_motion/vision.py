@@ -8,6 +8,8 @@ StateManager.
 """
 
 import math
+import time
+import platform
 import threading
 from pathlib import Path
 
@@ -83,8 +85,13 @@ def landmark_coords(image, lm):
 def init():
     """Initialize the webcam and start the camera processing thread.
 
-    Opens the default camera (index 0) and starts `cam_loop` as a daemon
-    thread. Raises an IOError if the camera cannot be opened.
+    Tries to open the default camera (index 0). On macOS, the first access can
+    trigger a permission dialog and `cv.VideoCapture(0)` may initially fail
+    until the user grants access. To provide a better UX, we retry opening the
+    camera for a short period instead of failing immediately.
+
+    Starts `cam_loop` as a daemon thread once the camera is available.
+    Raises an IOError only after a generous timeout.
     """
     global cam, rgb, frame, thread
     cam = cv.VideoCapture(0)
@@ -95,6 +102,31 @@ def init():
     cam.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
     cam.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
     cam.set(cv.CAP_PROP_FPS, 30)
+
+    is_macos = platform.system() == "Darwin"
+    timeout_s = 30 if is_macos else 8
+    start = time.time()
+
+    while True:
+        cam = cv.VideoCapture(0)
+        opened = False
+        try:
+            opened = cam.isOpened()
+        except Exception:
+            opened = False
+
+        if opened:
+            break
+
+        # Release and wait a bit to allow user to grant permission
+        try:
+            cam.release()
+        except Exception:
+            pass
+
+        if time.time() - start > timeout_s:
+            raise IOError("Cannot open camera (timeout while waiting for permission)")
+        time.sleep(0.5)
 
     print("cam opened")
     thread = threading.Thread(target=cam_loop, daemon=True)
@@ -212,6 +244,7 @@ def cam_loop():
     """Camera processing loop that runs in a background thread.
 
     This loop:
+      * Continuously tries to (re)open the webcam if needed.
       * Grabs frames from the webcam.
       * Runs MediaPipe Pose on each frame.
       * Draws skeleton overlays for full and skeleton-only frames.
@@ -219,7 +252,8 @@ def cam_loop():
       * Detects the current simple pose via `detect_pose_simple`.
       * Updates the StateManager with landmarks, pose and debug strings.
 
-    Loop exits when `_exit` is set to True or the camera is closed.
+    The loop tolerates temporary failures (e.g., while the user grants
+    permissions on macOS) by retrying instead of exiting immediately.
     """
     global frame, rgb, cam, current_pose, skeleton_only_frame, lm_string
     with mpPose.Pose(
@@ -232,10 +266,36 @@ def cam_loop():
             ) as pose:
 
         print(Path(__file__).name + " initialized")
-        while not _exit and cam.isOpened():
+        misses = 0
+        while not _exit:
+            # Ensure camera handle is open; try to (re)open if needed
+            try:
+                opened = cam.isOpened() if cam is not None else False
+            except Exception:
+                opened = False
+            if not opened:
+                try:
+                    if cam is not None:
+                        cam.release()
+                except Exception:
+                    pass
+                cam = cv.VideoCapture(0)
+                time.sleep(0.2)
+                continue
+
             ret, image = cam.read()
             if not ret:
-                break
+                misses += 1
+                # Occasionally try to reopen
+                if misses % 20 == 0:
+                    try:
+                        cam.release()
+                    except Exception:
+                        pass
+                    cam = cv.VideoCapture(0)
+                time.sleep(0.05)
+                continue
+            misses = 0
 
             rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             results = pose.process(rgb)
@@ -279,7 +339,10 @@ def cam_loop():
                         lm_string += "\n"
                 state_manager.set_landmark_string(lm_string)
 
-    cam.release()
+    try:
+        cam.release()
+    except Exception:
+        pass
 
 
 def update_images():
