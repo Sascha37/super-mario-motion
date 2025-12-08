@@ -8,9 +8,9 @@ StateManager.
 """
 
 import math
-import time
 import platform
 import threading
+import time
 from pathlib import Path
 
 import cv2 as cv
@@ -54,25 +54,6 @@ knee_left = 25
 knee_right = 26
 ankle_left = 27
 ankle_right = 28
-
-
-# enhance the image for better pose detection
-def enhance_for_pose(rgb_frame: np.ndarray) -> np.ndarray:
-    """Enhance contrast for better pose detection."""
-    ycrcb = cv.cvtColor(rgb_frame, cv.COLOR_RGB2YCrCb)
-    y, cr, cb = cv.split(ycrcb)
-
-    clahe = cv.createCLAHE(clipLimit=1.5, tileGridSize=(16, 16))
-    y_eq = clahe.apply(y)
-
-    ycrcb_eq = cv.merge((y_eq, cr, cb))
-    rgb_eq = cv.cvtColor(ycrcb_eq, cv.COLOR_YCrCb2RGB)
-
-    # soften the filter
-    alpha = 0.3
-    blended = cv.addWeighted(rgb_eq, alpha, rgb_frame, 1.0 - alpha, 0)
-    return blended
-
 
 
 def landmark_coords(image, lm):
@@ -308,9 +289,7 @@ def cam_loop():
             frame = cv.cvtColor(image, cv.COLOR_RGB2BGR)
 
             rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
-            rgb = enhance_frame(rgb)
             results = pose.process(rgb)
-
 
             if results.pose_landmarks:
                 # Draw webcam footage and skeleton
