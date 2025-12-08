@@ -89,7 +89,7 @@ def _worker():
 
         # skip frames with low landmark visibility
         vis = lm_arr[:, 3]
-        if np.mean(vis) < 0.4:
+        if np.mean(vis) < 0.4:  # can be tuned later
             time.sleep(0.01)
             continue
 

@@ -25,7 +25,7 @@ from super_mario_motion.state import StateManager
 # Init StateManager
 state_manger = StateManager()
 
-VISIBILITY_THRESH = 0.6
+VISIBILITY_THRESH = 0.6     # can be tuned later
 
 
 def is_valid_lm_frame(lm_arr: np.ndarray) -> bool:
