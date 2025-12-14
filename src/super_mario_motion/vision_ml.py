@@ -32,6 +32,8 @@ _thread = None
 _model = None
 model_path = None
 
+P_THRESH = 0.7  # threshold for landmark confidence
+
 
 def init():
     """Load the ML model and start the passive worker thread."""
@@ -112,7 +114,12 @@ def _worker():
         label = None
         if _model is not None:
             try:
-                label = _model.predict(x)[0]
+                prob = _model.predict_prob(x)[0]
+                pmax = float(np.max(prob))
+                if pmax >= P_THRESH:
+                    label = _model.classes_[int(np.argmax(prob))]
+                else:
+                    label = None
             except (ValueError, TypeError, NotFittedError):
                 label = None
 
@@ -120,7 +127,6 @@ def _worker():
             smooth.append(label)
             vals, counts = np.unique(list(smooth), return_counts=True)
             _current_pose = vals[np.argmax(counts)]
-
             state_manager.set_pose_full_body(_current_pose)
 
         time.sleep(0.001)
