@@ -273,6 +273,12 @@ def cam_loop():
                 continue
 
             ret, image = cam.read()
+            raw_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+            skel_rgb = raw_rgb.copy()
+            skeleton_only = np.zeros_like(raw_rgb)
+
+            results = pose.process(raw_rgb)
+
             if not ret:
                 misses += 1
                 # Occasionally try to reopen
@@ -286,21 +292,16 @@ def cam_loop():
                 continue
             misses = 0
 
-            frame = cv.cvtColor(image, cv.COLOR_RGB2BGR)
-
-            rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
-            results = pose.process(rgb)
+            frame = skel_rgb
+            rgb = raw_rgb
+            sekeleton_only_frame = skeleton_only
 
             if results.pose_landmarks:
-                # Draw webcam footage and skeleton
                 mpDrawing.draw_landmarks(
-                    frame, results.pose_landmarks, mpPose.POSE_CONNECTIONS
+                    skel_rgb, results.pose_landmarks, mpPose.POSE_CONNECTIONS
                     )
-
-                # Draw an image of only the skeleton
-                skeleton_only_frame = np.zeros_like(frame)
                 mpDrawing.draw_landmarks(
-                    skeleton_only_frame, results.pose_landmarks,
+                    skeleton_only, results.pose_landmarks,
                     mpPose.POSE_CONNECTIONS
                     )
 
