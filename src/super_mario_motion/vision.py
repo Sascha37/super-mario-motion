@@ -294,7 +294,7 @@ def cam_loop():
 
             frame = skel_rgb
             rgb = raw_rgb
-            sekeleton_only_frame = skeleton_only
+            skeleton_only_frame = skeleton_only
 
             if results.pose_landmarks:
                 mpDrawing.draw_landmarks(

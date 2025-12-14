@@ -114,10 +114,10 @@ def _worker():
         label = None
         if _model is not None:
             try:
-                prob = _model.predict_prob(x)[0]
-                pmax = float(np.max(prob))
+                proba = _model.predict_proba(x)[0]
+                pmax = float(np.max(proba))
                 if pmax >= P_THRESH:
-                    label = _model.classes_[int(np.argmax(prob))]
+                    label = _model.classes_[int(np.argmax(proba))]
                 else:
                     label = None
             except (ValueError, TypeError, NotFittedError):
