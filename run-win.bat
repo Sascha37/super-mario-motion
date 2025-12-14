@@ -27,6 +27,7 @@ pip install -r requirements.txt
 
 REM Run package module, not src
 echo Starting application...
+pip install -e .
 python -m super_mario_motion.main
 
 pause
