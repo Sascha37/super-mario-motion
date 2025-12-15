@@ -28,7 +28,7 @@ def init():
     user_os = (platform.system().lower())
     print(f"{module_prefix} Using {user_os} operating system.")
 
-    # Get path to the data folder relative to os
+    # Get the path to the data folder relative to os
     def get_data_path(platform_):
         global default_emu_path, default_rom_path
         match platform_:
@@ -84,7 +84,7 @@ def init():
         }
     print(f"{module_prefix} Searching for default path: {data_path}")
 
-    # Checks if local directory exists
+    # Checks if the local directory exists
     if os.path.isdir(data_path):
         print(f"{module_prefix} Found data path.")
     else:
@@ -93,7 +93,7 @@ def init():
     # Set path in global state
     state_manager.set_data_folder_path(data_path)
 
-    # Check if config folder exists, if not create it
+    # Check if the config folder exists, if not, create it
     config_folder_path = os.path.join(data_path, "config")
     if os.path.isdir(config_folder_path):
         print(f"{module_prefix} found config folder.")

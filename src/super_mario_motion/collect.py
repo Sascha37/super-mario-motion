@@ -25,7 +25,9 @@ from super_mario_motion.state import StateManager
 # Init StateManager
 state_manger = StateManager()
 
-VISIBILITY_THRESH = 0.6     # can be tuned later
+VISIBILITY_THRESH = 0.6  # can be tuned later
+STABLE_N = 5  # how many consecutive similar frames are required
+FEATURE_EPS = 0.05  # max allowed mean deviation per feature
 
 
 def is_valid_lm_frame(lm_arr: np.ndarray) -> bool:
@@ -132,21 +134,14 @@ def main():
                 )
 
     with mp_pose.Pose(
-            static_image_mode=False,
-            model_complexity=2,  # more accurate, but slower
-            smooth_landmarks=True,
-            enable_segmentation=False,
-            min_detection_confidence=0.4,  # more robust
-            min_tracking_confidence=0.4,  # more robust
+            model_complexity=2, min_detection_confidence=0.4,
+            min_tracking_confidence=0.4
             ) as pose, open(out_path, "a", newline="") as f:
 
         writer = csv.writer(f)
 
         next_t = 0.0
         start_time = time.time()
-
-        STABLE_N = 5  # how many consecutive similar frames are required
-        FEATURE_EPS = 0.05  # max allowed mean deviation per feature
 
         stable_buffer = []
         last_feat = None

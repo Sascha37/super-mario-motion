@@ -53,9 +53,18 @@ currently_held_keys = []
 last_orientation = "right"
 
 # Swimming repeat press configuration
-swim_repeat_interval = 0.25  # seconds between swim button taps while pose is held
+swim_repeat_interval = 0.25  # seconds between swim button taps while pose
+# is held
 last_swim_press_time = 0.0
 PDI_LETTER_MAP = {}
+MAPVK_VSC_TO_VK_EX = 3
+SC = {
+    "a": 0x1E, "b": 0x30, "c": 0x2E, "d": 0x20, "e": 0x12, "f": 0x21,
+    "g": 0x22, "h": 0x23, "i": 0x17, "j": 0x24, "k": 0x25, "l": 0x26,
+    "m": 0x32, "n": 0x31, "o": 0x18, "p": 0x19, "q": 0x10, "r": 0x13,
+    "s": 0x1F, "t": 0x14, "u": 0x16, "v": 0x2F, "w": 0x11, "x": 0x2D,
+    "y": 0x15, "z": 0x2C,
+    }
 
 
 def get_current_key_mapping():
@@ -73,9 +82,15 @@ def init():
     if sys.platform == "win32":
         try:
             PDI_LETTER_MAP = build_pydirectinput_letter_map()
-            print(f"{module_prefix} pydirectinput letter map loaded ({len(PDI_LETTER_MAP)}/26).")
+            print(
+                f"{module_prefix} pydirectinput letter map loaded ("
+                f"{len(PDI_LETTER_MAP)}/26)."
+                )
         except Exception as e:
-            print(f"{module_prefix} Failed building pydirectinput letter map: {e}.")
+            print(
+                f"{module_prefix} Failed building pydirectinput letter map: "
+                f"{e}."
+                )
             PDI_LETTER_MAP = {}
 
     # Load the scheme of the config
@@ -101,11 +116,12 @@ def input_loop():
       * Read send_permission from StateManager.
       * On send_permission rising edge: send input for current pose.
       * On pose change while permission is active: release previous keys,
-        send input for new pose.
+        send input for the new pose.
       * On send_permission falling edge: release all currently held keys.
     """
     print(Path(__file__).name + " initialized")
-    global pose, last_pose, mapping, send_permission, previous_send_permission, last_swim_press_time
+    global pose, last_pose, mapping, send_permission, \
+        previous_send_permission, last_swim_press_time
     while True:
         pose = state_manager.get_pose_full_body() if (
                 state_manager.get_current_mode() ==
@@ -140,9 +156,10 @@ def input_loop():
         time.sleep(0.02)
 
 
-
 def _key_down(key: str):
-    if sys.platform == "win32" and isinstance(key, str) and len(key) == 1 and key.isalpha():
+    if sys.platform == "win32" and isinstance(key, str) and len(
+            key
+            ) == 1 and key.isalpha():
         k = key.lower()
         mapped = PDI_LETTER_MAP.get(k)
         if mapped:
@@ -152,14 +169,15 @@ def _key_down(key: str):
 
 
 def _key_up(key: str):
-    if sys.platform == "win32" and isinstance(key, str) and len(key) == 1 and key.isalpha():
+    if sys.platform == "win32" and isinstance(key, str) and len(
+            key
+            ) == 1 and key.isalpha():
         k = key.lower()
         mapped = PDI_LETTER_MAP.get(k)
         if mapped:
             pyautogui.keyUp(mapped)
             return
     pyautogui.keyUp(key)
-
 
 
 def press_designated_input(pose_):
@@ -233,6 +251,7 @@ def release_held_keys():
         _key_up(key)
     currently_held_keys = []
 
+
 def build_pydirectinput_letter_map():
     """
     Map intended a–z to the pydirectinput key name (physical US key) that
@@ -246,7 +265,8 @@ def build_pydirectinput_letter_map():
     user32.GetKeyboardLayout.argtypes = [wintypes.DWORD]
     user32.GetKeyboardLayout.restype = wintypes.HANDLE
 
-    user32.MapVirtualKeyExW.argtypes = [wintypes.UINT, wintypes.UINT, wintypes.HANDLE]
+    user32.MapVirtualKeyExW.argtypes = [wintypes.UINT, wintypes.UINT,
+                                        wintypes.HANDLE]
     user32.MapVirtualKeyExW.restype = wintypes.UINT
 
     user32.ToUnicodeEx.argtypes = [
@@ -254,23 +274,15 @@ def build_pydirectinput_letter_map():
         ctypes.POINTER(ctypes.c_ubyte),
         wintypes.LPWSTR, ctypes.c_int,
         wintypes.UINT, wintypes.HANDLE
-    ]
+        ]
     user32.ToUnicodeEx.restype = ctypes.c_int
 
     # Set-1 scancodes for physical A–Z keys (US positions)
-    SC = {
-        "a": 0x1E, "b": 0x30, "c": 0x2E, "d": 0x20, "e": 0x12, "f": 0x21,
-        "g": 0x22, "h": 0x23, "i": 0x17, "j": 0x24, "k": 0x25, "l": 0x26,
-        "m": 0x32, "n": 0x31, "o": 0x18, "p": 0x19, "q": 0x10, "r": 0x13,
-        "s": 0x1F, "t": 0x14, "u": 0x16, "v": 0x2F, "w": 0x11, "x": 0x2D,
-        "y": 0x15, "z": 0x2C,
-    }
 
     hkl = user32.GetKeyboardLayout(0)
     if not hkl:
         return {}
 
-    MAPVK_VSC_TO_VK_EX = 3
     buf = ctypes.create_unicode_buffer(8)
     out = {}  # produced_char -> physical_key_name
 
@@ -299,4 +311,3 @@ def build_pydirectinput_letter_map():
             break
 
     return out
-
