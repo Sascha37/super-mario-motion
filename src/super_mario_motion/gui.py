@@ -158,7 +158,7 @@ def init():
             window.iconphoto(True, icon_img)
             window._icon_img = icon_img
     except Exception as e:
-        # Fail gracefully if icon cannot be loaded (e.g., missing file)
+        # Fail gracefully if the icon cannot be loaded (e.g., missing file)
         print(f"Icon load warning: {e}")
 
     if system in ("Windows", "Darwin"):  # calculation for Windows and macOS
@@ -595,7 +595,7 @@ def show_startup_overlay(message: str = "Please wait…"):
         return
     if startup_overlay is None:
         startup_overlay = tk.Frame(root_frame, bg=color_background)
-        # cover entire window client area
+        # cover the entire window client area
         startup_overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
         startup_overlay_label = tk.Label(
             startup_overlay,
@@ -603,7 +603,7 @@ def show_startup_overlay(message: str = "Please wait…"):
             fg=color_white,
             bg=color_background,
             font=("Helvetica", 16, "bold")
-        )
+            )
         startup_overlay_label.place(relx=0.5, rely=0.5, anchor="center")
     else:
         try:
@@ -815,7 +815,7 @@ def _set_collect_button(starting: bool):
     """Configure the collect button text and callback based on state.
 
     Args:
-        starting: If True, button becomes a “Stop collecting” button.
+        starting: If True, the button becomes a “Stop collecting” button.
     """
     if starting:
         button_collect_start.config(
@@ -906,7 +906,7 @@ def run_collect_step(index: int):
 def show_collect_countdown(n: int, pose_name: str, seconds: float, index: int):
     """Show a countdown before recording a specific pose.
 
-    When countdown reaches zero, starts recording for the given pose.
+    When the countdown reaches zero, starts recording for the given pose.
     """
     if collect_stop:
         return
@@ -943,7 +943,7 @@ def show_recording_countdown(remaining: int, pose_name: str, index: int):
 
 
 def record_collect_pose(pose_name: str, seconds: float, index: int):
-    """Record pose samples for the given duration and schedule next step.
+    """Record pose samples for the given duration and schedule the next step.
 
     This function runs in a worker thread and calls collect.main()
     with appropriate CLI arguments.
@@ -1036,7 +1036,8 @@ def close():
         # Lazy import; may not be loaded yet.
         from super_mario_motion import vision
         vision.stop_cam()
-    except (RuntimeError, AttributeError, cv2.error, ImportError, NameError) as e:
+    except (RuntimeError, AttributeError, cv2.error, ImportError,
+            NameError) as e:
         print("Camera shutdown warning:", e)
 
     window.destroy()

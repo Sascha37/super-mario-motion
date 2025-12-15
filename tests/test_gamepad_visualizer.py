@@ -63,7 +63,8 @@ def test_draw_highlight_overlay():
 
     expected = image.convert("RGB")
 
-    # image should remain the same because no inputs are sent
+    # the image should remain the same because no inputs are sent
     assert images_equal(res_image1, expected)
-    # image should be different because an input is being sent and highlighted
+    # the image should be different because an input is being sent and
+    # highlighted
     assert not images_equal(res_image2, expected)

@@ -40,7 +40,7 @@ def init():
     global _thread, _exit, _model, model_path
     _exit = False
 
-    # Try to load external model
+    # Try to load the external model
     try:
         model_path = Path(
             state_manager.get_data_folder_path()

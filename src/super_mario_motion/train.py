@@ -17,8 +17,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
-from super_mario_motion.state import StateManager
 from super_mario_motion import user_data
+from super_mario_motion.state import StateManager
 
 # StateManager
 state_manager = StateManager()

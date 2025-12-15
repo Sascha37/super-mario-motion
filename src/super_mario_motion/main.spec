@@ -1,7 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
 import sys
-from pathlib import Path
 
 import mediapipe as mp
 from PyInstaller.utils.hooks import collect_all

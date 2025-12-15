@@ -8,14 +8,15 @@ in a background thread. This avoids long blank periods and prevents the app
 from appearing to crash while waiting for OS camera permissions.
 """
 
+import os
 import sys
 import threading
-import os
 from pathlib import Path
 
 import cv2 as cv
 
-from super_mario_motion import game_launcher, gamepad_visualizer, gui, user_data
+from super_mario_motion import game_launcher, gamepad_visualizer, gui, \
+    user_data
 from super_mario_motion.state import StateManager
 
 
@@ -29,7 +30,6 @@ def webcam_is_available():
         cam = cv.VideoCapture(0)
         if cam is None:
             return False
-        is_opened = False
         try:
             is_opened = cam.isOpened()
         except Exception:
@@ -60,15 +60,16 @@ def _start_heavy_init_async(on_ready):
     Calls `on_ready()` on the Tk thread when initialization has finished
     (successfully or with handled errors).
     """
+
     def _worker():
-        # Initialize heavy modules in the background to keep UI responsive
+        # Initialize heavy modules in the background to keep the UI responsive
         errors = []
         # Ensure Matplotlib (used by MediaPipe drawing_utils) has a writable
         # config dir to avoid long first-run cache creation delays.
         try:
-            mpl_dir = Path.home() / ".super_mario_motion_mpl"
-            mpl_dir.mkdir(parents=True, exist_ok=True)
-            os.environ.setdefault("MPLCONFIGDIR", str(mpl_dir))
+            mpl_dir_ = Path.home() / ".super_mario_motion_mpl"
+            mpl_dir_.mkdir(parents=True, exist_ok=True)
+            os.environ.setdefault("MPLCONFIGDIR", str(mpl_dir_))
         except Exception:
             pass
 
@@ -84,9 +85,12 @@ def _start_heavy_init_async(on_ready):
 
         try:
             try:
-                gui.window.after(0, lambda: gui.show_startup_overlay(
-                    "Starting camera… \n If prompted, please allow camera access."
-                ))
+                gui.window.after(
+                    0, lambda: gui.show_startup_overlay(
+                        "Starting camera… \n If prompted, please allow "
+                        "camera access."
+                        )
+                    )
             except Exception:
                 pass
             if vision is not None:
@@ -100,9 +104,11 @@ def _start_heavy_init_async(on_ready):
             # optional exposure for other modules
             globals()["vision_ml"] = vision_ml
             try:
-                gui.window.after(0, lambda: gui.show_startup_overlay(
-                    "Loading pose model…"
-                ))
+                gui.window.after(
+                    0, lambda: gui.show_startup_overlay(
+                        "Loading pose model…"
+                        )
+                    )
             except Exception:
                 pass
             vision_ml.init()
@@ -115,9 +121,11 @@ def _start_heavy_init_async(on_ready):
             # optional exposure for completeness
             globals()["input"] = input_mod
             try:
-                gui.window.after(0, lambda: gui.show_startup_overlay(
-                    "Starting input module…"
-                ))
+                gui.window.after(
+                    0, lambda: gui.show_startup_overlay(
+                        "Starting input module…"
+                        )
+                    )
             except Exception:
                 pass
             input_mod.init()
@@ -199,7 +207,7 @@ if __name__ == "__main__":
         state_manager.set_standalone(True)
 
     # Configure Matplotlib cache directory early (used by mediapipe's
-    # drawing_utils) to avoid long font-cache build times on first run.
+    # drawing_utils) to avoid long font-cache build times on the first run.
     try:
         mpl_dir = Path.home() / ".super_mario_motion_mpl"
         mpl_dir.mkdir(parents=True, exist_ok=True)
@@ -218,12 +226,15 @@ if __name__ == "__main__":
     except Exception:
         pass
 
+
     def _on_ready(errors: list[str]):
         # Update overlay with errors if any; otherwise hide it
         if errors:
             msg = "\n".join(errors)
             try:
-                gui.show_startup_overlay(f"Some components failed to start:\n{msg}")
+                gui.show_startup_overlay(
+                    f"Some components failed to start:\n{msg}"
+                    )
             except Exception:
                 pass
         else:
@@ -235,7 +246,8 @@ if __name__ == "__main__":
         # Start periodic updates once heavy init finished (even with errors)
         gui.window.after(0, update)
 
-    # Start heavy subsystems in background
+
+    # Start heavy subsystems in the background
     _start_heavy_init_async(_on_ready)
 
     # Enter GUI loop
