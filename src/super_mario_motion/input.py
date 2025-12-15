@@ -52,6 +52,8 @@ pose = "standing"
 currently_held_keys = []
 last_orientation = "right"
 
+PDI_LETTER_MAP = {}
+
 
 def get_current_key_mapping():
     scheme = state_manager.get_control_scheme()
@@ -63,7 +65,16 @@ def get_current_key_mapping():
 
 
 def init():
-    global CONTROL_SCHEMES
+    global CONTROL_SCHEMES, PDI_LETTER_MAP
+
+    if sys.platform == "win32":
+        try:
+            PDI_LETTER_MAP = build_pydirectinput_letter_map()
+            print(f"{module_prefix} pydirectinput letter map loaded ({len(PDI_LETTER_MAP)}/26).")
+        except Exception as e:
+            print(f"{module_prefix} Failed building pydirectinput letter map: {e}.")
+            PDI_LETTER_MAP = {}
+
     # Load the scheme of the config
     config_file = state_manager.get_config_path()
     try:
@@ -115,66 +126,26 @@ def input_loop():
         time.sleep(0.02)
 
 
-def _translate_key_for_windows_layout(key: str) -> str:
-    """Windows layout-aware translation (based on the active layout).
-
-    Background: `pydirectinput` effectively sends US scancodes. On Windows,
-    to produce the intended character regardless of the active keyboard layout
-    (QWERTY/QWERTZ/AZERTY/…), we use the Windows API (`GetKeyboardLayout` +
-    `VkKeyScanExW`) to obtain the corresponding virtual key (VK_A..VK_Z) for
-    the target letter and derive the `pydirectinput` key name (`a`..`z`).
-
-    - Windows only.
-    - Only for simple letters a–z; other keys (arrows, Ctrl, …) remain
-      unchanged.
-    - Fallback on errors: return the key unchanged.
-    """
-    if sys.platform != 'win32':
-        return key
-
-    # Translate only simple letters (pydirectinput key names are lower-case)
-    if not (isinstance(key, str) and len(key) == 1 and key.isalpha()):
-        return key
-
-    try:
-        # Lazy import, only when actually running on Windows
-        import ctypes
-        from ctypes import wintypes
-
-        user32 = ctypes.WinDLL('user32', use_last_error=True)
-
-        user32.GetKeyboardLayout.argtypes = [wintypes.DWORD]
-        user32.GetKeyboardLayout.restype = wintypes.HANDLE  # HKL
-
-        user32.VkKeyScanExW.argtypes = [wintypes.WCHAR, wintypes.HANDLE]
-        user32.VkKeyScanExW.restype = wintypes.SHORT
-
-        hkl = user32.GetKeyboardLayout(0)
-        if not hkl:
-            return key
-
-        ch = key.lower()
-        res = user32.VkKeyScanExW(ch, hkl)
-        if res == -1:
-            return key
-
-        vk_code = res & 0xFF
-
-        VK_A = 0x41
-        VK_Z = 0x5A
-        if VK_A <= vk_code <= VK_Z:
-            return chr(ord('a') + (vk_code - VK_A))
-        return key
-    except Exception:
-        return key
-
 
 def _key_down(key: str):
-    pyautogui.keyDown(_translate_key_for_windows_layout(key))
+    if sys.platform == "win32" and isinstance(key, str) and len(key) == 1 and key.isalpha():
+        k = key.lower()
+        mapped = PDI_LETTER_MAP.get(k)
+        if mapped:
+            pyautogui.keyDown(mapped)
+            return
+    pyautogui.keyDown(key)
 
 
 def _key_up(key: str):
-    pyautogui.keyUp(_translate_key_for_windows_layout(key))
+    if sys.platform == "win32" and isinstance(key, str) and len(key) == 1 and key.isalpha():
+        k = key.lower()
+        mapped = PDI_LETTER_MAP.get(k)
+        if mapped:
+            pyautogui.keyUp(mapped)
+            return
+    pyautogui.keyUp(key)
+
 
 
 def press_designated_input(pose_):
@@ -247,3 +218,71 @@ def release_held_keys():
     for key in currently_held_keys:
         _key_up(key)
     currently_held_keys = []
+
+def build_pydirectinput_letter_map():
+    """
+    Map intended a–z to the pydirectinput key name (physical US key) that
+    produces it on the active Windows layout.
+    """
+    import ctypes
+    from ctypes import wintypes
+
+    user32 = ctypes.WinDLL("user32", use_last_error=True)
+
+    user32.GetKeyboardLayout.argtypes = [wintypes.DWORD]
+    user32.GetKeyboardLayout.restype = wintypes.HANDLE
+
+    user32.MapVirtualKeyExW.argtypes = [wintypes.UINT, wintypes.UINT, wintypes.HANDLE]
+    user32.MapVirtualKeyExW.restype = wintypes.UINT
+
+    user32.ToUnicodeEx.argtypes = [
+        wintypes.UINT, wintypes.UINT,
+        ctypes.POINTER(ctypes.c_ubyte),
+        wintypes.LPWSTR, ctypes.c_int,
+        wintypes.UINT, wintypes.HANDLE
+    ]
+    user32.ToUnicodeEx.restype = ctypes.c_int
+
+    # Set-1 scancodes for physical A–Z keys (US positions)
+    SC = {
+        "a": 0x1E, "b": 0x30, "c": 0x2E, "d": 0x20, "e": 0x12, "f": 0x21,
+        "g": 0x22, "h": 0x23, "i": 0x17, "j": 0x24, "k": 0x25, "l": 0x26,
+        "m": 0x32, "n": 0x31, "o": 0x18, "p": 0x19, "q": 0x10, "r": 0x13,
+        "s": 0x1F, "t": 0x14, "u": 0x16, "v": 0x2F, "w": 0x11, "x": 0x2D,
+        "y": 0x15, "z": 0x2C,
+    }
+
+    hkl = user32.GetKeyboardLayout(0)
+    if not hkl:
+        return {}
+
+    MAPVK_VSC_TO_VK_EX = 3
+    buf = ctypes.create_unicode_buffer(8)
+    out = {}  # produced_char -> physical_key_name
+
+    def produced_char(scancode: int) -> str | None:
+        vk = user32.MapVirtualKeyExW(scancode, MAPVK_VSC_TO_VK_EX, hkl)
+        if not vk:
+            return None
+
+        state = (ctypes.c_ubyte * 256)()  # no modifiers
+        buf.value = ""
+
+        rc = user32.ToUnicodeEx(vk, scancode, state, buf, len(buf), 0, hkl)
+
+        # dead key / no translation
+        if rc <= 0:
+            return None
+
+        return buf.value[0].lower()
+
+    for physical_key, sc in SC.items():
+        ch = produced_char(sc)
+        if ch and "a" <= ch <= "z" and ch not in out:
+            out[ch] = physical_key
+
+        if len(out) == 26:
+            break
+
+    return out
+
