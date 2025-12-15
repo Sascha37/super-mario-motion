@@ -19,6 +19,7 @@ If you don't have an emulator, the application also supports sending inputs to a
 - [Usage](#usage)
 - [Project Documentation](#project-documentation)
 - [Compatibility](#compatibility)
+- [Data Processing](#data-processing)
 - [License](#license)
 
 ## Requirements
@@ -112,7 +113,80 @@ We aim to support all versions of Windows, macOS, and Linux.
 
 If you encounter issues on any version, please leave an issue so we can investigate.
 
+## Data Processing
+
+### GUI Inputs (User Interaction)
+
+#### What the user does
+The user interacts with:
+- Mode selection (`Simple`, `Full-body`, `Collect`)
+- Preview selection (Webcam / Skeleton / Skeleton Only)
+- Game selection
+- Checkboxes (e.g. *Send Inputs*, *Debug*)
+- Buttons (Start game, Start collecting)
+
+#### What happens internally
+- Every GUI interaction updates the **current program state**
+- This state controls:
+  - how movements are interpreted
+  - what is shown on screen
+  - whether inputs are sent to the game
+
+#### What is stored?
+- **Nothing is saved to disk**
+- GUI inputs exist **only while the program is running**
+
+
+### Webcam Input
+
+#### What the program does with it
+For every frame:
+1. The image is analyzed to detect the user's body
+2. The body pose is estimated (arms, legs, torso)
+3. A simple pose label is determined (e.g. standing, jumping)
+4. Optional visuals are created:
+   - webcam image
+   - webcam with skeleton overlay
+   - skeleton only
+
+#### What is stored?
+- Webcam images are **not saved**
+- All data is used **live only** and replaced by the next frame
+
+
+### Collect Mode (Recording Data)
+
+#### When does this happen?
+- Only when the user activates **Collect mode**
+- Used to create training data
+
+#### What is recorded?
+- The webcam is analyzed the same way as in normal mode
+- Instead of showing results only:
+  - movement data is converted into **numbers**
+  - each set of numbers is linked to a pose name
+
+#### What is stored?
+- **CSV files** containing:
+  - pose label (text)
+  - skeleton landmark coordinates
+- No images
+- No video
+- No screenshots
+
+
+### Training (After Collecting)
+
+- Collected CSV files are used to train a model
+- The result is **one model file**
+
+#### What is stored?
+- One trained model file
+- No webcam data
+- No GUI data
+
 ## License
 
 This project is available under the GPL v3.0. See
 the [LICENSE](https://github.com/Sascha37/super-mario-motion/blob/main/LICENSE) file for more info.
+
