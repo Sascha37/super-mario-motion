@@ -19,8 +19,8 @@ If you don't have an emulator, the application also supports sending inputs to a
 - [Usage](#usage)
 - [Project Documentation](#project-documentation)
 - [Compatibility](#compatibility)
-- [License](#license)
 - [Data Processing](#data-processing)
+- [License](#license)
 
 ## Requirements
 ### For running the app
@@ -113,11 +113,6 @@ We aim to support all versions of Windows, macOS, and Linux.
 
 If you encounter issues on any version, please leave an issue so we can investigate.
 
-## License
-
-This project is available under the GPL v3.0. See
-the [LICENSE](https://github.com/Sascha37/super-mario-motion/blob/main/LICENSE) file for more info.
-
 ## Data Processing
 
 ### GUI Inputs (User Interaction)
@@ -187,7 +182,13 @@ For every frame:
 - Collected CSV files are used to train a model
 - The result is **one model file**
 
-### What is stored?
+#### What is stored?
 - One trained model file
 - No webcam data
 - No GUI data
+
+## License
+
+This project is available under the GPL v3.0. See
+the [LICENSE](https://github.com/Sascha37/super-mario-motion/blob/main/LICENSE) file for more info.
+
