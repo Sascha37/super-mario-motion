@@ -116,28 +116,28 @@ def input_loop():
 
 
 def _translate_key_for_windows_layout(key: str) -> str:
-    """Layout-abhängige Übersetzung für Windows (automatisch per aktivem Layout).
+    """Windows layout-aware translation (based on the active layout).
 
-    Hintergrund: pydirectinput sendet effektiv US-Scancodes. Um auf Windows
-    unabhängig vom aktiven Tastaturlayout (QWERTY/QWERTZ/AZERTY/…) den
-    gewünschten Buchstaben zu erzeugen, ermitteln wir per Windows-API (HKL +
-    VkKeyScanExW) den zugehörigen Virtual-Key (VK_A..VK_Z) für den Ziel-
-    buchstaben und leiten daraus den pydirectinput-Key (a..z) ab.
+    Background: `pydirectinput` effectively sends US scancodes. On Windows,
+    to produce the intended character regardless of the active keyboard layout
+    (QWERTY/QWERTZ/AZERTY/…), we use the Windows API (`GetKeyboardLayout` +
+    `VkKeyScanExW`) to obtain the corresponding virtual key (VK_A..VK_Z) for
+    the target letter and derive the `pydirectinput` key name (`a`..`z`).
 
-    - Nur auf Windows aktiv.
-    - Nur für einfache Buchstaben a–z; andere Tasten (Pfeile, Ctrl, …) bleiben
-      unverändert.
-    - Fallback bei Fehlern: unverändert zurückgeben.
+    - Windows only.
+    - Only for simple letters a–z; other keys (arrows, Ctrl, …) remain
+      unchanged.
+    - Fallback on errors: return the key unchanged.
     """
     if sys.platform != 'win32':
         return key
 
-    # Nur einfache Buchstaben übersetzen (pydirectinput-Keynamen sind lower-case)
+    # Translate only simple letters (pydirectinput key names are lower-case)
     if not (isinstance(key, str) and len(key) == 1 and key.isalpha()):
         return key
 
     try:
-        # Lazy-import, nur wenn wirklich auf Windows ausgeführt
+        # Lazy import, only when actually running on Windows
         import ctypes
         from ctypes import wintypes
 
