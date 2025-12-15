@@ -8,9 +8,9 @@ StateManager.
 """
 
 import math
-import time
 import platform
 import threading
+import time
 from pathlib import Path
 
 import cv2 as cv
@@ -22,8 +22,6 @@ from super_mario_motion.state import StateManager
 # globals
 lm_string = None
 skeleton_only_frame = None
-raw_frame = None
-skel_frame = None
 current_pose = "standing"
 
 # runtime
@@ -83,6 +81,14 @@ def init():
     Raises an IOError only after a generous timeout.
     """
     global cam, rgb, frame, thread
+    cam = cv.VideoCapture(0)
+    if not cam.isOpened():
+        raise IOError("Cannot open camera")
+
+    # try to enforce a uniform resolution and FPS
+    cam.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
+    cam.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
+    cam.set(cv.CAP_PROP_FPS, 30)
 
     is_macos = platform.system() == "Darwin"
     timeout_s = 30 if is_macos else 8
@@ -237,7 +243,15 @@ def cam_loop():
     permissions on macOS) by retrying instead of exiting immediately.
     """
     global frame, rgb, cam, current_pose, skeleton_only_frame, lm_string
-    with mpPose.Pose() as pose:
+    with mpPose.Pose(
+            static_image_mode=False,
+            model_complexity=1,
+            smooth_landmarks=True,
+            enable_segmentation=False,
+            min_detection_confidence=0.3,   # more robust
+            min_tracking_confidence=0.3,    # more robust
+            ) as pose:
+
         print(Path(__file__).name + " initialized")
         misses = 0
         while not _exit:
@@ -259,7 +273,6 @@ def cam_loop():
             ret, image = cam.read()
             if not ret:
                 misses += 1
-                # Occasionally try to reopen
                 if misses % 20 == 0:
                     try:
                         cam.release()
@@ -270,20 +283,18 @@ def cam_loop():
                 continue
             misses = 0
 
-            rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
-            results = pose.process(rgb)
-            frame = cv.cvtColor(image, cv.COLOR_RGB2BGR)
+            raw_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+            skel_rgb = raw_rgb.copy()
+            skeleton_only = np.zeros_like(raw_rgb)
+
+            results = pose.process(raw_rgb)
 
             if results.pose_landmarks:
-                # Draw webcam footage and skeleton
                 mpDrawing.draw_landmarks(
-                    frame, results.pose_landmarks, mpPose.POSE_CONNECTIONS
+                    skel_rgb, results.pose_landmarks, mpPose.POSE_CONNECTIONS
                     )
-
-                # Draw an image of only the skeleton
-                skeleton_only_frame = np.zeros_like(frame)
                 mpDrawing.draw_landmarks(
-                    skeleton_only_frame, results.pose_landmarks,
+                    skeleton_only, results.pose_landmarks,
                     mpPose.POSE_CONNECTIONS
                     )
 
@@ -298,7 +309,7 @@ def cam_loop():
                 state_manager.set_pose_landmarks(lm_arr)
 
                 # get current pose via helper method
-                current_pose = detect_pose_simple(frame, lm)
+                current_pose = detect_pose_simple(skel_rgb, lm)
 
                 state_manager.set_pose(current_pose)
 
@@ -306,11 +317,15 @@ def cam_loop():
                 lm_string = ""
                 for x in range(33):
                     lm_string += str(x) + str(
-                        landmark_coords(frame, lm[x])
+                        landmark_coords(skel_rgb, lm[x])
                         ) + " "
                     if (x + 1) % 4 == 0:
                         lm_string += "\n"
                 state_manager.set_landmark_string(lm_string)
+
+            frame = skel_rgb
+            rgb = raw_rgb
+            skeleton_only_frame = skeleton_only
 
     try:
         cam.release()
