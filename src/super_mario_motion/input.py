@@ -115,28 +115,66 @@ def input_loop():
         time.sleep(0.02)
 
 
-def _translate_key_for_windows_qwertz(key: str) -> str:
-    """Translate Y/Z for Windows with pydirectinput on QWERTZ layouts.
+def _translate_key_for_windows_layout(key: str) -> str:
+    """Layout-abhängige Übersetzung für Windows (automatisch per aktivem Layout).
 
-    pydirectinput uses scancodes that effectively assume a US layout. On
-    QWERTZ layouts (e.g., German), the Y and Z positions are swapped.
-    To ensure the intended character is produced in the target app, we
-    swap 'y' and 'z' when running on Windows (where pydirectinput is used).
+    Hintergrund: pydirectinput sendet effektiv US-Scancodes. Um auf Windows
+    unabhängig vom aktiven Tastaturlayout (QWERTY/QWERTZ/AZERTY/…) den
+    gewünschten Buchstaben zu erzeugen, ermitteln wir per Windows-API (HKL +
+    VkKeyScanExW) den zugehörigen Virtual-Key (VK_A..VK_Z) für den Ziel-
+    buchstaben und leiten daraus den pydirectinput-Key (a..z) ab.
+
+    - Nur auf Windows aktiv.
+    - Nur für einfache Buchstaben a–z; andere Tasten (Pfeile, Ctrl, …) bleiben
+      unverändert.
+    - Fallback bei Fehlern: unverändert zurückgeben.
     """
-    if sys.platform == 'win32':
-        if key == 'y':
-            return 'z'
-        if key == 'z':
-            return 'y'
-    return key
+    if sys.platform != 'win32':
+        return key
+
+    # Nur einfache Buchstaben übersetzen (pydirectinput-Keynamen sind lower-case)
+    if not (isinstance(key, str) and len(key) == 1 and key.isalpha()):
+        return key
+
+    try:
+        # Lazy-import, nur wenn wirklich auf Windows ausgeführt
+        import ctypes
+        from ctypes import wintypes
+
+        user32 = ctypes.WinDLL('user32', use_last_error=True)
+
+        user32.GetKeyboardLayout.argtypes = [wintypes.DWORD]
+        user32.GetKeyboardLayout.restype = wintypes.HANDLE  # HKL
+
+        user32.VkKeyScanExW.argtypes = [wintypes.WCHAR, wintypes.HANDLE]
+        user32.VkKeyScanExW.restype = wintypes.SHORT
+
+        hkl = user32.GetKeyboardLayout(0)
+        if not hkl:
+            return key
+
+        ch = key.lower()
+        res = user32.VkKeyScanExW(ch, hkl)
+        if res == -1:
+            return key
+
+        vk_code = res & 0xFF
+
+        VK_A = 0x41
+        VK_Z = 0x5A
+        if VK_A <= vk_code <= VK_Z:
+            return chr(ord('a') + (vk_code - VK_A))
+        return key
+    except Exception:
+        return key
 
 
 def _key_down(key: str):
-    pyautogui.keyDown(_translate_key_for_windows_qwertz(key))
+    pyautogui.keyDown(_translate_key_for_windows_layout(key))
 
 
 def _key_up(key: str):
-    pyautogui.keyUp(_translate_key_for_windows_qwertz(key))
+    pyautogui.keyUp(_translate_key_for_windows_layout(key))
 
 
 def press_designated_input(pose_):
