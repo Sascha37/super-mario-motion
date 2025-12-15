@@ -115,6 +115,30 @@ def input_loop():
         time.sleep(0.02)
 
 
+def _translate_key_for_windows_qwertz(key: str) -> str:
+    """Translate Y/Z for Windows with pydirectinput on QWERTZ layouts.
+
+    pydirectinput uses scancodes that effectively assume a US layout. On
+    QWERTZ layouts (e.g., German), the Y and Z positions are swapped.
+    To ensure the intended character is produced in the target app, we
+    swap 'y' and 'z' when running on Windows (where pydirectinput is used).
+    """
+    if sys.platform == 'win32':
+        if key == 'y':
+            return 'z'
+        if key == 'z':
+            return 'y'
+    return key
+
+
+def _key_down(key: str):
+    pyautogui.keyDown(_translate_key_for_windows_qwertz(key))
+
+
+def _key_up(key: str):
+    pyautogui.keyUp(_translate_key_for_windows_qwertz(key))
+
+
 def press_designated_input(pose_):
     """Send key presses according to the given pose label.
 
@@ -138,43 +162,43 @@ def press_designated_input(pose_):
         case "standing":
             pass
         case "jumping":
-            pyautogui.keyDown(jump)
-            pyautogui.keyDown(last_orientation)
+            _key_down(jump)
+            _key_down(last_orientation)
             time.sleep(0.1)
-            pyautogui.keyUp(last_orientation)
-            pyautogui.keyUp(jump)
+            _key_up(last_orientation)
+            _key_up(jump)
         case "running_right":
-            pyautogui.keyDown(run_throw)
-            pyautogui.keyDown(right)
+            _key_down(run_throw)
+            _key_down(right)
             currently_held_keys.append(run_throw)
             currently_held_keys.append(right)
             last_orientation = right
         case "running_left":
-            pyautogui.keyDown(run_throw)
-            pyautogui.keyDown(left)
+            _key_down(run_throw)
+            _key_down(left)
             currently_held_keys.append(run_throw)
             currently_held_keys.append(left)
             last_orientation = left
         case "walking_right":
-            pyautogui.keyDown(right)
+            _key_down(right)
             currently_held_keys.append(right)
             last_orientation = right
         case "walking_left":
-            pyautogui.keyDown(left)
+            _key_down(left)
             currently_held_keys.append(left)
             last_orientation = left
         case "crouching":
-            pyautogui.keyDown(down)
+            _key_down(down)
             currently_held_keys.append(down)
         case "throwing":
-            pyautogui.keyDown(run_throw)
-            pyautogui.keyUp(run_throw)
+            _key_down(run_throw)
+            _key_up(run_throw)
         case "swimming":
-            pyautogui.keyDown(last_orientation)
-            pyautogui.keyDown(jump)
+            _key_down(last_orientation)
+            _key_down(jump)
             time.sleep(0.05)
-            pyautogui.keyUp(last_orientation)
-            pyautogui.keyUp(jump)
+            _key_up(last_orientation)
+            _key_up(jump)
 
         case _:
             print(f"{module_prefix} No input defined for: " + pose_)
@@ -183,5 +207,5 @@ def press_designated_input(pose_):
 def release_held_keys():
     global currently_held_keys
     for key in currently_held_keys:
-        pyautogui.keyUp(key)
+        _key_up(key)
     currently_held_keys = []
