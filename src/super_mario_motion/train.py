@@ -114,6 +114,14 @@ def main():
             )
     training_csv = combine_run_csvs()
     x, y = load_csv(training_csv)
+
+    # drop samples with low average visibilities
+    n_vis = 33
+    vis = x[:, -n_vis:]
+    mask = np.mean(vis, axis=1) > 0.6
+    x = x[mask]
+    y = y[mask]
+
     s_train, s_test, y_train, y_test = train_test_split(
         x, y, test_size=0.2, stratify=y, random_state=42
         )
