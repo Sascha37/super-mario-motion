@@ -22,8 +22,6 @@ from super_mario_motion.state import StateManager
 # globals
 lm_string = None
 skeleton_only_frame = None
-raw_frame = None
-skel_frame = None
 current_pose = "standing"
 
 # runtime
@@ -273,15 +271,8 @@ def cam_loop():
                 continue
 
             ret, image = cam.read()
-            raw_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
-            skel_rgb = raw_rgb.copy()
-            skeleton_only = np.zeros_like(raw_rgb)
-
-            results = pose.process(raw_rgb)
-
             if not ret:
                 misses += 1
-                # Occasionally try to reopen
                 if misses % 20 == 0:
                     try:
                         cam.release()
@@ -292,9 +283,11 @@ def cam_loop():
                 continue
             misses = 0
 
-            frame = skel_rgb
-            rgb = raw_rgb
-            skeleton_only_frame = skeleton_only
+            raw_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+            skel_rgb = raw_rgb.copy()
+            skeleton_only = np.zeros_like(raw_rgb)
+
+            results = pose.process(raw_rgb)
 
             if results.pose_landmarks:
                 mpDrawing.draw_landmarks(
@@ -316,7 +309,7 @@ def cam_loop():
                 state_manager.set_pose_landmarks(lm_arr)
 
                 # get current pose via helper method
-                current_pose = detect_pose_simple(frame, lm)
+                current_pose = detect_pose_simple(skel_rgb, lm)
 
                 state_manager.set_pose(current_pose)
 
@@ -324,11 +317,15 @@ def cam_loop():
                 lm_string = ""
                 for x in range(33):
                     lm_string += str(x) + str(
-                        landmark_coords(frame, lm[x])
+                        landmark_coords(skel_rgb, lm[x])
                         ) + " "
                     if (x + 1) % 4 == 0:
                         lm_string += "\n"
                 state_manager.set_landmark_string(lm_string)
+
+            frame = skel_rgb
+            rgb = raw_rgb
+            skeleton_only_frame = skeleton_only
 
     try:
         cam.release()
