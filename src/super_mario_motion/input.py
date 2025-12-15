@@ -52,6 +52,10 @@ pose = "standing"
 currently_held_keys = []
 last_orientation = "right"
 
+# Swimming repeat press configuration
+swim_repeat_interval = 0.25  # seconds between swim button taps while pose is held
+last_swim_press_time = 0.0
+
 
 def get_current_key_mapping():
     scheme = state_manager.get_control_scheme()
@@ -91,7 +95,7 @@ def input_loop():
       * On send_permission falling edge: release all currently held keys.
     """
     print(Path(__file__).name + " initialized")
-    global pose, last_pose, mapping, send_permission, previous_send_permission
+    global pose, last_pose, mapping, send_permission, previous_send_permission, last_swim_press_time
     while True:
         pose = state_manager.get_pose_full_body() if (
                 state_manager.get_current_mode() ==
@@ -103,10 +107,21 @@ def input_loop():
                 press_designated_input(pose)
                 last_pose = pose
                 previous_send_permission = True
+                # Reset swim timer when starting to send
+                last_swim_press_time = time.time()
             if last_pose != pose:
                 release_held_keys()
                 last_pose = pose
                 press_designated_input(pose)
+                # Reset swim timer on pose change
+                if pose == "swimming":
+                    last_swim_press_time = time.time()
+            # While holding a swimming pose, repeatedly tap the swim button
+            if pose == "swimming":
+                now = time.time()
+                if now - last_swim_press_time >= swim_repeat_interval:
+                    press_designated_input("swimming")
+                    last_swim_press_time = now
         elif previous_send_permission:
             # When send_permission just changed from True to False
             release_held_keys()
