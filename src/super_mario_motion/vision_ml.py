@@ -80,7 +80,7 @@ def _worker():
 
     print(Path(__file__).name + " initialized (passive)")
 
-    smooth = deque(maxlen=7)
+    smooth = deque(maxlen=11)
 
     while not _exit:
         lm_arr = state_manager.get_pose_landmarks()
