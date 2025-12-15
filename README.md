@@ -166,12 +166,10 @@ For every frame:
   - movement data is converted into **numbers**
   - each set of numbers is linked to a pose name
 
-#### What is saved?
+#### What is stored?
 - **CSV files** containing:
   - pose label (text)
-  - numerical movement data
-
-#### What is NOT saved?
+  - skeleton landmark coordinates
 - No images
 - No video
 - No screenshots
