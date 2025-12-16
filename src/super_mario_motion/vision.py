@@ -271,6 +271,12 @@ def cam_loop():
                 continue
             misses = 0
 
+            h, w = image.shape[:2]
+            scale = 640 / float(w)
+            new_h = int(h * scale)
+            image = cv.resize(image, (640, new_h))
+            cam.set(cv.CAP_PROP_FPS, 30)
+
             rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             results = pose.process(rgb)
             frame = cv.cvtColor(image, cv.COLOR_RGB2BGR)
