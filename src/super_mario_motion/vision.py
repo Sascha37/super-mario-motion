@@ -270,6 +270,7 @@ def cam_loop():
                 time.sleep(0.05)
                 continue
             misses = 0
+            image = cv.resize(image, (640, 360))
 
             rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             results = pose.process(rgb)
