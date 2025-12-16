@@ -134,8 +134,7 @@ def main():
                 )
 
     with mp_pose.Pose(
-            model_complexity=2, min_detection_confidence=0.4,
-            min_tracking_confidence=0.4
+            min_detection_confidence=0.4, min_tracking_confidence=0.4
             ) as pose, open(out_path, "a", newline="") as f:
 
         writer = csv.writer(f)
