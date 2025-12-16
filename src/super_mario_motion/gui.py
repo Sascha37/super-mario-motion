@@ -532,6 +532,18 @@ def init():
         )
     label_debug_landmarks.grid(row=2, column=0, columnspan=2)
 
+    if state_manager.get_invalid_config():
+        print("[GUI] Creating on screen warning for config")
+        label_config_warning = tk.Label(
+            frame_bottom_right,
+            bg=color_dark_widget,
+            fg="#FFFF00",
+            width=40,
+            text="Invalid JSON syntax in config file.\nLoading failed.",
+            font=("Helvetica",  9, "bold")
+        )
+        label_config_warning.grid(row=3,column=0,columnspan=2)
+
     # Text Label for the collection status, visible during collect mode
     global label_collect_status, button_collect_start
     font_collect_normal = tkfont.Font(family="Consolas", size=25)

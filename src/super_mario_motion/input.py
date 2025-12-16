@@ -102,7 +102,11 @@ def init():
         CONTROL_SCHEMES["Custom"] = extracted_mapping
         print(f"{module_prefix} loaded scheme from config.")
     except Exception as e:
-        print(f"{module_prefix} Failed reading config: {e}.")
+        print(f"{module_prefix} Failed reading config: {e}.\n"
+            f"{module_prefix} using RetroArch mapping as fallback"
+            f" for custom."
+            )
+        CONTROL_SCHEMES["Custom"] = CONTROL_SCHEMES["Original (RetroArch)"]
 
     thread = threading.Thread(target=input_loop, daemon=True)
     thread.start()

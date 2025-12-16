@@ -110,6 +110,16 @@ def init():
         print(f"{module_prefix} Config created.")
     state_manager.set_config_path(config_path)
 
+    # Validate the loaded config
+    try:
+        with open(config_path, "r") as f:
+            json.load(f)
+    except Exception as e:
+        print(f"{module_prefix} The JSON syntax of the config file"
+        f" is violated: {e}")
+        state_manager.set_invalid_config(True)
+
+
 
 def create_folder_helper(path):
     try:

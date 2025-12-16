@@ -32,6 +32,8 @@ class StateManager:
 
     config_path = None
 
+    invalid_config = False
+
     # Getter
     @classmethod
     def get_pose(cls):
@@ -89,6 +91,10 @@ class StateManager:
     def get_config_path(cls):
         return cls.config_path
 
+    @classmethod
+    def get_invalid_config(cls):
+        return cls.invalid_config
+
     # Setter
     @classmethod
     def set_pose(cls, new_pose):
@@ -142,3 +148,7 @@ class StateManager:
     @classmethod
     def set_config_path(cls, new_config_path):
         cls.config_path = new_config_path
+        
+    @classmethod
+    def set_invalid_config(cls, new_invalid_config):
+        cls.invalid_config = new_invalid_config
