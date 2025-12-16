@@ -27,16 +27,17 @@ If you don't have an emulator, the application also supports sending inputs to a
 - **Webcam:** Any common USB-Webcam will do, make sure it is connected, otherwise the program will
   not be able to run
 
-- (Optional) **NES Emulator**: Any of your choice. Recommended: default
-  settings [RetroArch](https://www.retroarch.com/?page=platforms) using FCEUmm core
+- (Optional) **NES Emulator**: Any of your choice.
+  - **Recommended:** default
+  settings [Steam version of RetroArch](https://store.steampowered.com/app/1118310/RetroArch/) using the preinstalled FCEUmm NES core
 - (Optional) **ROM file**: You must provide your own legally obtained NES ROM. This repository does not
   include or link to any ROMs.
 
 ### For building the app
 
-- **Python**: Version 3.12.11
+- **Python**: Version 3.12.10 / 3.12.11
 
-- **Python-modules**: All required modules can be found in
+- **External libraries**: All required modules can be found in
   the [requirements.txt](https://github.com/Sascha37/super-mario-motion/blob/main/requirements.txt)
   file
 
@@ -70,13 +71,22 @@ install dependencies using pip. Look into
 the [Makefile](https://github.com/Sascha37/super-mario-motion/blob/main/Makefile) of this project
 for reference.
 
-### On Windows
+### On Windows (without PyCharm)
 
-If you just want to **run** the program, execute the `run-win.bat` file.
+If you just want to **run** the program, execute the `run-win.bat` file, located in the root folder of the project.
 
-If you want to **work with and modify this code**, open it in a code editor
-like [PyCharm](https://www.jetbrains.com/pycharm/) and select the correct version of the python
-interpreter (3.12.11 or 3.12.10)
+You can edit the source code in any IDE you like.
+
+### On Windows (with PyCharm)
+If you want to **work with and modify this code**, we recommend the code editor
+[PyCharm](https://www.jetbrains.com/pycharm/)
+
+There are a few steps to setup this project inside of the IDE.
+
+1. Make sure you have the correct version of the python interpreter installed (3.12.10 or 3.12.11)
+2. PyCharm will prompt you to create a virtual environment and install the dependencies listed in `requirements.txt`, do that
+3. Now you need to setup the run configurations. Do do that by clicking on the top right where it says `Current File`. And select `edit configurations`. A new window will pop up. There you will add a new configuration by pressing the `+`-Button. You need to select `Python`. You can give it a name like `main`, make sure that you select `module` from the drop down menu and set the path as `super_mario_motion.main`.
+4. Right click the `\src\` folder and select: `Mark Directory as` -> `Sources Root`
 
 ## Usage
 
@@ -113,7 +123,7 @@ We aim to support all versions of Windows, macOS, and Linux.
 
 If you encounter issues on any version, please leave an issue so we can investigate.
 
-## Data Processing
+## Data Processings
 
 ### GUI Inputs (User Interaction)
 
@@ -144,14 +154,11 @@ For every frame:
 1. The image is analyzed to detect the user's body
 2. The body pose is estimated (arms, legs, torso)
 3. A simple pose label is determined (e.g. standing, jumping)
-4. Optional visuals are created:
-   - webcam image
-   - webcam with skeleton overlay
-   - skeleton only
+4. Optional visual previews are rendered
 
 #### What is stored?
 - Webcam images are **not saved**
-- All data is used **live only** and replaced by the next frame
+- All data is used **during runtime** and replaced by the next frame
 
 
 ### Collect Mode (Recording Data)
@@ -170,20 +177,16 @@ For every frame:
 - **CSV files** containing:
   - pose label (text)
   - skeleton landmark coordinates
-- No images
-- No video
-- No screenshots
+- No images, video or screenshots are saved
 
 
-### Training (After Collecting)
+### Model Training (After Collecting)
 
-- Collected CSV files are used to train a model
-- The result is **one model file**
+- Collected CSV files are used to train a model, the result is **one model file** in form of a `.joblib` file
 
 #### What is stored?
 - One trained model file
-- No webcam data
-- No GUI data
+- No webcam or GUI data
 
 ## License
 
