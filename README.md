@@ -24,19 +24,20 @@ If you don't have an emulator, the application also supports sending inputs to a
 
 ## Requirements
 ### For running the app
-- **Webcam:** Any common USB-Webcam will do, make sure it is connected, otherwise the program will
+- **Webcam:** Any common USB webcam will do, make sure it is connected, otherwise, the program will
   not be able to run
 
-- (Optional) **NES Emulator**: Any of your choice. Recommended: default
-  settings [RetroArch](https://www.retroarch.com/?page=platforms) using FCEUmm core
+- (Optional) **NES Emulator**: Any of your choice.
+  - **Recommended:** default
+  settings [Steam version of RetroArch](https://store.steampowered.com/app/1118310/RetroArch/) using the preinstalled FCEUmm NES core
 - (Optional) **ROM file**: You must provide your own legally obtained NES ROM. This repository does not
   include or link to any ROMs.
 
 ### For building the app
 
-- **Python**: Version 3.12.11
+- **Python**: Version 3.12.10 / 3.12.11
 
-- **Python-modules**: All required modules can be found in
+- **External libraries**: All required modules can be found in
   the [requirements.txt](https://github.com/Sascha37/super-mario-motion/blob/main/requirements.txt)
   file
 
@@ -50,7 +51,7 @@ https://github.com/Sascha37/super-mario-motion/releases/latest
 
 ### On macOS and Linux (using `make`)
 
-If you want to start to work on the app, use:
+If you want to start working on the app, use:
 
 ```
 git clone https://github.com/Sascha37/super-mario-motion.git
@@ -60,23 +61,32 @@ make run
 
 - `make run` will start the application
 - `make pyinstaller` will build an executable (for the current os)
-- `make train` builds the ml-model (needs training data)
+- `make train` builds the ML model (needs training data)
 - `make test` will run the pytest testsuite
 
 To modify the source code, open the project in your preferred text editor or IDE.
 
-Alternatively to using the makefile you can manually create a Python virtual environment and
+Alternatively to using the makefile, you can manually create a Python virtual environment and
 install dependencies using pip. Look into
 the [Makefile](https://github.com/Sascha37/super-mario-motion/blob/main/Makefile) of this project
 for reference.
 
-### On Windows
+### On Windows (without PyCharm)
 
-If you just want to **run** the program, execute the `run-win.bat` file.
+If you just want to **run** the program, execute the `run-win.bat` file, located in the root folder of the project.
 
-If you want to **work with and modify this code**, open it in a code editor
-like [PyCharm](https://www.jetbrains.com/pycharm/) and select the correct version of the python
-interpreter (3.12.11 or 3.12.10)
+You can edit the source code in any IDE you like.
+
+### On Windows (with PyCharm)
+If you want to **work with and modify this code**, we recommend the code editor
+[PyCharm](https://www.jetbrains.com/pycharm/)
+
+There are a few steps to set up this project inside the IDE.
+
+1. Make sure you have the correct version of the Python interpreter installed (3.12.10 or 3.12.11)
+2. PyCharm will prompt you to create a virtual environment and install the dependencies listed in `requirements.txt`. Do that.
+3. Now you need to set up the run configurations. Do that by clicking on the top right where it says `Current File`. And select `edit configurations`. A new window will pop up. There, you will add a new configuration by pressing the `+`-Button. You need to select `Python`. You can give it a name like `main`, make sure that you select `module` from the drop-down menu and set the path as `super_mario_motion.main`.
+4. Right-click the `\src\` folder and select: `Mark Directory as` -> `Sources Root`.
 
 ## Usage
 
@@ -84,9 +94,8 @@ interpreter (3.12.11 or 3.12.10)
 
 - Start the program (either from source code or the standalone application).
 - Select the version of the game you want to play (web or original).
-- Select between `Simple` (designed to be used while sitting) or `Full-body`-mode (designed to be used while standing). 
-- Inputs can only be sent to the game if the window of the game is in focus and the `Send Inputs`
-  checkbox has been checked.
+- Select between `Simple` (designed to be used while sitting) or `Full-body ' mode (designed to be used while standing). 
+- Inputs can only be sent to the game if the window of the game is in focus and the `Send Inputs` checkbox has been checked.
 
 **For more information please press the `Help`-Button or [open this file](https://github.com/Sascha37/super-mario-motion/blob/main/docs/help/help_page.pdf)**
 
@@ -143,15 +152,12 @@ The user interacts with:
 For every frame:
 1. The image is analyzed to detect the user's body
 2. The body pose is estimated (arms, legs, torso)
-3. A simple pose label is determined (e.g. standing, jumping)
-4. Optional visuals are created:
-   - webcam image
-   - webcam with skeleton overlay
-   - skeleton only
+3. A simple pose label is determined (e.g., standing, jumping)
+4. Optional visual previews are rendered
 
 #### What is stored?
 - Webcam images are **not saved**
-- All data is used **live only** and replaced by the next frame
+- All data is used **during runtime** and replaced by the next frame
 
 
 ### Collect Mode (Recording Data)
@@ -170,23 +176,18 @@ For every frame:
 - **CSV files** containing:
   - pose label (text)
   - skeleton landmark coordinates
-- No images
-- No video
-- No screenshots
+- No images, videos, or screenshots are saved
 
 
-### Training (After Collecting)
+### Model Training (After Collecting)
 
-- Collected CSV files are used to train a model
-- The result is **one model file**
+- Collected CSV files are used to train a model, the result is **one model file** in the form of a `.joblib` file
 
 #### What is stored?
 - One trained model file
-- No webcam data
-- No GUI data
+- No webcam or GUI data
 
 ## License
 
 This project is available under the GPL v3.0. See
 the [LICENSE](https://github.com/Sascha37/super-mario-motion/blob/main/LICENSE) file for more info.
-
