@@ -27,7 +27,7 @@ state_manger = StateManager()
 
 VISIBILITY_THRESH = 0.6  # can be tuned later
 STABLE_N = 3  # how many consecutive similar frames are required
-FEATURE_EPS = 0.15  # max allowed mean deviation per feature
+FEATURE_EPS = 0.2  # max allowed mean deviation per feature
 
 
 def is_valid_lm_frame(lm_arr: np.ndarray) -> bool:
