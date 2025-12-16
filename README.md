@@ -24,7 +24,7 @@ If you don't have an emulator, the application also supports sending inputs to a
 
 ## Requirements
 ### For running the app
-- **Webcam:** Any common USB-Webcam will do, make sure it is connected, otherwise the program will
+- **Webcam:** Any common USB webcam will do, make sure it is connected, otherwise, the program will
   not be able to run
 
 - (Optional) **NES Emulator**: Any of your choice.
@@ -51,7 +51,7 @@ https://github.com/Sascha37/super-mario-motion/releases/latest
 
 ### On macOS and Linux (using `make`)
 
-If you want to start to work on the app, use:
+If you want to start working on the app, use:
 
 ```
 git clone https://github.com/Sascha37/super-mario-motion.git
@@ -61,12 +61,12 @@ make run
 
 - `make run` will start the application
 - `make pyinstaller` will build an executable (for the current os)
-- `make train` builds the ml-model (needs training data)
+- `make train` builds the ML model (needs training data)
 - `make test` will run the pytest testsuite
 
 To modify the source code, open the project in your preferred text editor or IDE.
 
-Alternatively to using the makefile you can manually create a Python virtual environment and
+Alternatively to using the makefile, you can manually create a Python virtual environment and
 install dependencies using pip. Look into
 the [Makefile](https://github.com/Sascha37/super-mario-motion/blob/main/Makefile) of this project
 for reference.
@@ -81,12 +81,12 @@ You can edit the source code in any IDE you like.
 If you want to **work with and modify this code**, we recommend the code editor
 [PyCharm](https://www.jetbrains.com/pycharm/)
 
-There are a few steps to setup this project inside of the IDE.
+There are a few steps to set up this project inside the IDE.
 
-1. Make sure you have the correct version of the python interpreter installed (3.12.10 or 3.12.11)
-2. PyCharm will prompt you to create a virtual environment and install the dependencies listed in `requirements.txt`, do that
-3. Now you need to setup the run configurations. Do do that by clicking on the top right where it says `Current File`. And select `edit configurations`. A new window will pop up. There you will add a new configuration by pressing the `+`-Button. You need to select `Python`. You can give it a name like `main`, make sure that you select `module` from the drop down menu and set the path as `super_mario_motion.main`.
-4. Right click the `\src\` folder and select: `Mark Directory as` -> `Sources Root`
+1. Make sure you have the correct version of the Python interpreter installed (3.12.10 or 3.12.11)
+2. PyCharm will prompt you to create a virtual environment and install the dependencies listed in `requirements.txt`. Do that.
+3. Now you need to set up the run configurations. Do that by clicking on the top right where it says `Current File`. And select `edit configurations`. A new window will pop up. There, you will add a new configuration by pressing the `+`-Button. You need to select `Python`. You can give it a name like `main`, make sure that you select `module` from the drop-down menu and set the path as `super_mario_motion.main`.
+4. Right-click the `\src\` folder and select: `Mark Directory as` -> `Sources Root`.
 
 ## Usage
 
@@ -94,9 +94,8 @@ There are a few steps to setup this project inside of the IDE.
 
 - Start the program (either from source code or the standalone application).
 - Select the version of the game you want to play (web or original).
-- Select between `Simple` (designed to be used while sitting) or `Full-body`-mode (designed to be used while standing). 
-- Inputs can only be sent to the game if the window of the game is in focus and the `Send Inputs`
-  checkbox has been checked.
+- Select between `Simple` (designed to be used while sitting) or `Full-body ' mode (designed to be used while standing). 
+- Inputs can only be sent to the game if the window of the game is in focus and the `Send Inputs` checkbox has been checked.
 
 **For more information please press the `Help`-Button or [open this file](https://github.com/Sascha37/super-mario-motion/blob/main/docs/help/help_page.pdf)**
 
@@ -123,7 +122,7 @@ We aim to support all versions of Windows, macOS, and Linux.
 
 If you encounter issues on any version, please leave an issue so we can investigate.
 
-## Data Processings
+## Data Processing
 
 ### GUI Inputs (User Interaction)
 
@@ -153,7 +152,7 @@ The user interacts with:
 For every frame:
 1. The image is analyzed to detect the user's body
 2. The body pose is estimated (arms, legs, torso)
-3. A simple pose label is determined (e.g. standing, jumping)
+3. A simple pose label is determined (e.g., standing, jumping)
 4. Optional visual previews are rendered
 
 #### What is stored?
@@ -177,12 +176,12 @@ For every frame:
 - **CSV files** containing:
   - pose label (text)
   - skeleton landmark coordinates
-- No images, video or screenshots are saved
+- No images, videos, or screenshots are saved
 
 
 ### Model Training (After Collecting)
 
-- Collected CSV files are used to train a model, the result is **one model file** in form of a `.joblib` file
+- Collected CSV files are used to train a model, the result is **one model file** in the form of a `.joblib` file
 
 #### What is stored?
 - One trained model file
@@ -192,4 +191,3 @@ For every frame:
 
 This project is available under the GPL v3.0. See
 the [LICENSE](https://github.com/Sascha37/super-mario-motion/blob/main/LICENSE) file for more info.
-
