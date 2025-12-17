@@ -38,7 +38,7 @@ def combine_run_csvs(
     """Combine multiple collected run CSVs into a single CSV file.
 
     Existing output file is removed first. Header rows in the following files
-    (starting with 'label,') are skipped.
+    (starting with "label,") are skipped.
 
     Args:
         output_name: Name of the combined CSV file to create.

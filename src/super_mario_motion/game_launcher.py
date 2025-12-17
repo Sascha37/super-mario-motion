@@ -53,23 +53,25 @@ def init():
         config_retroarch_path = (
             json.loads(Path(config_path).read_text())[
                 "emu-path"]
-            )
+        )
 
         config_rom_path = (
             json.loads(Path(config_path).read_text())[
                 "rom-path"]
-            )
+        )
 
         config_custom_path = (
             json.loads(Path(config_path).read_text())[
                 "custom-game-path"]
-            )
+        )
     except Exception as e:
         config_retroarch_path = "null"
         config_rom_path = "null"
         config_custom_path = "null"
-        print(f"{module_log_prefix} failed to read config: {e}\n"
-            f"{module_log_prefix} setting paths to null.")
+        print(
+            f"{module_log_prefix} failed to read config: {e}\n"
+            f"{module_log_prefix} setting paths to null."
+            )
 
     retroarch_path = Path(config_retroarch_path)
     rom_path = Path(config_rom_path)
@@ -89,7 +91,7 @@ def get_command(platform_):
     `subprocess.run`.
 
     Args:
-        platform_ (str): Platform identifier (e.g. 'linux', 'darwin', 'win32').
+        platform_ (str): Platform identifier (e.g. "linux", "darwin", "win32").
 
     Returns:
         list[str]: Command and arguments to launch RetroArch with the ROM.

@@ -166,7 +166,7 @@ def update():
 
     # Update Images to display in gui.py
     try:
-        if 'vision' in globals():
+        if "vision" in globals():
             vision.update_images()
     except Exception:
         pass

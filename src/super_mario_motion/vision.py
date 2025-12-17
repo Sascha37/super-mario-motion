@@ -22,8 +22,6 @@ from super_mario_motion.state import StateManager
 # globals
 lm_string = None
 skeleton_only_frame = None
-raw_frame = None
-skel_frame = None
 current_pose = "standing"
 
 # runtime
@@ -33,8 +31,8 @@ frame = None
 _exit = False
 thread = None
 
-mpPose = mp.solutions.pose
-mpDrawing = mp.solutions.drawing_utils
+mp_pose = mp.solutions.pose
+mp_drawing = mp.solutions.drawing_utils
 
 state_manager = StateManager()
 
@@ -238,7 +236,7 @@ def cam_loop():
     permissions on macOS) by retrying instead of exiting immediately.
     """
     global frame, rgb, cam, current_pose, skeleton_only_frame, lm_string
-    with mpPose.Pose() as pose:
+    with mp_pose.Pose() as pose:
         print(Path(__file__).name + " initialized")
         misses = 0
         while not _exit:
@@ -279,19 +277,19 @@ def cam_loop():
 
             rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             results = pose.process(rgb)
-            frame = cv.cvtColor(image, cv.COLOR_RGB2BGR)
+            frame = image
 
             if results.pose_landmarks:
                 # Draw webcam footage and skeleton
-                mpDrawing.draw_landmarks(
-                    frame, results.pose_landmarks, mpPose.POSE_CONNECTIONS
+                mp_drawing.draw_landmarks(
+                    frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS
                     )
 
                 # Draw an image of only the skeleton
                 skeleton_only_frame = np.zeros_like(frame)
-                mpDrawing.draw_landmarks(
+                mp_drawing.draw_landmarks(
                     skeleton_only_frame, results.pose_landmarks,
-                    mpPose.POSE_CONNECTIONS
+                    mp_pose.POSE_CONNECTIONS
                     )
 
                 # Simple pose detection

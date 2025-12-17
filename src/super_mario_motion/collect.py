@@ -23,10 +23,10 @@ from super_mario_motion.pose_features import (elbow_left, elbow_right,
 from super_mario_motion.state import StateManager
 
 # Init StateManager
-state_manger = StateManager()
+state_manager = StateManager()
 
 VISIBILITY_THRESH = 0.6  # can be tuned later
-STABLE_N = 5  # how many consecutive similar frames are required
+STABLE_N = 5  # number of consecutive similar frames required
 FEATURE_EPS = 0.05  # max allowed mean deviation per feature
 
 
@@ -150,7 +150,7 @@ def main():
             bgr = None
 
             if args.source in ("auto", "vision"):
-                bgr = state_manger.get_opencv_image_webcam()
+                bgr = state_manager.get_opencv_image_webcam()
 
             if bgr is None and args.source in ("auto", "camera"):
                 if cam is None:

@@ -49,7 +49,7 @@ def pose_to_buttons(pose: str) -> List[str]:
     in which direction to jump.
 
     Args:
-        pose: Pose label (e.g. 'standing', 'running_right', 'jumping').
+        pose: Pose label (e.g. "standing", "running_right", "jumping").
 
     Returns:
         list[str]: List of button names that should be considered pressed.
