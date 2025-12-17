@@ -16,7 +16,7 @@ from pathlib import Path
 import cv2 as cv
 
 from super_mario_motion import game_launcher, gamepad_visualizer, gui, \
-    user_data
+    user_data, vision
 from super_mario_motion.state import StateManager
 
 
