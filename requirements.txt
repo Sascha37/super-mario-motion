@@ -1,6 +1,6 @@
 pydirectinput
 numpy
-mediapipe
+mediapipe==0.10.21
 opencv-python
 PyAutoGUI
 pillow
