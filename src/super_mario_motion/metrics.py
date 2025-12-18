@@ -9,9 +9,14 @@ from super_mario_motion.pose_features import extract_features
 
 _model = None
 
-# Sample pose for standing
 
-sample_landmarks = [[ 0.44344768,  0.12862258, -0.52724975,  0.9999959 ],
+def transform_landmarks(landmarks):
+    feat = extract_features(np.asarray(landmarks))
+    return feat.reshape(1, -1)
+
+# Sample pose for standing
+sample_standing = transform_landmarks(
+        [[ 0.44344768,  0.12862258, -0.52724975,  0.9999959 ],
        [ 0.4466985 ,  0.11005745, -0.5054582 ,  0.9999868 ],
        [ 0.45136994,  0.1095399 , -0.505459  ,  0.99998677],
        [ 0.45602483,  0.10892276, -0.50542736,  0.9999852 ],
@@ -44,8 +49,43 @@ sample_landmarks = [[ 0.44344768,  0.12862258, -0.52724975,  0.9999959 ],
        [ 0.40416384,  0.9024896 ,  0.2710532 ,  0.8190876 ],
        [ 0.5093587 ,  0.9507483 ,  0.12808432,  0.9774671 ],
        [ 0.3897793 ,  0.9632971 ,  0.08934968,  0.9676652 ]]
-a = np.load("/home/sascha/Documents/teamprojekt/aa/super-mario-motion/landmark_standing6.npy")
-print(a)
+)
+
+sample_crouching = transform_landmarks(
+        [[ 0.4141589 ,  0.5229582 , -0.59570765,  0.99999595],
+       [ 0.41702896,  0.5019441 , -0.5779897 ,  0.99999076],
+       [ 0.4214796 ,  0.49975604, -0.5779791 ,  0.9999934 ],
+       [ 0.42566967,  0.49757755, -0.5781208 ,  0.9999889 ],
+       [ 0.39886767,  0.50870126, -0.58028173,  0.99998903],
+       [ 0.39105707,  0.51154566, -0.580478  ,  0.99999106],
+       [ 0.38428572,  0.51395375, -0.5805767 ,  0.99998343],
+       [ 0.43121377,  0.50276494, -0.4472708 ,  0.99998844],
+       [ 0.37210518,  0.52580744, -0.4562613 ,  0.9999882 ],
+       [ 0.42577153,  0.5422162 , -0.54435414,  0.99999833],
+       [ 0.40721983,  0.5504485 , -0.5469955 ,  0.99999785],
+       [ 0.47875008,  0.5992901 , -0.36749205,  0.99996394],
+       [ 0.33118945,  0.6115389 , -0.41273275,  0.9998446 ],
+       [ 0.47437507,  0.7551978 , -0.39898148,  0.99166083],
+       [ 0.34476608,  0.75825804, -0.45410386,  0.9920563 ],
+       [ 0.44445643,  0.90134686, -0.48058748,  0.9931891 ],
+       [ 0.3845655 ,  0.9210321 , -0.50603247,  0.98536676],
+       [ 0.45280138,  0.9438291 , -0.528695  ,  0.983642  ],
+       [ 0.37995568,  0.9671519 , -0.5542278 ,  0.9703078 ],
+       [ 0.4350027 ,  0.95038575, -0.55318135,  0.9847895 ],
+       [ 0.4015686 ,  0.96452177, -0.57358575,  0.9727912 ],
+       [ 0.42784357,  0.9334356 , -0.49208206,  0.9860013 ],
+       [ 0.40209237,  0.949513  , -0.5156566 ,  0.97415125],
+       [ 0.43563527,  0.77988595,  0.0018728 ,  0.9999556 ],
+       [ 0.35547248,  0.7790811 , -0.0020202 ,  0.99993265],
+       [ 0.5238993 ,  0.78507334, -0.33957887,  0.9708933 ],
+       [ 0.23212536,  0.8037713 , -0.35692278,  0.97481745],
+       [ 0.45833555,  0.8749453 , -0.01005285,  0.8313998 ],
+       [ 0.3324824 ,  0.87990636, -0.00484164,  0.76944   ],
+       [ 0.45163593,  0.88441414,  0.02325876,  0.81576073],
+       [ 0.3599527 ,  0.88190454,  0.03156534,  0.6687139 ],
+       [ 0.50460136,  0.94679254, -0.03032129,  0.78488034],
+       [ 0.3037199 ,  0.96223176, -0.02080463,  0.72154814]]
+)
 # Load model
 try:
     model_path = ph.resource_path(
@@ -56,15 +96,11 @@ except Exception as e:
     print(f"Model not found {e}")
     sys.exit(1)
 
-def transform_landmarks(landmarks):
-    feat = extract_features(np.asarray(landmarks))
-    return feat.reshape(1, -1)
-
 def guess_most_likely(input):
     guesses = _model.predict_proba(input)[0]
     return _model.classes_[int(np.argmax(guesses))]
 
-def print_all_guesses(input):
+def print_probability(input):
     guesses = _model.predict_proba(input)[0]
     for i, prob in enumerate(guesses):
         guess = _model.classes_[i]
@@ -87,8 +123,7 @@ def get_accuracy(expected, dataset):
             correct += 1
     return (correct/(i+1))*100
 
-transformed_landmarks = transform_landmarks(a)
 
-print_all_guesses(transformed_landmarks)
-print(f"Average execution time: {get_average_execution_time(99, guess_most_likely, transformed_landmarks)} ms")
-print(f"Acc:{get_accuracy("standing", [transformed_landmarks,transformed_landmarks,transformed_landmarks])}")
+print_probability(sample_crouching)
+print(f"Average execution time: {get_average_execution_time(99, guess_most_likely, sample_crouching)} ms")
+print(f"Acc:{get_accuracy("crouching", [sample_crouching,sample_crouching])}")
