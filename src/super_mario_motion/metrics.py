@@ -2,7 +2,6 @@ import os
 import sys
 import time
 import numpy as np
-
 from joblib import load
 
 from super_mario_motion import path_helper as ph
@@ -11,6 +10,7 @@ from super_mario_motion.pose_features import extract_features
 _model = None
 
 # Sample pose for standing
+
 sample_landmarks = [[ 0.44344768,  0.12862258, -0.52724975,  0.9999959 ],
        [ 0.4466985 ,  0.11005745, -0.5054582 ,  0.9999868 ],
        [ 0.45136994,  0.1095399 , -0.505459  ,  0.99998677],
@@ -44,7 +44,8 @@ sample_landmarks = [[ 0.44344768,  0.12862258, -0.52724975,  0.9999959 ],
        [ 0.40416384,  0.9024896 ,  0.2710532 ,  0.8190876 ],
        [ 0.5093587 ,  0.9507483 ,  0.12808432,  0.9774671 ],
        [ 0.3897793 ,  0.9632971 ,  0.08934968,  0.9676652 ]]
-
+a = np.load("/home/sascha/Documents/teamprojekt/aa/super-mario-motion/landmark_standing6.npy")
+print(a)
 # Load model
 try:
     model_path = ph.resource_path(
@@ -69,6 +70,7 @@ def print_all_guesses(input):
         guess = _model.classes_[i]
         print(f"{guess}, probability: {round(prob*100,2)}%")
 
+# TODO use random input
 def get_average_execution_time(runs, func, input):
     total_time = 0
     for n in range(runs):
@@ -78,7 +80,15 @@ def get_average_execution_time(runs, func, input):
         total_time += (t_stop - t_start)*1000
     return total_time / n
 
-transformed_landmarks = transform_landmarks(sample_landmarks)
+def get_accuracy(expected, dataset):
+    correct = 0
+    for i,data in enumerate(dataset):
+        if (guess_most_likely(data) == expected):
+            correct += 1
+    return (correct/(i+1))*100
+
+transformed_landmarks = transform_landmarks(a)
 
 print_all_guesses(transformed_landmarks)
-print(f"Average execution time: {get_average_execution_time(99, guess_most_likely, transformed_landmarks)}")
+print(f"Average execution time: {get_average_execution_time(99, guess_most_likely, transformed_landmarks)} ms")
+print(f"Acc:{get_accuracy("standing", [transformed_landmarks,transformed_landmarks,transformed_landmarks])}")
