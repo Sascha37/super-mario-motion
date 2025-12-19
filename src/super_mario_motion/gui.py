@@ -23,6 +23,7 @@ import cv2
 from PIL import Image, ImageTk
 
 from super_mario_motion import game_launcher, path_helper as ph
+from super_mario_motion.settings import Settings
 from super_mario_motion.state import StateManager
 
 pose = ""
@@ -95,7 +96,6 @@ COLLECTION_STEPS = [
     ("swimming", 10),
     ]
 CSV_PATH = "pose_samples.csv"
-FPS = 30
 current_run_csv = CSV_PATH
 
 # Will hold the randomized order for a single collection run
@@ -970,7 +970,7 @@ def record_collect_pose(pose_name: str, seconds: float, index: int):
         "--label", pose_name,
         "--seconds", str(seconds),
         "--csv", current_run_csv,
-        "--fps", str(FPS),
+        "--fps", str(Settings.webcam_fps),
         "--source", "auto",
         ]
     _collect.main()

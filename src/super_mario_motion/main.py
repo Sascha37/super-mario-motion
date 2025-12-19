@@ -18,6 +18,7 @@ import cv2 as cv
 from super_mario_motion import game_launcher, gamepad_visualizer, gui, \
     user_data
 from super_mario_motion.state import StateManager
+from super_mario_motion.settings import Settings
 
 
 def webcam_is_available():
@@ -194,7 +195,7 @@ def update():
         )
     gui.set_gamepad_image(gamepad_img)
 
-    gui.window.after(20, update)
+    gui.window.after(Settings.gui_update_ms, update)
 
 
 if __name__ == "__main__":

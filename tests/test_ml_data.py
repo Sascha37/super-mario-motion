@@ -13,6 +13,8 @@ import pytest
 
 from super_mario_motion.collect import extract_features
 
+csv_row_length = 110
+
 LABELS = [
     "standing", "walking_left", "running_left", "walking_right",
     "running_right", "jumping", "crouching", "throwing", "swimming"
@@ -43,7 +45,7 @@ def test_training_csv_integrity():
                 # Row length check
                 assert len(
                     row
-                    ) == 110, f"Invalid row length in {file}: {len(row)}"
+                    ) == csv_row_length, f"Invalid row length in {file}: {len(row)}"
 
                 # Label check
                 label = row[0]

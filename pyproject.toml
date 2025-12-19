@@ -13,3 +13,6 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.ruff]
+select = ["PLR2004", "RUF100"]

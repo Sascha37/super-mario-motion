@@ -23,6 +23,7 @@ from super_mario_motion import path_helper as ph
 from super_mario_motion.pose_features import extract_features
 # get frames from vision.py
 from super_mario_motion.state import StateManager
+from super_mario_motion.settings import Settings
 
 state_manager = StateManager()
 
@@ -80,7 +81,7 @@ def _worker():
 
     print(Path(__file__).name + " initialized (passive)")
 
-    smooth = deque(maxlen=11)
+    smooth = deque(maxlen=Settings.ml_majority_vote)
 
     while not _exit:
         lm_arr = state_manager.get_pose_landmarks()

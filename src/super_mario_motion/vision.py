@@ -18,6 +18,7 @@ import mediapipe as mp
 import numpy as np
 
 from super_mario_motion.state import StateManager
+from super_mario_motion.settings import Settings
 
 # globals
 lm_string = None
@@ -272,10 +273,10 @@ def cam_loop():
             misses = 0
 
             h, w = image.shape[:2]
-            scale = 640 / float(w)
+            scale = Settings.webcam_res / float(w)
             new_h = int(h * scale)
-            image = cv.resize(image, (640, new_h))
-            cam.set(cv.CAP_PROP_FPS, 30)
+            image = cv.resize(image, (Settings.webcam_res, new_h))
+            cam.set(cv.CAP_PROP_FPS, Settings.webcam_fps)
 
             rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             results = pose.process(rgb)

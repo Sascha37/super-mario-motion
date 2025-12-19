@@ -13,6 +13,7 @@ import time
 from pathlib import Path
 
 from super_mario_motion.state import StateManager
+from super_mario_motion.settings import Settings
 
 module_prefix = "[Input]"
 
@@ -53,8 +54,6 @@ currently_held_keys = []
 last_orientation = "right"
 
 # Swimming repeat press configuration
-swim_repeat_interval = 0.25  # seconds between swim button taps while pose
-# is held
 last_swim_press_time = 0.0
 PDI_LETTER_MAP = {}
 MAPVK_VSC_TO_VK_EX = 3
@@ -149,7 +148,7 @@ def input_loop():
             # While holding a swimming pose, repeatedly tap the swim button
             if pose == "swimming":
                 now = time.time()
-                if now - last_swim_press_time >= swim_repeat_interval:
+                if now - last_swim_press_time >= Settings.swim_interval:
                     press_designated_input("swimming")
                     last_swim_press_time = now
         elif previous_send_permission:

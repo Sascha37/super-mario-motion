@@ -14,6 +14,7 @@ from pathlib import Path
 import cv2 as cv
 import mediapipe as mp
 import numpy as np
+from fontTools.voltLib.ast import SettingDefinition
 
 from super_mario_motion.pose_features import (elbow_left, elbow_right,
                                               extract_features, hip_left,
@@ -94,7 +95,7 @@ def main():
         )
     ap.add_argument("--csv", default="pose_samples.csv")
     ap.add_argument(
-        "--fps", type=float, default=20.0,
+        "--fps", type=float, default=Settings.collection_fps,
         help="goal-sampling rate"
         )
 
