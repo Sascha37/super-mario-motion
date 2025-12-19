@@ -117,9 +117,8 @@ def init():
             state_manager.set_invalid_config(False)
     except Exception as e:
         print(f"{module_prefix} The JSON syntax of the config file"
-        f" is violated: {e}")
+              f" is violated: {e}")
         state_manager.set_invalid_config(True)
-
 
 
 def create_folder_helper(path):

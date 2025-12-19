@@ -6,7 +6,6 @@ launching the configured game or web version.
 """
 
 import getpass
-import json
 import os
 import platform
 import random
@@ -1020,16 +1019,18 @@ def open_config():
 
     threading.Thread(target=_open, daemon=True).start()
 
+
 def update_launch_button_state():
     if button_launch_game is None or selected_control_scheme is None:
         return
 
     scheme = selected_control_scheme.get() or ""
     disable = (
-        (scheme == "Original (RetroArch)" and not game_launcher.retro_paths_valid) or
-        (scheme == "Custom" and not game_launcher.custom_path_valid)
+            (scheme == "Original (RetroArch)" and not game_launcher.retro_paths_valid) or
+            (scheme == "Custom" and not game_launcher.custom_path_valid)
     )
     button_launch_game.state(["disabled"] if disable else ["!disabled"])
+
 
 def config_validation():
     global label_config_warning
@@ -1044,7 +1045,7 @@ def config_validation():
                 width=40,
                 text="Invalid JSON syntax in config file.\nLoading failed.",
                 font=("Helvetica", 9, "bold")
-            )
+                )
             label_config_warning.grid(row=3, column=0, columnspan=2)
         else:
             label_config_warning.grid()
@@ -1052,10 +1053,12 @@ def config_validation():
         if label_config_warning is not None:
             label_config_warning.grid_remove()
 
+
 def reload_config():
     """Reload config.json from disk and apply changes at runtime.
     Runs in a background thread to keep the UI responsive.
     """
+
     def _reload():
         from super_mario_motion import user_data
         user_data.init()
@@ -1064,6 +1067,7 @@ def reload_config():
         config_validation()
 
     threading.Thread(target=_reload, daemon=True).start()
+
 
 def center_window(w, h):
     sw = window.winfo_screenwidth()
