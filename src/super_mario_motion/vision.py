@@ -279,7 +279,7 @@ def cam_loop():
 
             rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             results = pose.process(rgb)
-            frame = image
+            frame = cv.cvtColor(image, cv.COLOR_RGB2BGR)
 
             if results.pose_landmarks:
                 # Draw webcam footage and skeleton
