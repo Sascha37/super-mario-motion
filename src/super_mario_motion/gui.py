@@ -34,13 +34,18 @@ root_frame = None
 label_webcam = None
 selected_preview, selected_mode, selected_control_scheme = None, None, None
 allow_debug_info, send_keystrokes, checkbox_toggle_inputs = None, None, None
-(label_virtual_gamepad_visualizer, label_pose_visualizer, label_current_pose,
- label_debug_landmarks) = None, None, None, None
+(
+    label_virtual_gamepad_visualizer, label_pose_visualizer,
+    label_current_pose,
+    label_debug_landmarks
+    ) = None, None, None, None
 button_collect_start, label_collect_status = None, None
 startup_overlay = None
 startup_overlay_label = None
-geometry_normal, geometry_collect, screen_width, screen_height = (None, None,
-                                                                  None, None)
+geometry_normal, geometry_collect, screen_width, screen_height = (
+    None, None,
+    None, None
+    )
 font_collect_normal, font_collect_large = None, None
 
 # Webcam preview
@@ -382,8 +387,10 @@ def init():
         style="Custom.TCombobox"
         )
     option_menu_preview.bind("<<ComboboxSelected>>", clear_combobox_selection)
-    option_menu_preview["values"] = ["Webcam", "Webcam + Skeleton",
-                                     "Skeleton Only"]
+    option_menu_preview["values"] = [
+        "Webcam", "Webcam + Skeleton",
+        "Skeleton Only"
+        ]
     option_menu_preview.current(0)
     option_menu_preview.grid(row=2, column=1)
 
@@ -439,9 +446,11 @@ def init():
         "<<ComboboxSelected>>",
         on_control_scheme_change
         )
-    option_menu_control_scheme["values"] = ["Original (RetroArch)",
-                                            "supermarioplay (Web)",
-                                            "Custom"]
+    option_menu_control_scheme["values"] = [
+        "Original (RetroArch)",
+        "supermarioplay (Web)",
+        "Custom"
+        ]
     option_menu_control_scheme.current(0)
     option_menu_control_scheme.grid(row=4, column=1)
 
@@ -540,7 +549,7 @@ def init():
             fg="#FFFF00",
             width=40,
             text="Invalid JSON syntax in config file.\nLoading failed.",
-            font=("Helvetica",  9, "bold")
+            font=("Helvetica", 9, "bold")
             )
         label_config_warning.grid(row=3, column=0, columnspan=2)
 
@@ -1048,8 +1057,10 @@ def close():
         # Lazy import; may not be loaded yet.
         from super_mario_motion import vision
         vision.stop_cam()
-    except (RuntimeError, AttributeError, cv2.error, ImportError,
-            NameError) as e:
+    except (
+            RuntimeError, AttributeError, cv2.error, ImportError,
+            NameError
+            ) as e:
         print("Camera shutdown warning:", e)
 
     window.destroy()

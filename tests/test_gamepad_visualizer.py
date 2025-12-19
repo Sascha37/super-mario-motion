@@ -4,8 +4,10 @@ from PIL import Image
 
 import super_mario_motion.gamepad_visualizer as gv
 from super_mario_motion import path_helper as ph
-from super_mario_motion.gamepad_visualizer import get_base_image, \
+from super_mario_motion.gamepad_visualizer import (
+    get_base_image,
     pose_to_buttons
+    )
 
 last_orientation: str = "right"
 

@@ -15,11 +15,13 @@ import cv2 as cv
 import mediapipe as mp
 import numpy as np
 
-from super_mario_motion.pose_features import (elbow_left, elbow_right,
-                                              extract_features, hip_left,
-                                              hip_right, shoulder_left,
-                                              shoulder_right, wrist_left,
-                                              wrist_right)
+from super_mario_motion.pose_features import (
+    elbow_left, elbow_right,
+    extract_features, hip_left,
+    hip_right, shoulder_left,
+    shoulder_right, wrist_left,
+    wrist_right
+    )
 from super_mario_motion.state import StateManager
 
 # Init StateManager

@@ -270,8 +270,10 @@ def build_pydirectinput_letter_map():
     user32.GetKeyboardLayout.argtypes = [wintypes.DWORD]
     user32.GetKeyboardLayout.restype = wintypes.HANDLE
 
-    user32.MapVirtualKeyExW.argtypes = [wintypes.UINT, wintypes.UINT,
-                                        wintypes.HANDLE]
+    user32.MapVirtualKeyExW.argtypes = [
+        wintypes.UINT, wintypes.UINT,
+        wintypes.HANDLE
+        ]
     user32.MapVirtualKeyExW.restype = wintypes.UINT
 
     user32.ToUnicodeEx.argtypes = [

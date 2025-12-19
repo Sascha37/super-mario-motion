@@ -75,16 +75,18 @@ def pose_to_buttons(pose: str) -> List[str]:
         case "throwing":
             return ["B"]
         case "jumping" | "swimming":
-            return ["A",
-                    "DPAD_RIGHT" if last_orientation == "right" else
-                    "DPAD_LEFT"]
+            return [
+                "A",
+                "DPAD_RIGHT" if last_orientation == "right" else
+                "DPAD_LEFT"
+                ]
         case _:
             return []
 
 
 def draw_highlight_overlay(
-        base_size: tuple[int, int],
-        pressed: Iterable[str]
+    base_size: tuple[int, int],
+    pressed: Iterable[str]
         ) -> Image.Image:
     """Create an RGBA overlay that highlights pressed buttons.
 
@@ -120,8 +122,8 @@ def draw_highlight_overlay(
 
 
 def create_gamepad_image(
-        pose: str, send_active: bool = True,
-        base_image_: Image.Image | None = None
+    pose: str, send_active: bool = True,
+    base_image_: Image.Image | None = None
         ) -> Image.Image:
     """Create a gamepad image with highlighted buttons for a given pose.
 

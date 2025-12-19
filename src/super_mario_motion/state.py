@@ -110,8 +110,8 @@ class StateManager:
 
     @classmethod
     def set_all_opencv_images(
-            cls, new_webcam, new_webcam_skeleton,
-            new_skeleton_only
+        cls, new_webcam, new_webcam_skeleton,
+        new_skeleton_only
             ):
         cls.opencv_image_webcam = new_webcam
         cls.opencv_image_webcam_skeleton = new_webcam_skeleton
@@ -148,7 +148,7 @@ class StateManager:
     @classmethod
     def set_config_path(cls, new_config_path):
         cls.config_path = new_config_path
-        
+
     @classmethod
     def set_invalid_config(cls, new_invalid_config):
         cls.invalid_config = new_invalid_config

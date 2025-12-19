@@ -164,8 +164,10 @@ def detect_pose_simple(frame_, lm):
 
     # define common coordinates
     shoulder_width = distance(shoulder_left_xy, shoulder_right_xy)
-    shoulder_left_y, shoulder_right_y = (shoulder_left_xy[1],
-                                         shoulder_right_xy[1])
+    shoulder_left_y, shoulder_right_y = (
+        shoulder_left_xy[1],
+        shoulder_right_xy[1]
+        )
     eye_left_y, eye_right_y = eye_left_xy[1], eye_right_xy[1]
     wrist_left_x, wrist_left_y = wrist_left_xy
     wrist_right_x, wrist_right_y = wrist_right_xy
