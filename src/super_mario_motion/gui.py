@@ -283,7 +283,19 @@ def init():
     button_config.grid(
         row=1,
         column=0,
-        columnspan=2,
+        sticky="nsew"
+        )
+
+    button_config_reload = ttk.Button(
+        buttons_frame,
+        text="reload config",
+        command=reload_config,
+        style="Custom.TButton",
+        )
+
+    button_config_reload.grid(
+        row=1,
+        column=1,
         sticky="nsew"
         )
 
@@ -1021,6 +1033,8 @@ def open_config():
 
     threading.Thread(target=_open, daemon=True).start()
 
+def reload_config():
+    return null
 
 def center_window(w, h):
     sw = window.winfo_screenwidth()
