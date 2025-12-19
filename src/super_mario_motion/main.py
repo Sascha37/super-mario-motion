@@ -19,6 +19,7 @@ from super_mario_motion import game_launcher, gamepad_visualizer, gui, \
     user_data
 from super_mario_motion.state import StateManager
 from super_mario_motion.settings import Settings
+import vision
 
 
 def webcam_is_available():

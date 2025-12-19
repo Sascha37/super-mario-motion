@@ -14,7 +14,6 @@ from pathlib import Path
 import cv2 as cv
 import mediapipe as mp
 import numpy as np
-from fontTools.voltLib.ast import SettingDefinition
 
 from super_mario_motion.pose_features import (elbow_left, elbow_right,
                                               extract_features, hip_left,
@@ -22,6 +21,7 @@ from super_mario_motion.pose_features import (elbow_left, elbow_right,
                                               shoulder_right, wrist_left,
                                               wrist_right)
 from super_mario_motion.state import StateManager
+from super_mario_motion.settings import Settings
 
 # Init StateManager
 state_manger = StateManager()

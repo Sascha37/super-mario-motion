@@ -20,16 +20,9 @@ target-version = "py312"
 fix = false
 
 [tool.ruff.lint]
-select = [
-    "PLR2004",
-    "RUF100",
-    "F",
-    "E",
+select = ["F",
+    "E9",
+    "W",
     "B",
-    "SIM",
-    "UP",
-    "RUF",
-    "PL",
-    "C90"
+    "PLR2004"
 ]
-
