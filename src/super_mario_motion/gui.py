@@ -6,6 +6,7 @@ launching the configured game or web version.
 """
 
 import getpass
+import json
 import os
 import platform
 import random
@@ -1034,7 +1035,15 @@ def open_config():
     threading.Thread(target=_open, daemon=True).start()
 
 def reload_config():
-    return null
+    """Reload config.json from disk and apply changes at runtime.
+    Runs in a background thread to keep the UI responsive.
+    """
+    def _reload():
+        from super_mario_motion import user_data
+        user_data.init()
+        game_launcher.init()
+
+    threading.Thread(target=_reload, daemon=True).start()
 
 def center_window(w, h):
     sw = window.winfo_screenwidth()
