@@ -36,6 +36,7 @@ CONTROL_SCHEMES = {
         },
     "Custom": {}
     }
+alphabet_len = 26
 
 if sys.platform == 'win32':
     import pydirectinput as pyautogui
@@ -310,7 +311,7 @@ def build_pydirectinput_letter_map():
         if ch and "a" <= ch <= "z" and ch not in out:
             out[ch] = physical_key
 
-        if len(out) == 26:
+        if len(out) == alphabet_len:
             break
 
     return out
