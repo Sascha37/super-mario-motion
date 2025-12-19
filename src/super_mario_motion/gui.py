@@ -44,7 +44,7 @@ geometry_normal, geometry_collect, screen_width, screen_height = (None, None,
                                                                   None, None)
 font_collect_normal, font_collect_large = None, None
 
-button_launch_game = None
+button_launch_game, label_config_warning = None, None
 
 # Webcam preview
 webcam_image_width = 612
@@ -1032,17 +1032,25 @@ def update_launch_button_state():
     button_launch_game.state(["disabled"] if disable else ["!disabled"])
 
 def config_validation():
+    global label_config_warning
+
     if state_manager.get_invalid_config():
         print("[GUI] Creating on screen warning for config")
-        label_config_warning = tk.Label(
-            frame_bottom_right,
-            bg=color_dark_widget,
-            fg="#FFFF00",
-            width=40,
-            text="Invalid JSON syntax in config file.\nLoading failed.",
-            font=("Helvetica",  9, "bold")
-        )
-        label_config_warning.grid(row=3,column=0,columnspan=2)
+        if label_config_warning is None:
+            label_config_warning = tk.Label(
+                frame_bottom_right,
+                bg=color_dark_widget,
+                fg="#FFFF00",
+                width=40,
+                text="Invalid JSON syntax in config file.\nLoading failed.",
+                font=("Helvetica", 9, "bold")
+            )
+            label_config_warning.grid(row=3, column=0, columnspan=2)
+        else:
+            label_config_warning.grid()
+    else:
+        if label_config_warning is not None:
+            label_config_warning.grid_remove()
 
 def reload_config():
     """Reload config.json from disk and apply changes at runtime.
