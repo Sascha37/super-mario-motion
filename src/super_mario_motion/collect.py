@@ -15,44 +15,11 @@ import cv2 as cv
 import mediapipe as mp
 import numpy as np
 
-from super_mario_motion.pose_features import (elbow_left, elbow_right,
-                                              extract_features, hip_left,
-                                              hip_right, shoulder_left,
-                                              shoulder_right, wrist_left,
-                                              wrist_right)
+from super_mario_motion.pose_features import extract_features
 from super_mario_motion.state import StateManager
 
 # Init StateManager
 state_manger = StateManager()
-
-VISIBILITY_THRESH = 0.6  # can be tuned later
-STABLE_N = 3  # how many consecutive similar frames are required
-FEATURE_EPS = 0.2  # max allowed mean deviation per feature
-
-
-def is_valid_lm_frame(lm_arr: np.ndarray) -> bool:
-    """
-    Check if a frame is good enough for training based on visibility.
-    Only keep frames where all required joints are clearly visible.
-    """
-    required_indices = [
-        shoulder_left, shoulder_right,
-        elbow_left, elbow_right,
-        wrist_left, wrist_right,
-        hip_left, hip_right,
-        ]
-    vis = lm_arr[:, 3]
-    return np.all(vis[required_indices] >= VISIBILITY_THRESH)
-
-
-def features_similar(a: np.ndarray, b: np.ndarray, eps: float) -> bool:
-    """
-    Simple similarity check between two feature vectors.
-    Uses mean absolute difference.
-    """
-    if a.shape != b.shape:
-        return False
-    return float(np.mean(np.abs(a - b))) < eps
 
 
 def main():
@@ -182,34 +149,12 @@ def main():
                 dtype=np.float32
                 )
 
-            # filter frames based on landmark visibility
-            if not is_valid_lm_frame(lm_arr):
-                time.sleep(0.002)
-                continue
-
             feat = extract_features(lm_arr)
 
-            if last_feat is None:
-                last_feat = feat
-                stable_buffer = [feat]
-            else:
-                if features_similar(feat, last_feat, FEATURE_EPS):
-                    stable_buffer.append(feat)
-                    last_feat = feat
-                else:
-                    # pose changed, reset buffer
-                    stable_buffer = [feat]
-                    last_feat = feat
-
-            # only write when pose is stable over STABLE_N frames
-            if len(stable_buffer) >= STABLE_N:
-                mean_feat = np.mean(stable_buffer, axis=0)
-                writer.writerow(
-                    [args.label] + [f"{x:.6f}" for x in mean_feat.tolist()]
-                    )
-                n_saved += 1
-                stable_buffer = []  # reset buffer after saving one sample
-                last_feat = None
+            writer.writerow(
+                [args.label] + [f"{x:.6f}" for x in mean_feat.tolist()]
+                )
+            n_saved += 1
 
             next_t += period
             sleep_for = next_t - (time.time() - start_time)
