@@ -152,7 +152,7 @@ def main():
             feat = extract_features(lm_arr)
 
             writer.writerow(
-                [args.label] + [f"{x:.6f}" for x in mean_feat.tolist()]
+                [args.label] + [f"{x:.6f}" for x in feat.tolist()]
                 )
             n_saved += 1
 
