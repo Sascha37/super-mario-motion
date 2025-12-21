@@ -29,6 +29,7 @@ data_path = state_manager.get_data_folder_path()
 
 CSV_PATH = Path(data_path)
 MODEL_PATH = Path(data_path) / "pose_model.joblib"
+NUMBER_OF_ELEMENTS_PER_LINE = 19
 
 
 def combine_run_csvs(
@@ -86,7 +87,7 @@ def load_csv(csv_path: Path):
     with open(csv_path) as f:
         for line in f:
             parts = line.strip().split(",")
-            if len(parts) < 10:
+            if len(parts) < NUMBER_OF_ELEMENTS_PER_LINE:
                 continue
             labels.append(parts[0])
             feats.append([float(x) for x in parts[1:]])
