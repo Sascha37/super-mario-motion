@@ -19,7 +19,7 @@ from super_mario_motion.pose_features import extract_features
 from super_mario_motion.state import StateManager
 
 # Init StateManager
-state_manger = StateManager()
+state_manager = StateManager()
 
 
 def main():
@@ -116,7 +116,7 @@ def main():
             bgr = None
 
             if args.source in ("auto", "vision"):
-                bgr = state_manger.get_opencv_image_webcam()
+                bgr = state_manager.get_opencv_image_webcam()
 
             if bgr is None and args.source in ("auto", "camera"):
                 if cam is None:

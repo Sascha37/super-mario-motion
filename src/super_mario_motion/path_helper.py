@@ -9,7 +9,7 @@ import sys
 
 
 def resource_path(rel_path):
-    if hasattr(sys, '_MEIPASS'):
+    if hasattr(sys, "_MEIPASS"):
         # noinspection PyProtectedMember
         return os.path.join(sys._MEIPASS, rel_path)
     try:

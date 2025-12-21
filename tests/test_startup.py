@@ -12,8 +12,10 @@ This is useful for testing modules that depend on external libraries or
 resources.
 """
 
-from super_mario_motion import collect, game_launcher, gamepad_visualizer, \
+from super_mario_motion import (
+    collect, game_launcher, gamepad_visualizer,
     gui, input as smm_input, main, vision, vision_ml
+    )
 
 
 def test_main(monkeypatch):

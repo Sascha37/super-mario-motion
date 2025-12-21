@@ -15,8 +15,10 @@ from pathlib import Path
 
 import cv2 as cv
 
-from super_mario_motion import game_launcher, gamepad_visualizer, gui, \
-    user_data
+from super_mario_motion import (
+    game_launcher, gamepad_visualizer, gui,
+    user_data, vision
+    )
 from super_mario_motion.state import StateManager
 
 
@@ -76,11 +78,11 @@ def _start_heavy_init_async(on_ready):
         # Lazy-import heavy modules here to avoid blocking GUI import time.
         try:
             import importlib
-            vision = importlib.import_module("super_mario_motion.vision")
+            vision_ = importlib.import_module("super_mario_motion.vision")
             # expose to this module's globals so `update()` can use it
-            globals()["vision"] = vision
+            globals()["vision"] = vision_
         except Exception as e:
-            vision = None
+            vision_ = None
             errors.append(f"Camera module import failed: {e}")
 
         try:
@@ -93,8 +95,8 @@ def _start_heavy_init_async(on_ready):
                     )
             except Exception:
                 pass
-            if vision is not None:
-                vision.init()
+            if vision_ is not None:
+                vision_.init()
         except Exception as e:
             errors.append(f"Camera init failed: {e}")
 
@@ -166,7 +168,7 @@ def update():
 
     # Update Images to display in gui.py
     try:
-        if 'vision' in globals():
+        if "vision" in globals():
             vision.update_images()
     except Exception:
         pass

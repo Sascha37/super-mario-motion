@@ -8,8 +8,10 @@ walking, running, jumping, crouching, throwing, and swimming cases.
 
 import numpy as np
 
-from super_mario_motion.vision import detect_pose_simple, eye_left, \
+from super_mario_motion.vision import (
+    detect_pose_simple, eye_left,
     eye_right, shoulder_left, shoulder_right, wrist_left, wrist_right
+    )
 
 
 class DummyLm:

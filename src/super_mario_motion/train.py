@@ -32,13 +32,13 @@ MODEL_PATH = Path(data_path) / "pose_model.joblib"
 
 
 def combine_run_csvs(
-        output_name: str = "pose_samples_all.csv",
-        pattern: str = "pose_samples_*.csv"
+    output_name: str = "pose_samples_all.csv",
+    pattern: str = "pose_samples_*.csv"
         ) -> Path:
     """Combine multiple collected run CSVs into a single CSV file.
 
     Existing output file is removed first. Header rows in the following files
-    (starting with 'label,') are skipped.
+    (starting with "label,") are skipped.
 
     Args:
         output_name: Name of the combined CSV file to create.

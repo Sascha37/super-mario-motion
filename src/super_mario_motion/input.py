@@ -36,7 +36,7 @@ CONTROL_SCHEMES = {
     "Custom": {}
     }
 
-if sys.platform == 'win32':
+if sys.platform == "win32":
     import pydirectinput as pyautogui
 else:
     import pyautogui
@@ -102,7 +102,8 @@ def init():
         CONTROL_SCHEMES["Custom"] = extracted_mapping
         print(f"{module_prefix} loaded scheme from config.")
     except Exception as e:
-        print(f"{module_prefix} Failed reading config: {e}.\n"
+        print(
+            f"{module_prefix} Failed reading config: {e}.\n"
             f"{module_prefix} using RetroArch mapping as fallback"
             f" for custom."
             )
@@ -192,7 +193,7 @@ def press_designated_input(pose_):
     tracked in `currently_held_keys`.
 
     Args:
-        pose_: Pose label (e.g. 'walking_right', 'jumping').
+        pose_: Pose label (e.g. "walking_right", "jumping").
     """
     global currently_held_keys, last_orientation
 
@@ -269,8 +270,10 @@ def build_pydirectinput_letter_map():
     user32.GetKeyboardLayout.argtypes = [wintypes.DWORD]
     user32.GetKeyboardLayout.restype = wintypes.HANDLE
 
-    user32.MapVirtualKeyExW.argtypes = [wintypes.UINT, wintypes.UINT,
-                                        wintypes.HANDLE]
+    user32.MapVirtualKeyExW.argtypes = [
+        wintypes.UINT, wintypes.UINT,
+        wintypes.HANDLE
+        ]
     user32.MapVirtualKeyExW.restype = wintypes.UINT
 
     user32.ToUnicodeEx.argtypes = [
