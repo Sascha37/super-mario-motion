@@ -77,7 +77,7 @@ def get_current_key_mapping():
 
 
 def init():
-    global CONTROL_SCHEMES, PDI_LETTER_MAP
+    global PDI_LETTER_MAP
 
     if sys.platform == "win32":
         try:
@@ -94,19 +94,7 @@ def init():
             PDI_LETTER_MAP = {}
 
     # Load the scheme of the config
-    config_file = state_manager.get_config_path()
-    try:
-        extracted_mapping = json.loads(
-            Path(config_file).read_text()
-            )["custom_key_mapping"]
-        CONTROL_SCHEMES["Custom"] = extracted_mapping
-        print(f"{module_prefix} loaded scheme from config.")
-    except Exception as e:
-        print(f"{module_prefix} Failed reading config: {e}.\n"
-            f"{module_prefix} using RetroArch mapping as fallback"
-            f" for custom."
-            )
-        CONTROL_SCHEMES["Custom"] = CONTROL_SCHEMES["Original (RetroArch)"]
+    load_custom_keymap()
 
     thread = threading.Thread(target=input_loop, daemon=True)
     thread.start()
@@ -315,3 +303,19 @@ def build_pydirectinput_letter_map():
             break
 
     return out
+
+def load_custom_keymap():
+    global CONTROL_SCHEMES
+    config_file = state_manager.get_config_path()
+    try:
+        extracted_mapping = json.loads(
+            Path(config_file).read_text()
+            )["custom_key_mapping"]
+        CONTROL_SCHEMES["Custom"] = extracted_mapping
+        print(f"{module_prefix} loaded scheme from config.")
+    except Exception as e:
+        print(f"{module_prefix} Failed reading config: {e}.\n"
+            f"{module_prefix} using RetroArch mapping as fallback"
+            f" for custom."
+            )
+        CONTROL_SCHEMES["Custom"] = CONTROL_SCHEMES["Original (RetroArch)"]

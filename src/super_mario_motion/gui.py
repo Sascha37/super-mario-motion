@@ -1060,9 +1060,10 @@ def reload_config():
     """
 
     def _reload():
-        from super_mario_motion import user_data
+        from super_mario_motion import user_data, input
         user_data.init()
         game_launcher.init()
+        input.load_custom_keymap()
         update_launch_button_state()
         config_validation()
 
