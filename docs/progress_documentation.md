@@ -209,3 +209,29 @@ But we managed work through them all. With that our program ist mostly feature c
   via a dropdown menu
 - It is now possible to **play the game by launching an external website** containing the game
 - **Added an app icon** that displays in the lop left of our UI and taskbar
+
+---
+
+## Week 10 (02.12.25 - 09.12.25)
+
+- **Fixed our train script** to work again, by changing the path where to look for training data.
+- The config now gets **created with default paths** where the emulator is likely installed.
+- Made the **collect mode use the full screen** to better see instructions from far away.
+- **Updated README** and the **help page** to better reflect the state of our project.
+- Fixed the issue with camera permissions on macOS systems not being granted.
+  - **We now have a startup screen** where everything gets loaded and the user on mac is asked to grant camera permissions.
+- When writing more tests, we realized that one function was calculating incorrect numbers. We fixed the function, but had to abandon the previous training data.
+  - We already have **collected a new set of training data**.
+  
+---
+
+## Week 11 (09.12.25 - 16.12.25)
+
+- Got **others to test the application** and got some **valuable feedback**
+  - Took notes of all bugs and issues
+- Readme and help page now includes **more information**, making it easier for others to set up the project
+- We looked into ways to have a better model.
+  - In the end we kept on using the same model as before
+- Added a **warning inside of the program**, if the config is invalid
+- **Made our pose recognition logic better**, by deciding the pose based on a majority vote and other performance related enhancements
+- **Fixed an issue** where the program would not send keystrokes correctly on windows with certain keyboard layouts
