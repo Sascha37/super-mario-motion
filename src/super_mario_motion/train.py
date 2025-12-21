@@ -29,7 +29,7 @@ data_path = state_manager.get_data_folder_path()
 
 CSV_PATH = Path(data_path)
 MODEL_PATH = Path(data_path) / "pose_model.joblib"
-NUMBER_OF_ELEMENTS_PER_LINE = 19
+NUMBER_OF_ELEMENTS_PER_LINE = 110
 
 
 def combine_run_csvs(
