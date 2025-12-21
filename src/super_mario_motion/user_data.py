@@ -112,12 +112,14 @@ def init():
 
     # Validate the loaded config
     try:
-        with open(config_path, "r") as f:
+        with open(config_path) as f:
             json.load(f)
             state_manager.set_invalid_config(False)
     except Exception as e:
-        print(f"{module_prefix} The JSON syntax of the config file"
-              f" is violated: {e}")
+        print(
+            f"{module_prefix} The JSON syntax of the config file"
+            f" is violated: {e}"
+            )
         state_manager.set_invalid_config(True)
 
 

@@ -13,6 +13,7 @@ import time
 from pathlib import Path
 
 from super_mario_motion.state import StateManager
+from super_mario_motion.settings import Settings
 
 module_prefix = "[Input]"
 
@@ -35,8 +36,9 @@ CONTROL_SCHEMES = {
         },
     "Custom": {}
     }
+alphabet_len = 26
 
-if sys.platform == 'win32':
+if sys.platform == "win32":
     import pydirectinput as pyautogui
 else:
     import pyautogui
@@ -53,8 +55,6 @@ currently_held_keys = []
 last_orientation = "right"
 
 # Swimming repeat press configuration
-swim_repeat_interval = 0.25  # seconds between swim button taps while pose
-# is held
 last_swim_press_time = 0.0
 PDI_LETTER_MAP = {}
 MAPVK_VSC_TO_VK_EX = 3
@@ -137,7 +137,7 @@ def input_loop():
             # While holding a swimming pose, repeatedly tap the swim button
             if pose == "swimming":
                 now = time.time()
-                if now - last_swim_press_time >= swim_repeat_interval:
+                if now - last_swim_press_time >= Settings.swim_interval:
                     press_designated_input("swimming")
                     last_swim_press_time = now
         elif previous_send_permission:
@@ -180,7 +180,7 @@ def press_designated_input(pose_):
     tracked in `currently_held_keys`.
 
     Args:
-        pose_: Pose label (e.g. 'walking_right', 'jumping').
+        pose_: Pose label (e.g. "walking_right", "jumping").
     """
     global currently_held_keys, last_orientation
 
@@ -257,8 +257,10 @@ def build_pydirectinput_letter_map():
     user32.GetKeyboardLayout.argtypes = [wintypes.DWORD]
     user32.GetKeyboardLayout.restype = wintypes.HANDLE
 
-    user32.MapVirtualKeyExW.argtypes = [wintypes.UINT, wintypes.UINT,
-                                        wintypes.HANDLE]
+    user32.MapVirtualKeyExW.argtypes = [
+        wintypes.UINT, wintypes.UINT,
+        wintypes.HANDLE
+        ]
     user32.MapVirtualKeyExW.restype = wintypes.UINT
 
     user32.ToUnicodeEx.argtypes = [
@@ -299,7 +301,7 @@ def build_pydirectinput_letter_map():
         if ch and "a" <= ch <= "z" and ch not in out:
             out[ch] = physical_key
 
-        if len(out) == 26:
+        if len(out) == alphabet_len:
             break
 
     return out

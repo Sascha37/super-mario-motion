@@ -18,12 +18,11 @@ import mediapipe as mp
 import numpy as np
 
 from super_mario_motion.state import StateManager
+from super_mario_motion.settings import Settings
 
 # globals
 lm_string = None
 skeleton_only_frame = None
-raw_frame = None
-skel_frame = None
 current_pose = "standing"
 
 # runtime
@@ -33,8 +32,8 @@ frame = None
 _exit = False
 thread = None
 
-mpPose = mp.solutions.pose
-mpDrawing = mp.solutions.drawing_utils
+mp_pose = mp.solutions.pose
+mp_drawing = mp.solutions.drawing_utils
 
 state_manager = StateManager()
 
@@ -166,8 +165,10 @@ def detect_pose_simple(frame_, lm):
 
     # define common coordinates
     shoulder_width = distance(shoulder_left_xy, shoulder_right_xy)
-    shoulder_left_y, shoulder_right_y = (shoulder_left_xy[1],
-                                         shoulder_right_xy[1])
+    shoulder_left_y, shoulder_right_y = (
+        shoulder_left_xy[1],
+        shoulder_right_xy[1]
+        )
     eye_left_y, eye_right_y = eye_left_xy[1], eye_right_xy[1]
     wrist_left_x, wrist_left_y = wrist_left_xy
     wrist_right_x, wrist_right_y = wrist_right_xy
@@ -238,7 +239,7 @@ def cam_loop():
     permissions on macOS) by retrying instead of exiting immediately.
     """
     global frame, rgb, cam, current_pose, skeleton_only_frame, lm_string
-    with mpPose.Pose() as pose:
+    with mp_pose.Pose() as pose:
         print(Path(__file__).name + " initialized")
         misses = 0
         while not _exit:
@@ -272,10 +273,10 @@ def cam_loop():
             misses = 0
 
             h, w = image.shape[:2]
-            scale = 640 / float(w)
+            scale = Settings.webcam_res / float(w)
             new_h = int(h * scale)
-            image = cv.resize(image, (640, new_h))
-            cam.set(cv.CAP_PROP_FPS, 30)
+            image = cv.resize(image, (Settings.webcam_res, new_h))
+            cam.set(cv.CAP_PROP_FPS, Settings.webcam_fps)
 
             rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             results = pose.process(rgb)
@@ -283,15 +284,15 @@ def cam_loop():
 
             if results.pose_landmarks:
                 # Draw webcam footage and skeleton
-                mpDrawing.draw_landmarks(
-                    frame, results.pose_landmarks, mpPose.POSE_CONNECTIONS
+                mp_drawing.draw_landmarks(
+                    frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS
                     )
 
                 # Draw an image of only the skeleton
                 skeleton_only_frame = np.zeros_like(frame)
-                mpDrawing.draw_landmarks(
+                mp_drawing.draw_landmarks(
                     skeleton_only_frame, results.pose_landmarks,
-                    mpPose.POSE_CONNECTIONS
+                    mp_pose.POSE_CONNECTIONS
                     )
 
                 # Simple pose detection

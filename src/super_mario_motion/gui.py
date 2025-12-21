@@ -23,6 +23,7 @@ import cv2
 from PIL import Image, ImageTk
 
 from super_mario_motion import game_launcher, path_helper as ph
+from super_mario_motion.settings import Settings
 from super_mario_motion.state import StateManager
 
 pose = ""
@@ -34,13 +35,18 @@ root_frame = None
 label_webcam = None
 selected_preview, selected_mode, selected_control_scheme = None, None, None
 allow_debug_info, send_keystrokes, checkbox_toggle_inputs = None, None, None
-(label_virtual_gamepad_visualizer, label_pose_visualizer, label_current_pose,
- label_debug_landmarks) = None, None, None, None
+(
+    label_virtual_gamepad_visualizer, label_pose_visualizer,
+    label_current_pose,
+    label_debug_landmarks
+    ) = None, None, None, None
 button_collect_start, label_collect_status = None, None
 startup_overlay = None
 startup_overlay_label = None
-geometry_normal, geometry_collect, screen_width, screen_height = (None, None,
-                                                                  None, None)
+geometry_normal, geometry_collect, screen_width, screen_height = (
+    None, None,
+    None, None
+    )
 font_collect_normal, font_collect_large = None, None
 
 button_launch_game, label_config_warning = None, None
@@ -55,11 +61,11 @@ gamepad_image_width = 200
 gamepad_image_height = 100
 
 # Colors
-color_background = '#202326'
-color_dark_widget = '#141618'
-color_white = '#FFFFFF'
-color_disabled_background = '#444444'
-color_disabled_text = '#888888'
+color_background = "#202326"
+color_dark_widget = "#141618"
+color_white = "#FFFFFF"
+color_disabled_background = "#444444"
+color_disabled_text = "#888888"
 # Filepaths for images that are being used on init
 path_image_webcam_sample = ph.resource_path(
     os.path.join("images", "webcam_sample.jpg")
@@ -97,7 +103,6 @@ COLLECTION_STEPS = [
     ("swimming", 10),
     ]
 CSV_PATH = "pose_samples.csv"
-FPS = 30
 current_run_csv = CSV_PATH
 
 # Will hold the randomized order for a single collection run
@@ -132,7 +137,7 @@ def init():
     global button_launch_game
 
     window = tk.Tk()
-    window.title('Super Mario Motion')
+    window.title("Super Mario Motion")
     window.minsize(window_width, window_height)
     window.resizable(False, False)
     window.configure(background=color_background)
@@ -192,8 +197,8 @@ def init():
     if system == "Darwin":
         # always open the gui on top of all other windows for macOS
         window.lift()
-        window.attributes('-topmost', True)
-        window.after(100, lambda: window.attributes('-topmost', False))
+        window.attributes("-topmost", True)
+        window.after(100, lambda: window.attributes("-topmost", False))
 
     # Loading default images
     try:
@@ -330,7 +335,7 @@ def init():
 
     # Custom ttk Style for Combobox
     style = ttk.Style()
-    style.theme_use('alt')
+    style.theme_use("alt")
     style.configure(
         "Custom.TCombobox",
         fieldbackground=color_dark_widget,
@@ -390,8 +395,10 @@ def init():
         style="Custom.TCombobox"
         )
     option_menu_preview.bind("<<ComboboxSelected>>", clear_combobox_selection)
-    option_menu_preview['values'] = ["Webcam", "Webcam + Skeleton",
-                                     "Skeleton Only"]
+    option_menu_preview["values"] = [
+        "Webcam", "Webcam + Skeleton",
+        "Skeleton Only"
+        ]
     option_menu_preview.current(0)
     option_menu_preview.grid(row=2, column=1)
 
@@ -418,7 +425,7 @@ def init():
         style="Custom.TCombobox"
         )
     option_menu_mode.bind("<<ComboboxSelected>>", on_mode_change)
-    option_menu_mode['values'] = ["Simple", "Full-body", "Collect"]
+    option_menu_mode["values"] = ["Simple", "Full-body", "Collect"]
     option_menu_mode.current(0)
     option_menu_mode.grid(row=3, column=1)
 
@@ -447,9 +454,11 @@ def init():
         "<<ComboboxSelected>>",
         on_control_scheme_change
         )
-    option_menu_control_scheme['values'] = ["Original (RetroArch)",
-                                            "supermarioplay (Web)",
-                                            "Custom"]
+    option_menu_control_scheme["values"] = [
+        "Original (RetroArch)",
+        "supermarioplay (Web)",
+        "Custom"
+        ]
     option_menu_control_scheme.current(0)
     option_menu_control_scheme.grid(row=4, column=1)
 
@@ -459,7 +468,7 @@ def init():
     global allow_debug_info
     allow_debug_info = tk.IntVar(value=0)
     checkbox_debug_info = tk.Checkbutton(
-        frame_bottom_left, text='Debug Info',
+        frame_bottom_left, text="Debug Info",
         bg=color_dark_widget, fg=color_white,
         selectcolor=color_background,
         highlightthickness=0, bd=0,
@@ -478,7 +487,7 @@ def init():
     send_keystrokes = tk.IntVar()
     checkbox_toggle_inputs = tk.Checkbutton(
         frame_bottom_left,
-        text='Send Inputs',
+        text="Send Inputs",
         bg=color_dark_widget,
         fg=color_white,
         selectcolor=color_background,
@@ -686,7 +695,7 @@ def set_webcam_image(webcam, webcam_skeleton, only_skeleton):
 
     # add black bars to the resized image to maintain webcam preview size
     img = img.resize((new_w, new_h), Image.LANCZOS)
-    canvas = Image.new('RGB', (dst_w, dst_h), (0, 0, 0))
+    canvas = Image.new("RGB", (dst_w, dst_h), (0, 0, 0))
     canvas.paste(img, ((dst_w - new_w) // 2, (dst_h - new_h) // 2))
     image = ImageTk.PhotoImage(canvas)
 
@@ -871,7 +880,7 @@ def start_collect_sequence():
     user = getpass.getuser()
     current_run_csv = str(
         runs_dir / f"pose_samples_{user}_"
-                   f"{datetime.now().strftime('%d.%m.%Y_%H.%M')}.csv"
+                   f"{datetime.now().strftime("%d.%m.%Y_%H.%M")}.csv"
         )
     label_collect_status.config(text="Starting Sequence…")
     _set_collect_button(starting=True)
@@ -968,7 +977,7 @@ def record_collect_pose(pose_name: str, seconds: float, index: int):
         "--label", pose_name,
         "--seconds", str(seconds),
         "--csv", current_run_csv,
-        "--fps", str(FPS),
+        "--fps", str(Settings.webcam_fps),
         "--source", "auto",
         ]
     _collect.main()
@@ -1000,7 +1009,7 @@ def open_help_menu():
 def open_config():
     """Open the config file in the system's default editor/viewer.
 
-    Uses os.startfile on Windows, 'open' on macOS, and 'xdg-open' on Linux.
+    Uses os.startfile on Windows, "open" on macOS, and "xdg-open" on Linux.
     The actual editor depends on the user's file associations.
     """
     config_path = Path(state_manager.get_config_path())
@@ -1096,8 +1105,10 @@ def close():
         # Lazy import; may not be loaded yet.
         from super_mario_motion import vision
         vision.stop_cam()
-    except (RuntimeError, AttributeError, cv2.error, ImportError,
-            NameError) as e:
+    except (
+            RuntimeError, AttributeError, cv2.error, ImportError,
+            NameError
+            ) as e:
         print("Camera shutdown warning:", e)
 
     window.destroy()

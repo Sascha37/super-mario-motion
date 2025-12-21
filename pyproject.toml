@@ -13,3 +13,16 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.ruff]
+line-length = 79
+target-version = "py312"
+fix = false
+
+[tool.ruff.lint]
+select = ["F",
+    "E9",
+    "W",
+    "B",
+    "PLR2004"
+]
