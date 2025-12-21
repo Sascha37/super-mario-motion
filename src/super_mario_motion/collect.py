@@ -17,6 +17,7 @@ import numpy as np
 
 from super_mario_motion.pose_features import extract_features
 from super_mario_motion.state import StateManager
+from super_mario_motion.settings import Settings
 
 # Init StateManager
 state_manager = StateManager()
@@ -61,7 +62,7 @@ def main():
         )
     ap.add_argument("--csv", default="pose_samples.csv")
     ap.add_argument(
-        "--fps", type=float, default=20.0,
+        "--fps", type=float, default=Settings.collection_fps,
         help="goal-sampling rate"
         )
 
