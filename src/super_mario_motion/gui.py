@@ -49,6 +49,8 @@ geometry_normal, geometry_collect, screen_width, screen_height = (
     )
 font_collect_normal, font_collect_large = None, None
 
+button_launch_game, label_config_warning = None, None
+
 # Webcam preview
 webcam_image_width = 612
 webcam_image_height = 408
@@ -132,6 +134,7 @@ def init():
     global button_collect_start, label_collect_status
     global geometry_normal, geometry_collect, screen_width, screen_height
     global font_collect_normal, font_collect_large, window_width, window_height
+    global button_launch_game
 
     window = tk.Tk()
     window.title("Super Mario Motion")
@@ -288,7 +291,19 @@ def init():
     button_config.grid(
         row=1,
         column=0,
-        columnspan=2,
+        sticky="nsew"
+        )
+
+    button_config_reload = ttk.Button(
+        buttons_frame,
+        text="reload config",
+        command=reload_config,
+        style="Custom.TButton",
+        )
+
+    button_config_reload.grid(
+        row=1,
+        column=1,
         sticky="nsew"
         )
 
@@ -368,14 +383,7 @@ def init():
     def clear_combobox_selection(event):
         event.widget.selection_clear()
 
-    def update_launch_button_state():
-        scheme = selected_control_scheme.get()
-        if ((scheme == "Original (RetroArch)" and not
-            game_launcher.retro_paths_valid) or (
-                scheme == "Custom" and not game_launcher.custom_path_valid)):
-            button_launch_game.state(["disabled"])
-        else:
-            button_launch_game.state(["!disabled"])
+    update_launch_button_state()
 
     # Preview Combobox
     global selected_preview
@@ -541,17 +549,7 @@ def init():
         )
     label_debug_landmarks.grid(row=2, column=0, columnspan=2)
 
-    if state_manager.get_invalid_config():
-        print("[GUI] Creating on screen warning for config")
-        label_config_warning = tk.Label(
-            frame_bottom_right,
-            bg=color_dark_widget,
-            fg="#FFFF00",
-            width=40,
-            text="Invalid JSON syntax in config file.\nLoading failed.",
-            font=("Helvetica", 9, "bold")
-            )
-        label_config_warning.grid(row=3, column=0, columnspan=2)
+    config_validation()
 
     # Text Label for the collection status, visible during collect mode
     global label_collect_status, button_collect_start
@@ -1029,6 +1027,56 @@ def open_config():
             print(f"[GUI] Could not open config: {e}")
 
     threading.Thread(target=_open, daemon=True).start()
+
+
+def update_launch_button_state():
+    if button_launch_game is None or selected_control_scheme is None:
+        return
+
+    scheme = selected_control_scheme.get() or ""
+    disable = (
+            (scheme == "Original (RetroArch)" and not game_launcher.retro_paths_valid) or
+            (scheme == "Custom" and not game_launcher.custom_path_valid)
+    )
+    button_launch_game.state(["disabled"] if disable else ["!disabled"])
+
+
+def config_validation():
+    global label_config_warning
+
+    if state_manager.get_invalid_config():
+        print("[GUI] Creating on screen warning for config")
+        if label_config_warning is None:
+            label_config_warning = tk.Label(
+                frame_bottom_right,
+                bg=color_dark_widget,
+                fg="#FFFF00",
+                width=40,
+                text="Invalid JSON syntax in config file.\nLoading failed.",
+                font=("Helvetica", 9, "bold")
+                )
+            label_config_warning.grid(row=3, column=0, columnspan=2)
+        else:
+            label_config_warning.grid()
+    else:
+        if label_config_warning is not None:
+            label_config_warning.grid_remove()
+
+
+def reload_config():
+    """Reload config.json from disk and apply changes at runtime.
+    Runs in a background thread to keep the UI responsive.
+    """
+
+    def _reload():
+        from super_mario_motion import user_data, input
+        user_data.init()
+        game_launcher.init()
+        input.load_custom_keymap()
+        update_launch_button_state()
+        config_validation()
+
+    threading.Thread(target=_reload, daemon=True).start()
 
 
 def center_window(w, h):
