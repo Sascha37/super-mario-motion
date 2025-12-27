@@ -106,15 +106,18 @@ def print_probability(input):
         guess = _model.classes_[i]
         print(f"{guess}, probability: {round(prob*100,2)}%")
 
-# TODO use random input
+def get_execution_time(func,input):
+    t_start = time.perf_counter()
+    func(input)
+    t_stop = time.perf_counter()
+    return (t_stop - t_start)*1000
+
+
 def get_average_execution_time(runs, func, input):
     total_time = 0
     for n in range(runs):
-        t_start = time.perf_counter()
-        func(input)
-        t_stop = time.perf_counter()
-        total_time += (t_stop - t_start)*1000
-    return total_time / n
+        total_time += get_execution_time(func, input)
+    return total_time / runs
 
 def get_accuracy(expected, dataset):
     correct = 0
@@ -127,3 +130,5 @@ def get_accuracy(expected, dataset):
 print_probability(sample_crouching)
 print(f"Average execution time: {get_average_execution_time(99, guess_most_likely, sample_crouching)} ms")
 print(f"Acc:{get_accuracy("crouching", [sample_crouching,sample_crouching])}")
+
+print(f"Execution time: {get_execution_time(guess_most_likely, sample_crouching)}")
