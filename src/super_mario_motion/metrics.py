@@ -76,14 +76,28 @@ def get_total_accuracy(labels, npy_dir):
         total_accuracy += get_accuracy_for_label(label,npy_dir,False)
     return (total_accuracy/len(labels))
 
+def get_file_size(path):
+    return os.path.getsize(path)
+
 npy_path = ph.resource_path(
                 os.path.join("..", "..", "tests", "npy")
                 )
+def print_metric_report():
+    separator_length = 35
+    runs = 99
+    labels = ["standing", "walking_left"]
 
-#print_probability(sample_crouching)
-print(f"Average execution time: {get_average_execution_time(99, guess_most_likely, npy_path)} ms")
-print(f"Acc standing:{get_accuracy_for_label("standing", npy_path, False)}")
-print(f"Acc walking_left:{get_accuracy_for_label("walking_left", npy_path, True)}")
-print(f"Combined accuracy:{get_total_accuracy(["standing", "walking_left"],npy_path)}")
+    print(f"#"*separator_length)
+    print(f"Report for file: {model_path}\n")
+    print(f"File size: {get_file_size(model_path)/1000000} MB")
+    print(f"Average execution time across {runs} runs: {get_average_execution_time(runs, guess_most_likely, npy_path)} ms\n")
+    print("Accuracy")
+    for label in labels:
+        print(f"{get_accuracy_for_label(label, npy_path, False)}% -- {label}")
+    
+    print(f"{get_total_accuracy(labels,npy_path)}% -- Total accuracy")
+    print(f"#"*separator_length)
+    
+print_metric_report()
 
 
