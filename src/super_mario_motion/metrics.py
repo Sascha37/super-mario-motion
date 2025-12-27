@@ -68,13 +68,13 @@ def get_accuracy_for_label(expected, npy_dir, verbose):
             print(guess_most_likely(data))
         if (guess_most_likely(data) == expected):
             correct += 1
-    return (correct/len(files))*100
+    return round((correct/len(files))*100,2)
 
 def get_total_accuracy(labels, npy_dir):
     total_accuracy = 0
     for label in labels:
         total_accuracy += get_accuracy_for_label(label,npy_dir,False)
-    return (total_accuracy/len(labels))
+    return round(total_accuracy/len(labels),2)
 
 def get_file_size(path):
     return os.path.getsize(path)
@@ -84,8 +84,11 @@ npy_path = ph.resource_path(
                 )
 def print_metric_report():
     separator_length = 35
-    runs = 99
-    labels = ["standing", "walking_left"]
+    runs = 150
+    labels = ["standing", "walking_left",
+    "walking_right", "jumping", "running_right",
+    "running_left","crouching", "throwing",
+    "swimming"]
 
     print(f"#"*separator_length)
     print(f"Report for file: {model_path}\n")
