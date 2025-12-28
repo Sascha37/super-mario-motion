@@ -17,6 +17,7 @@ class StateManager:
     opencv_image_webcam = None
     opencv_image_webcam_skeleton = None
     opencv_image_skeleton_only = None
+    current_cam_index = 0
 
     gui_checkbox_send_permission = False
 
@@ -58,6 +59,10 @@ class StateManager:
     @classmethod
     def get_opencv_image_webcam(cls):
         return cls.opencv_image_webcam
+
+    @classmethod
+    def get_current_cam_index(cls):
+        return cls.current_cam_index
 
     @classmethod
     def get_send_permission(cls):
@@ -116,6 +121,10 @@ class StateManager:
         cls.opencv_image_webcam = new_webcam
         cls.opencv_image_webcam_skeleton = new_webcam_skeleton
         cls.opencv_image_skeleton_only = new_skeleton_only
+
+    @classmethod
+    def set_current_cam_index(cls, new_cam_index):
+        cls.current_cam_index = new_cam_index
 
     @classmethod
     def set_send_permission(cls, new_send_permission):

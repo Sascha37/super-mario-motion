@@ -1112,3 +1112,6 @@ def close():
         print("Camera shutdown warning:", e)
 
     window.destroy()
+
+def switch_cam():
+ state_manager.set_current_cam_index()
