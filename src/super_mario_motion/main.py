@@ -13,6 +13,7 @@ import sys
 import threading
 import platform
 from pathlib import Path
+from AVFoundation import AVCaptureDevice
 
 import cv2 as cv
 
@@ -93,19 +94,17 @@ def find_cams():
         except Exception:
             pass
 
-    elif platform == "darwin":
+    elif system == "Darwin":
         try:
-            import AVFoundation
-            devices = AVFoundation.AVCaptureDevice.devicesWithMediaType_(
-                AVFoundation.AVMediaTypeVideo
-                )
-            cams_available.append(dev.localizedName())
+            devices = AVCaptureDevice.devicesWithMediaType_("vide")
+            for device in devices:
+                cams_available.append(device.localizedName())
         except Exception:
             pass
 
-    for i, cam in enumerate(cams_available):
-        if not webcam_is_available(i):
-            del cams_avaliable[i]
+    # for i, cam in enumerate(cams_available):
+    #     if not webcam_is_available(i):
+    #         del cams_available[i]
     return cams_available
 
 

@@ -22,7 +22,8 @@ from tkinter import ttk
 import cv2
 from PIL import Image, ImageTk
 
-from super_mario_motion import game_launcher, path_helper, main as ph
+from super_mario_motion import game_launcher, path_helper as ph
+from super_mario_motion import main as main
 from super_mario_motion.settings import Settings
 from super_mario_motion.state import StateManager
 
