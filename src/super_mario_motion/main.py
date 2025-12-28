@@ -16,8 +16,6 @@ from pathlib import Path
 
 import cv2 as cv
 
-from pygrabber.dshow_graph import FilterGraph
-
 from super_mario_motion import (
     game_launcher, gamepad_visualizer, gui,
     user_data, vision
@@ -68,6 +66,7 @@ def find_cams():
     system = platform.system()
 
     if system == "Windows":
+        from pygrabber.dshow_graph import FilterGraph
         try:
             from pygrabber.dshow_graph import FilterGraph
             names = FilterGraph().get_input_devices()
@@ -75,7 +74,7 @@ def find_cams():
         except Exception:
             pass
 
-    elif platform.startswith("linux"):
+    elif system == "Linux":
         try:
             out = subprocess.check_output(
                 ["v4l2-ctl", "--list-devices"],

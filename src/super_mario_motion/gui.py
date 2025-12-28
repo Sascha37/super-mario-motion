@@ -22,7 +22,7 @@ from tkinter import ttk
 import cv2
 from PIL import Image, ImageTk
 
-from super_mario_motion import game_launcher, path_helper as ph
+from super_mario_motion import game_launcher, path_helper, main as ph
 from super_mario_motion.settings import Settings
 from super_mario_motion.state import StateManager
 
@@ -1113,5 +1113,6 @@ def close():
 
     window.destroy()
 
-def switch_cam():
- state_manager.set_current_cam_index()
+# def switch_cam():
+#     index = ph.cams_available.index()
+#  state_manager.set_current_cam_index(index)
