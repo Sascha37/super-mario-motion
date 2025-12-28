@@ -53,7 +53,7 @@ def get_average_execution_time(runs, func, npy_dir):
         input_data = transform_landmarks(np.load(file))
         execution_time = get_execution_time(func, input_data)
         total_time += execution_time
-    return total_time / runs
+    return round(total_time / runs,3)
 
 # Calculates the average accuracy for determening a specific label
 def get_accuracy_for_label(expected, npy_dir, verbose):
@@ -68,7 +68,7 @@ def get_accuracy_for_label(expected, npy_dir, verbose):
             print(guess_most_likely(data))
         if (guess_most_likely(data) == expected):
             correct += 1
-    return round((correct/len(files))*100,2)
+    return round((correct/len(files))*100,3)
 
 def get_total_accuracy(labels, npy_dir):
     total_accuracy = 0
@@ -77,7 +77,7 @@ def get_total_accuracy(labels, npy_dir):
     return round(total_accuracy/len(labels),2)
 
 def get_file_size(path):
-    return os.path.getsize(path)
+    return round(os.path.getsize(path)/1000000,3)
 
 npy_path = ph.resource_path(
                 os.path.join("..", "..", "tests", "npy")
@@ -92,7 +92,7 @@ def print_metric_report():
 
     print(f"#"*separator_length)
     print(f"Report for file: {model_path}\n")
-    print(f"File size: {get_file_size(model_path)/1000000} MB")
+    print(f"File size: {get_file_size(model_path)} MB")
     print(f"Average execution time across {runs} runs: {get_average_execution_time(runs, guess_most_likely, npy_path)} ms\n")
     print("Accuracy")
     for label in labels:
