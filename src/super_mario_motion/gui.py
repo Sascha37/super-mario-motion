@@ -283,7 +283,7 @@ def init():
 
     button_config = ttk.Button(
         buttons_frame,
-        text="edit config",
+        text="Edit Config",
         command=open_config,
         style="Custom.TButton",
         )
@@ -296,7 +296,7 @@ def init():
 
     button_config_reload = ttk.Button(
         buttons_frame,
-        text="reload config",
+        text="Reload Config",
         command=reload_config,
         style="Custom.TButton",
         )
@@ -456,7 +456,7 @@ def init():
         )
     option_menu_control_scheme["values"] = [
         "Original (RetroArch)",
-        "supermarioplay (Web)",
+        "Supermarioplay (Web)",
         "Custom"
         ]
     option_menu_control_scheme.current(0)
@@ -536,7 +536,7 @@ def init():
         frame_bottom_right,
         bg=color_dark_widget,
         fg=color_white,
-        text="Current pose:" + pose
+        text="Current Pose:" + pose
         )
     label_current_pose.grid(row=1, column=0, columnspan=2)
 
@@ -755,7 +755,7 @@ def update_pose_image():
 
 
 def update_pose_text():
-    label_current_pose.config(text="Current pose:" + pose)
+    label_current_pose.config(text="Current Pose:" + pose)
 
 
 def update_debug_landmarks(landmarks):
