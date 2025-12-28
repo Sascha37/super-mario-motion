@@ -108,28 +108,24 @@ def main():
     pipe = Pipeline(
         [
             ("scaler", StandardScaler()),
-            ("clf", SVC(probability=True))
+            ("clf", SVC(
+                kernel="linear",
+                C=5.0,
+                gamma="scale",
+                probability=True,
+                class_weight="balanced"
+            ))
             ]
         )
 
-    grid = {
-        "clf__C": [0.5, 1, 2, 5],
-        "clf__kernel": ["rbf", "linear"],
-        "clf__gamma": ["scale", "auto"]
-        }
+    pipe.fit(s_train, y_train)
 
-    gs = GridSearchCV(
-        pipe, grid, cv=5, n_jobs=-1, scoring="f1_weighted",
-        verbose=1
-        )
-    gs.fit(s_train, y_train)
+    y_pred = pipe.predict(s_test)
 
-    print("Best params:", gs.best_params_)
-    y_pred = gs.predict(s_test)
     print(classification_report(y_test, y_pred))
     print("Confusion matrix:\n", confusion_matrix(y_test, y_pred))
 
-    dump(gs.best_estimator_, MODEL_PATH)
+    dump(pipe, MODEL_PATH)
     print(f"Saved model -> {MODEL_PATH}")
 
 
