@@ -131,7 +131,7 @@ def launch_game():
     via `subprocess.run`. Prints error messages if launch fails.
     """
     scheme = StateManager.get_control_scheme()
-    if scheme == "supermarioplay (Web)":
+    if scheme == "Supermarioplay (Web)":
         webbrowser.open("https://supermarioplay.com")
         return
 

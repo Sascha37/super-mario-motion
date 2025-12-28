@@ -455,8 +455,8 @@ def init():
         on_control_scheme_change
         )
     option_menu_control_scheme["values"] = [
-        "Original (RetroArch)",
         "Supermarioplay (Web)",
+        "Original (RetroArch)",
         "Custom"
         ]
     option_menu_control_scheme.current(0)
