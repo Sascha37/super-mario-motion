@@ -70,19 +70,6 @@ def combine_run_csvs(
 
 
 def load_csv(csv_path: Path):
-    """Load features and labels from a pose-sample CSV file.
-
-    Expects the first column to be the label and the remaining columns to
-    be floating-point feature values.
-
-    Args:
-        csv_path: Path to the CSV file.
-
-    Returns:
-        tuple[np.ndarray, np.ndarray]:
-            x: Feature matrix of shape (n_samples, n_features), dtype float32.
-            y: Label array of shape (n_samples), dtype object/str.
-    """
     labels, feats = [], []
     with open(csv_path) as f:
         for line in f:
@@ -96,18 +83,9 @@ def load_csv(csv_path: Path):
     return x, y
 
 
-def main():
-    """Train and evaluate the pose classifier, then save the best model.
 
-    Steps:
-      * Combine all run CSV files.
-      * Load feature matrix X and labels y.
-      * Split into train/test sets with stratification.
-      * Build a pipeline: StandardScaler -> PCA (95% var) -> SVC.
-      * Run GridSearchCV over SVC hyperparameters (C, kernel, gamma).
-      * Print best parameters, classification report and confusion matrix.
-      * Save the best estimator to MODEL_PATH.
-    """
+def main():
+    # Check if CSV files exists. If so, concatenate them
     if not CSV_PATH.exists():
         raise FileNotFoundError(
             f"{CSV_PATH} not found. Collect data first"
@@ -130,8 +108,6 @@ def main():
     pipe = Pipeline(
         [
             ("scaler", StandardScaler()),
-            ("pca", PCA(n_components=0.95, svd_solver="full")),
-            # optional, can be removed
             ("clf", SVC(probability=True))
             ]
         )

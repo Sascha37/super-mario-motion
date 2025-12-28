@@ -18,9 +18,10 @@ def transform_landmarks(landmarks):
 
 # Load model
 try:
-    model_path = ph.resource_path(
-                os.path.join("data", "pose_model.joblib")
-                )
+    #model_path = "ph.resource_path(
+    #            os.path.join("data", "pose_model.joblib")
+    #            )"
+    model_path = "/home/sascha/.local/share/supermariomotion/pose_model.joblib" #TODO:change back!!
     _model = load(model_path)
 except Exception as e:
     print(f"Model not found {e}")
