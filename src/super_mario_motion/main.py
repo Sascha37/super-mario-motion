@@ -11,9 +11,12 @@ from appearing to crash while waiting for OS camera permissions.
 import os
 import sys
 import threading
+import platform
 from pathlib import Path
 
 import cv2 as cv
+
+from pygrabber.dshow_graph import FilterGraph
 
 from super_mario_motion import (
     game_launcher, gamepad_visualizer, gui,
@@ -24,14 +27,14 @@ from super_mario_motion.settings import Settings
 from super_mario_motion import vision
 
 
-def webcam_is_available():
+def webcam_is_available(x):
     """Best-effort check if a webcam is available on index 0.
 
     Returns:
         bool: True if a frame can be captured from the webcam, otherwise False.
     """
     try:
-        cam = cv.VideoCapture(0)
+        cam = cv.VideoCapture(x)
         if cam is None:
             return False
         try:
@@ -56,6 +59,59 @@ def webcam_is_available():
         return bool(ret)
     except Exception:
         return False
+
+
+def find_cams():
+    global cams_available
+    cams_available = []
+
+    system = platform.system()
+
+    if system == "Windows":
+        try:
+            from pygrabber.dshow_graph import FilterGraph
+            names = FilterGraph().get_input_devices()
+            cams_available.append(names)
+        except Exception:
+            pass
+
+    elif platform.startswith("linux"):
+        try:
+            out = subprocess.check_output(
+                ["v4l2-ctl", "--list-devices"],
+                text=True,
+                errors="ignore"
+                )
+
+            current_name = None
+            for line in out.splitlines():
+                if line and not line.startswith("\t") and line.endswith(":"):
+                    current_name = line[:-1]
+
+                elif line.strip().startswith("/dev/video"):
+                    device = line.strip()
+                    cams_available.append(current_name)
+        except Exception:
+            pass
+
+    elif platform == "darwin":
+        try:
+            import AVFoundation
+            devices = AVFoundation.AVCaptureDevice.devicesWithMediaType_(
+                AVFoundation.AVMediaTypeVideo
+                )
+            cams_available.append(dev.localizedName())
+        except Exception:
+            pass
+
+    for i, cam in enumerate(cams_available):
+        if not webcam_is_available(i):
+            del cams_avaliable[i]
+    return cams_available
+
+
+cams_available = find_cams()
+print(cams_available)
 
 
 def _start_heavy_init_async(on_ready):
@@ -191,7 +247,7 @@ def update():
         current_pose_full_body
         if state_manager.get_current_mode() == "Full-body"
         else current_pose
-        )
+    )
     send_active = state_manager.get_send_permission()
     gamepad_img = gamepad_visualizer.create_gamepad_image(
         pose_for_gamepad, send_active=send_active
