@@ -567,7 +567,7 @@ def init():
     # Start Collecting ttk Button
     button_collect_start = ttk.Button(
         frame_bottom_right,
-        text="Start collecting",
+        text="Start Collecting",
         command=start_collect_sequence,
         style="Custom.TButton"
         )
@@ -838,12 +838,12 @@ def _set_collect_button(starting: bool):
     """
     if starting:
         button_collect_start.config(
-            text="Stop collecting",
+            text="Stop Collecting",
             command=stop_collect_sequence
             )
     else:
         button_collect_start.config(
-            text="Start collecting",
+            text="Start Collecting",
             command=start_collect_sequence
             )
 
