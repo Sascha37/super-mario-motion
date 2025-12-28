@@ -24,6 +24,7 @@ from PIL import Image, ImageTk
 
 from super_mario_motion import game_launcher, path_helper as ph
 from super_mario_motion import main as main
+from super_mario_motion import vision as vision
 from super_mario_motion.settings import Settings
 from super_mario_motion.state import StateManager
 
@@ -330,7 +331,7 @@ def init():
         text="Preview:"
         )
     label_preview.grid(
-        row=2,
+        row=3,
         column=0
         )
 
@@ -401,14 +402,35 @@ def init():
         "Skeleton Only"
         ]
     option_menu_preview.current(0)
-    option_menu_preview.grid(row=2, column=1)
+    option_menu_preview.grid(row=3, column=1)
 
     # "Mode:" Text Label
     label_mode = tk.Label(
         frame_bottom_left, bg=color_dark_widget,
         fg=color_white, text="Mode:"
         )
-    label_mode.grid(row=3, column=0)
+    label_mode.grid(row=4, column=0)
+
+    # Webcam Combobox
+    global selected_cam
+    selected_cam = tk.StringVar()
+    option_menu_cam = ttk.Combobox(
+        frame_bottom_left,
+        textvariable=selected_cam,
+        state="readonly",
+        style="Custom.TCombobox"
+        )
+    option_menu_cam.bind("<<ComboboxSelected>>", change_cam)
+    option_menu_cam["values"] = main.cams_available
+    option_menu_cam.current(0)
+    option_menu_cam.grid(row=2, column=1)
+
+    # "Mode:" Text Label
+    label_cam = tk.Label(
+        frame_bottom_left, bg=color_dark_widget,
+        fg=color_white, text="Cam:"
+        )
+    label_cam.grid(row=2, column=0)
 
     # Mode Combobox
     global selected_mode
@@ -428,7 +450,7 @@ def init():
     option_menu_mode.bind("<<ComboboxSelected>>", on_mode_change)
     option_menu_mode["values"] = ["Simple", "Full-body", "Collect"]
     option_menu_mode.current(0)
-    option_menu_mode.grid(row=3, column=1)
+    option_menu_mode.grid(row=4, column=1)
 
     # Control Scheme Label
     global selected_control_scheme
@@ -436,7 +458,7 @@ def init():
         frame_bottom_left, bg=color_dark_widget,
         fg=color_white, text="Game:"
         )
-    label_control_scheme.grid(row=4, column=0)
+    label_control_scheme.grid(row=5, column=0)
 
     # Control Scheme Combobox
     selected_control_scheme = tk.StringVar()
@@ -461,7 +483,7 @@ def init():
         "Custom"
         ]
     option_menu_control_scheme.current(0)
-    option_menu_control_scheme.grid(row=4, column=1)
+    option_menu_control_scheme.grid(row=5, column=1)
 
     update_launch_button_state()
 
@@ -477,7 +499,7 @@ def init():
         height=2
         )
     checkbox_debug_info.grid(
-        row=5,
+        row=6,
         column=0,
         columnspan=2,
         sticky="ew"
@@ -497,7 +519,7 @@ def init():
         width=20, height=2
         )
     checkbox_toggle_inputs.grid(
-        row=6,
+        row=7,
         column=0,
         columnspan=2,
         sticky="ew"
@@ -1114,6 +1136,9 @@ def close():
 
     window.destroy()
 
-# def switch_cam():
-#     index = ph.cams_available.index()
-#  state_manager.set_current_cam_index(index)
+def change_cam(event):
+    for i, cam in enumerate(main.cams_available):
+        if main.cams_available[i] == selected_cam:
+            index = i
+    state_manager.set_current_cam_index(i)
+    vision.init()

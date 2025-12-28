@@ -88,7 +88,7 @@ def init():
     start = time.time()
 
     while True:
-        cam = cv.VideoCapture(0)
+        cam = cv.VideoCapture(StateManager.get_current_cam_index())
         try:
             opened = cam.isOpened()
         except Exception:
@@ -254,7 +254,7 @@ def cam_loop():
                         cam.release()
                 except Exception:
                     pass
-                cam = cv.VideoCapture(0)
+                cam = cv.VideoCapture(StateManager.get_current_cam_index())
                 time.sleep(0.2)
                 continue
 
@@ -267,7 +267,7 @@ def cam_loop():
                         cam.release()
                     except Exception:
                         pass
-                    cam = cv.VideoCapture(0)
+                    cam = cv.VideoCapture(StateManager.get_current_cam_index())
                 time.sleep(0.05)
                 continue
             misses = 0
