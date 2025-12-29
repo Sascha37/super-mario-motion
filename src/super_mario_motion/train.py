@@ -118,6 +118,7 @@ def main():
             ]
         )
 
+
     pipe.fit(s_train, y_train)
 
     y_pred = pipe.predict(s_test)
