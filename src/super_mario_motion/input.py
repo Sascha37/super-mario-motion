@@ -29,7 +29,7 @@ CONTROL_SCHEMES = {
         },
     "supermarioplay (Web)": {
         "jump": "up",
-        "run_throw": "ctrl",
+        "run_throw": "shift",
         "left": "left",
         "right": "right",
         "down": "down",
