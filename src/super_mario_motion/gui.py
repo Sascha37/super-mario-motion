@@ -310,18 +310,17 @@ def init():
         )
 
     # Separator
-    separator = ttk.Separator(
+    spacer = tk.Frame(
         frame_bottom_left,
-        orient=tk.HORIZONTAL,
-        style="Custom.TSeparator"
+        height=10,
+        bg=color_background
         )
-    separator.grid(
+
+    spacer.grid(
         row=1,
         column=0,
         columnspan=2,
-        stick="ew",
-        pady=30
-        )
+        sticky="ew")
 
     # Text Label "Preview:"
     label_preview = tk.Label(
