@@ -105,7 +105,8 @@ def find_cams():
     for i, cam in enumerate(cams_available):
         if not webcam_is_available(i):
             cams_available[i] = ""
-            gui_cams_available = [x for x in cams_available if x != ""]
+
+    gui_cams_available = [x for x in cams_available if x != ""]
     return cams_available
 
 
