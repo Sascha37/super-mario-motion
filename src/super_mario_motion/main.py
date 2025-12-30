@@ -13,7 +13,6 @@ import sys
 import threading
 import platform
 from pathlib import Path
-from AVFoundation import AVCaptureDevice
 
 import cv2 as cv
 
@@ -61,7 +60,8 @@ def webcam_is_available(x):
 
 
 def find_cams():
-    global cams_available
+    global cams_available, gui_cams_available
+    gui_cams_available = []
     cams_available = []
 
     system = platform.system()
@@ -69,9 +69,8 @@ def find_cams():
     if system == "Windows":
         from pygrabber.dshow_graph import FilterGraph
         try:
-            from pygrabber.dshow_graph import FilterGraph
             names = FilterGraph().get_input_devices()
-            cams_available.append(names)
+            cams_available = names
         except Exception:
             pass
 
@@ -95,6 +94,7 @@ def find_cams():
             pass
 
     elif system == "Darwin":
+        from AVFoundation import AVCaptureDevice
         try:
             devices = AVCaptureDevice.devicesWithMediaType_("vide")
             for device in devices:
@@ -102,9 +102,10 @@ def find_cams():
         except Exception:
             pass
 
-    # for i, cam in enumerate(cams_available):
-    #     if not webcam_is_available(i):
-    #         del cams_available[i]
+    for i, cam in enumerate(cams_available):
+        if not webcam_is_available(i):
+            cams_available[i] = ""
+            gui_cams_available = [x for x in cams_available if x != ""]
     return cams_available
 
 

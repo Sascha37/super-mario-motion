@@ -11,3 +11,5 @@ pyinstaller
 coverage
 sphinx
 furo
+pygrabber; platform_system == "Windows"
+pyobjc-framework-AVFoundation; platform_system == "Darwin"
