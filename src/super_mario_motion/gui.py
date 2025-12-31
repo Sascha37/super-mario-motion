@@ -1135,6 +1135,7 @@ def close():
 
     window.destroy()
 
+
 def change_cam(event):
     global index
     selected_cam_value = selected_cam.get()

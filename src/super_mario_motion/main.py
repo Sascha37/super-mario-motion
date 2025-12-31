@@ -13,6 +13,7 @@ import sys
 import threading
 import platform
 from pathlib import Path
+import subprocess
 
 import cv2 as cv
 

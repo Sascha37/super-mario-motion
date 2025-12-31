@@ -30,7 +30,7 @@ cam = None
 rgb = None
 frame = None
 _exit = False
-thread = None
+_cam_thread = None
 
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
@@ -81,14 +81,20 @@ def init():
     Starts `cam_loop` as a daemon thread once the camera is available.
     Raises an IOError only after a generous timeout.
     """
-    global cam, rgb, frame, thread
+    global cam, rgb, frame, _cam_thread, _exit
 
     is_macos = platform.system() == "Darwin"
     timeout_s = 30 if is_macos else 8
     start = time.time()
 
+    if _cam_thread is not None and _cam_thread.is_alive():
+        stop_cam()
+        if _cam_thread is not None and _cam_thread.is_alive():
+            return
+    _exit = False
+
     while True:
-        cam = cv.VideoCapture(StateManager.get_current_cam_index())
+        cam = cv.VideoCapture(state_manager.get_current_cam_index())
         try:
             opened = cam.isOpened()
         except Exception:
@@ -110,19 +116,26 @@ def init():
         time.sleep(0.5)
 
     print("cam opened")
-    thread = threading.Thread(target=cam_loop, daemon=True)
-    thread.start()
+    _cam_thread = threading.Thread(target=cam_loop, daemon=True)
+    _cam_thread.start()
 
 
 def stop_cam():
-    global _exit, thread, cam
+    global _exit, _cam_thread, cam
     _exit = True
 
-    if thread is not None:
-        thread.join(timeout=0.5)
-        thread = None
+    if _cam_thread is not None:
+        _cam_thread.join(timeout=2.0)
+        if _cam_thread.is_alive():
+            return
+
+    _cam_thread = None
+
     if cam is not None:
-        cam.release()
+        try:
+            cam.release()
+        except Exception:
+            pass
         cam = None
 
 
@@ -239,9 +252,18 @@ def cam_loop():
     permissions on macOS) by retrying instead of exiting immediately.
     """
     global frame, rgb, cam, current_pose, skeleton_only_frame, lm_string
+
     with mp_pose.Pose() as pose:
         print(Path(__file__).name + " initialized")
-        misses = 0
+
+        if cam is None or not cam.isOpened():
+            cam = None
+            return
+        try:
+            cam.set(cv.CAP_PROP_FPS, Settings.webcam_fps)
+        except Exception:
+            pass
+
         while not _exit:
             # Ensure the camera handle is open; try to (re)open if needed
             try:
@@ -254,29 +276,32 @@ def cam_loop():
                         cam.release()
                 except Exception:
                     pass
-                cam = cv.VideoCapture(StateManager.get_current_cam_index())
+                cam = cv.VideoCapture(state_manager.get_current_cam_index())
                 time.sleep(0.2)
-                continue
 
-            ret, image = cam.read()
-            if not ret:
-                misses += 1
-                # Occasionally try to reopen
-                if misses % 20 == 0:
-                    try:
-                        cam.release()
-                    except Exception:
-                        pass
-                    cam = cv.VideoCapture(StateManager.get_current_cam_index())
+                try:
+                    if not cam.isOpened():
+                        cam = None
+                        time.sleep(0.5)
+                        continue
+                except Exception:
+                    cam = None
+                    time.sleep(0.5)
+                    continue
+
+            if cam is None:
                 time.sleep(0.05)
                 continue
-            misses = 0
+            ret, image = cam.read()
+
+            if not ret or image is None:
+                time.sleep(0.05)
+                continue
 
             h, w = image.shape[:2]
             scale = Settings.webcam_res / float(w)
             new_h = int(h * scale)
             image = cv.resize(image, (Settings.webcam_res, new_h))
-            cam.set(cv.CAP_PROP_FPS, Settings.webcam_fps)
 
             rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             results = pose.process(rgb)
@@ -321,9 +346,10 @@ def cam_loop():
                 state_manager.set_landmark_string(lm_string)
 
     try:
-        cam.release()
-    except Exception:
-        pass
+        if cam is not None:
+            cam.release()
+    finally:
+        cam = None
 
 
 def update_images():
