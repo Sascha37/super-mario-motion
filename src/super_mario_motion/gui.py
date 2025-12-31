@@ -23,6 +23,8 @@ import cv2
 from PIL import Image, ImageTk
 
 from super_mario_motion import game_launcher, path_helper as ph
+from super_mario_motion import main as main
+from super_mario_motion import vision as vision
 from super_mario_motion.settings import Settings
 from super_mario_motion.state import StateManager
 
@@ -283,7 +285,7 @@ def init():
 
     button_config = ttk.Button(
         buttons_frame,
-        text="edit config",
+        text="Edit Config",
         command=open_config,
         style="Custom.TButton",
         )
@@ -296,7 +298,7 @@ def init():
 
     button_config_reload = ttk.Button(
         buttons_frame,
-        text="reload config",
+        text="Reload Config",
         command=reload_config,
         style="Custom.TButton",
         )
@@ -308,18 +310,17 @@ def init():
         )
 
     # Separator
-    separator = ttk.Separator(
+    spacer = tk.Frame(
         frame_bottom_left,
-        orient=tk.HORIZONTAL,
-        style="Custom.TSeparator"
+        height=10,
+        bg=color_background
         )
-    separator.grid(
+
+    spacer.grid(
         row=1,
         column=0,
         columnspan=2,
-        stick="ew",
-        pady=30
-        )
+        sticky="ew")
 
     # Text Label "Preview:"
     label_preview = tk.Label(
@@ -329,7 +330,7 @@ def init():
         text="Preview:"
         )
     label_preview.grid(
-        row=2,
+        row=3,
         column=0
         )
 
@@ -400,14 +401,36 @@ def init():
         "Skeleton Only"
         ]
     option_menu_preview.current(0)
-    option_menu_preview.grid(row=2, column=1)
+    option_menu_preview.grid(row=3, column=1)
 
     # "Mode:" Text Label
     label_mode = tk.Label(
         frame_bottom_left, bg=color_dark_widget,
         fg=color_white, text="Mode:"
         )
-    label_mode.grid(row=3, column=0)
+    label_mode.grid(row=4, column=0)
+
+    # Webcam Combobox
+    global selected_cam
+    selected_cam = tk.StringVar()
+    option_menu_cam = ttk.Combobox(
+        frame_bottom_left,
+        textvariable=selected_cam,
+        state="readonly",
+        style="Custom.TCombobox"
+        )
+    
+    option_menu_cam.bind("<<ComboboxSelected>>", change_cam)
+    option_menu_cam["values"] = main.gui_cams_available
+    option_menu_cam.current(0)
+    option_menu_cam.grid(row=2, column=1)
+
+    # "Mode:" Text Label
+    label_cam = tk.Label(
+        frame_bottom_left, bg=color_dark_widget,
+        fg=color_white, text="Cam:"
+        )
+    label_cam.grid(row=2, column=0)
 
     # Mode Combobox
     global selected_mode
@@ -427,7 +450,7 @@ def init():
     option_menu_mode.bind("<<ComboboxSelected>>", on_mode_change)
     option_menu_mode["values"] = ["Simple", "Full-body", "Collect"]
     option_menu_mode.current(0)
-    option_menu_mode.grid(row=3, column=1)
+    option_menu_mode.grid(row=4, column=1)
 
     # Control Scheme Label
     global selected_control_scheme
@@ -435,7 +458,7 @@ def init():
         frame_bottom_left, bg=color_dark_widget,
         fg=color_white, text="Game:"
         )
-    label_control_scheme.grid(row=4, column=0)
+    label_control_scheme.grid(row=5, column=0)
 
     # Control Scheme Combobox
     selected_control_scheme = tk.StringVar()
@@ -455,12 +478,12 @@ def init():
         on_control_scheme_change
         )
     option_menu_control_scheme["values"] = [
+        "Supermarioplay (Web)",
         "Original (RetroArch)",
-        "supermarioplay (Web)",
         "Custom"
         ]
     option_menu_control_scheme.current(0)
-    option_menu_control_scheme.grid(row=4, column=1)
+    option_menu_control_scheme.grid(row=5, column=1)
 
     update_launch_button_state()
 
@@ -476,7 +499,7 @@ def init():
         height=2
         )
     checkbox_debug_info.grid(
-        row=5,
+        row=6,
         column=0,
         columnspan=2,
         sticky="ew"
@@ -496,7 +519,7 @@ def init():
         width=20, height=2
         )
     checkbox_toggle_inputs.grid(
-        row=6,
+        row=7,
         column=0,
         columnspan=2,
         sticky="ew"
@@ -536,7 +559,7 @@ def init():
         frame_bottom_right,
         bg=color_dark_widget,
         fg=color_white,
-        text="Current pose:" + pose
+        text="Current Pose:" + pose
         )
     label_current_pose.grid(row=1, column=0, columnspan=2)
 
@@ -567,7 +590,7 @@ def init():
     # Start Collecting ttk Button
     button_collect_start = ttk.Button(
         frame_bottom_right,
-        text="Start collecting",
+        text="Start Collecting",
         command=start_collect_sequence,
         style="Custom.TButton"
         )
@@ -755,7 +778,7 @@ def update_pose_image():
 
 
 def update_pose_text():
-    label_current_pose.config(text="Current pose:" + pose)
+    label_current_pose.config(text="Current Pose:" + pose)
 
 
 def update_debug_landmarks(landmarks):
@@ -838,12 +861,12 @@ def _set_collect_button(starting: bool):
     """
     if starting:
         button_collect_start.config(
-            text="Stop collecting",
+            text="Stop Collecting",
             command=stop_collect_sequence
             )
     else:
         button_collect_start.config(
-            text="Start collecting",
+            text="Start Collecting",
             command=start_collect_sequence
             )
 
@@ -1112,3 +1135,13 @@ def close():
         print("Camera shutdown warning:", e)
 
     window.destroy()
+
+
+def change_cam(event):
+    global index
+    event.widget.selection_clear()
+    selected_cam_value = selected_cam.get()
+    index = main.cams_available.index(selected_cam_value)
+    state_manager.set_current_cam_index(index)
+    print(index)
+    vision.init()
