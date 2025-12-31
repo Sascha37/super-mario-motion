@@ -419,6 +419,7 @@ def init():
         state="readonly",
         style="Custom.TCombobox"
         )
+    
     option_menu_cam.bind("<<ComboboxSelected>>", change_cam)
     option_menu_cam["values"] = main.gui_cams_available
     option_menu_cam.current(0)
@@ -1138,6 +1139,7 @@ def close():
 
 def change_cam(event):
     global index
+    event.widget.selection_clear()
     selected_cam_value = selected_cam.get()
     index = main.cams_available.index(selected_cam_value)
     state_manager.set_current_cam_index(index)
