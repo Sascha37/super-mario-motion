@@ -13,4 +13,7 @@ class Settings:
     swim_interval = 0.25
 
     # vision_ml
-    ml_majority_vote = 11
+    ml_majority_vote = 7
+    frame_quality = 0.6
+    p_thresh = 0.75
+    vote_ratio = 0.6
