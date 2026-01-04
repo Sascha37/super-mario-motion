@@ -113,6 +113,7 @@ collection_order = None
 collecting = False
 collect_stop = False
 after_handles = []
+previous_mode_collect = False
 
 # StateManager
 state_manager = StateManager()
@@ -797,9 +798,13 @@ def apply_mode(mode: str):
     global label_virtual_gamepad_visualizer, label_pose_visualizer, \
         label_current_pose
     global checkbox_toggle_inputs, allow_debug_info, send_keystrokes
-    global geometry_normal, geometry_collect
+    global geometry_normal, geometry_collect, previous_mode_collect
+
+    if not previous_mode_collect:
+        get_geometry()
 
     if mode == "Collect":
+        previous_mode_collect = True
         allow_debug_info.set(1)
         send_keystrokes.set(0)
         window.resizable(True, True)
@@ -824,10 +829,11 @@ def apply_mode(mode: str):
         _set_collect_button(starting=False)
 
     else:
+        previous_mode_collect = False
         if platform.system() != "Linux":
             window.resizable(True, True)
             window.geometry(geometry_normal)
-            center_window(window_width, window_height)
+            #center_window(window_width, window_height)
         else:
             screen_width_linux, screen_height_linux = \
                 geometry_collect.split("+")[0].split("x")
@@ -1109,6 +1115,9 @@ def center_window(w, h):
     y = (sh - h) // 2
     window.geometry(f"{w}x{h}+{x}+{y}")
 
+def get_geometry():
+    global geometry_normal
+    geometry_normal = window.geometry()
 
 # os.path.join("images","webcam_sample.jpg")
 # gets called by the "Start Game"-Button
