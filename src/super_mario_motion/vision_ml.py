@@ -21,9 +21,9 @@ from sklearn.exceptions import NotFittedError
 
 from super_mario_motion import path_helper as ph
 from super_mario_motion.pose_features import extract_features
+from super_mario_motion.settings import Settings
 # get frames from vision.py
 from super_mario_motion.state import StateManager
-from super_mario_motion.settings import Settings
 
 state_manager = StateManager()
 
@@ -34,7 +34,7 @@ _model = None
 model_path = None
 
 P_THRESH = Settings.p_thresh  # threshold for model confidence
-VOTE_RATIO = Settings.vote_ratio    # ratio for the majority vote
+VOTE_RATIO = Settings.vote_ratio  # ratio for the majority vote
 
 
 def init():

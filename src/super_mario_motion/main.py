@@ -9,11 +9,11 @@ from appearing to crash while waiting for OS camera permissions.
 """
 
 import os
+import platform
+import subprocess
 import sys
 import threading
-import platform
 from pathlib import Path
-import subprocess
 
 import cv2 as cv
 
@@ -21,9 +21,10 @@ from super_mario_motion import (
     game_launcher, gamepad_visualizer, gui,
     user_data, vision
     )
-from super_mario_motion.state import StateManager
 from super_mario_motion.settings import Settings
-from super_mario_motion import vision
+from super_mario_motion.state import StateManager
+
+gui_cams_available = None
 
 
 def webcam_is_available(x):
@@ -89,7 +90,7 @@ def find_cams():
                     current_name = line[:-1]
 
                 elif line.strip().startswith("/dev/video"):
-                    device = line.strip()
+                    line.strip()
                     cams_available.append(current_name)
         except Exception:
             pass
@@ -103,7 +104,7 @@ def find_cams():
         except Exception:
             pass
 
-    for i, cam in enumerate(cams_available):
+    for i, _cam in enumerate(cams_available):
         if not webcam_is_available(i):
             cams_available[i] = ""
 
@@ -248,7 +249,7 @@ def update():
         current_pose_full_body
         if state_manager.get_current_mode() == "Full-body"
         else current_pose
-    )
+        )
     send_active = state_manager.get_send_permission()
     gamepad_img = gamepad_visualizer.create_gamepad_image(
         pose_for_gamepad, send_active=send_active

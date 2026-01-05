@@ -22,9 +22,10 @@ from tkinter import ttk
 import cv2
 from PIL import Image, ImageTk
 
-from super_mario_motion import game_launcher, path_helper as ph
-from super_mario_motion import main as main
-from super_mario_motion import vision as vision
+from super_mario_motion import (
+    game_launcher, main as main, path_helper as ph,
+    vision as vision
+    )
 from super_mario_motion.settings import Settings
 from super_mario_motion.state import StateManager
 
@@ -52,6 +53,8 @@ geometry_normal, geometry_collect, screen_width, screen_height = (
 font_collect_normal, font_collect_large = None, None
 
 button_launch_game, label_config_warning = None, None
+selected_cam = None
+index = None
 
 # Webcam preview
 webcam_image_width = 612
@@ -916,7 +919,7 @@ def stop_collect_sequence():
     _set_collect_button(starting=False)
 
 
-def run_collect_step(index: int):
+def run_collect_step(index_: int):
     """Run a single step of the collection sequence.
 
     Advances through COLLECTION_STEPS (or the randomized order) and
@@ -929,7 +932,7 @@ def run_collect_step(index: int):
 
     steps = collection_order if collection_order else COLLECTION_STEPS
 
-    if index >= len(steps):
+    if index_ >= len(steps):
         _cancel_scheduled()
         label_collect_status.config(text="Finished.")
         collecting = False
@@ -938,11 +941,12 @@ def run_collect_step(index: int):
         _set_collect_button(starting=False)
         return
 
-    pose_name, seconds = steps[index]
-    show_collect_countdown(3, pose_name, seconds, index)
+    pose_name, seconds = steps[index_]
+    show_collect_countdown(3, pose_name, seconds, index_)
 
 
-def show_collect_countdown(n: int, pose_name: str, seconds: float, index: int):
+def show_collect_countdown(
+        n: int, pose_name: str, seconds: float, index_: int):
     """Show a countdown before recording a specific pose.
 
     When the countdown reaches zero, starts recording for the given pose.
@@ -956,20 +960,20 @@ def show_collect_countdown(n: int, pose_name: str, seconds: float, index: int):
         if not collect_stop:
             threading.Thread(
                 target=record_collect_pose,
-                args=(pose_name, seconds, index),
+                args=(pose_name, seconds, index_),
                 daemon=True
                 ).start()
-            show_recording_countdown(int(seconds), pose_name, index)
+            show_recording_countdown(int(seconds), pose_name, index_)
         return
 
     label_collect_status.config(text=f"{pose_name} in {n} …")
     _schedule_after(
         1000, show_collect_countdown, n - 1, pose_name, seconds,
-        index
+        index_
         )
 
 
-def show_recording_countdown(remaining: int, pose_name: str, index: int):
+def show_recording_countdown(remaining: int, pose_name: str, index_: int):
     if collect_stop:
         return
     if remaining <= 0:
@@ -977,11 +981,11 @@ def show_recording_countdown(remaining: int, pose_name: str, index: int):
     label_collect_status.config(text=f"Rec: {pose_name} ({remaining}s)")
     _schedule_after(
         1000, show_recording_countdown, remaining - 1, pose_name,
-        index
+        index_
         )
 
 
-def record_collect_pose(pose_name: str, seconds: float, index: int):
+def record_collect_pose(pose_name: str, seconds: float, index_: int):
     """Record pose samples for the given duration and schedule the next step.
 
     This function runs in a worker thread and calls collect.main()
@@ -1002,7 +1006,7 @@ def record_collect_pose(pose_name: str, seconds: float, index: int):
         ]
     _collect.main()
     if not collect_stop:
-        _schedule_after(500, lambda: run_collect_step(index + 1))
+        _schedule_after(500, lambda: run_collect_step(index_ + 1))
 
 
 # Takes in a Path and opens this path as a file in the default browser
@@ -1056,10 +1060,10 @@ def update_launch_button_state():
     scheme = selected_control_scheme.get() or ""
     disable = (
             (
-                        scheme == "Original (RetroArch)" and not
-            game_launcher.retro_paths_valid) or
+                scheme == "Original (RetroArch)" and not
+                game_launcher.retro_paths_valid) or
             (scheme == "Custom" and not game_launcher.custom_path_valid)
-    )
+        )
     button_launch_game.state(["disabled"] if disable else ["!disabled"])
 
 

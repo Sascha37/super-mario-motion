@@ -45,7 +45,8 @@ def test_training_csv_integrity():
                 # Row length check
                 assert len(
                     row
-                    ) == csv_row_length, f"Invalid row length in {file}: {len(row)}"
+                    ) == csv_row_length, (f"Invalid row length in {file}: "
+                                          f"{len(row)}")
 
                 # Label check
                 label = row[0]
