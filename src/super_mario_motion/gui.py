@@ -321,7 +321,8 @@ def init():
         row=1,
         column=0,
         columnspan=2,
-        sticky="ew")
+        sticky="ew"
+        )
 
     # Text Label "Preview:"
     label_preview = tk.Label(
@@ -420,7 +421,7 @@ def init():
         state="readonly",
         style="Custom.TCombobox"
         )
-    
+
     option_menu_cam.bind("<<ComboboxSelected>>", change_cam)
     option_menu_cam["values"] = main.gui_cams_available
     option_menu_cam.current(0)
@@ -832,18 +833,6 @@ def apply_mode(mode: str):
         previous_mode_collect = False
         window.resizable(True, True)
         window.geometry(geometry_normal)
-        # if platform.system() != "Linux":
-        #     window.resizable(True, True)
-        #     window.geometry(geometry_normal)
-            # center_window(window_width, window_height)
-        # else:
-            # screen_width_linux, screen_height_linux = \
-            #     geometry_collect.split("+")[0].split("x")
-            # swl = int(screen_width_linux)
-            # shl = int(screen_height_linux)
-            # posx = (swl - window_width) // 2
-            # posy = (shl - window_height) // 2
-            # window.geometry(f"{window_width}x{window_height}+{posx}+{posy}")
 
         window.resizable(False, False)
         label_collect_status.configure(font=font_collect_normal)
@@ -1066,7 +1055,9 @@ def update_launch_button_state():
 
     scheme = selected_control_scheme.get() or ""
     disable = (
-            (scheme == "Original (RetroArch)" and not game_launcher.retro_paths_valid) or
+            (
+                        scheme == "Original (RetroArch)" and not
+            game_launcher.retro_paths_valid) or
             (scheme == "Custom" and not game_launcher.custom_path_valid)
     )
     button_launch_game.state(["disabled"] if disable else ["!disabled"])
@@ -1117,9 +1108,11 @@ def center_window(w, h):
     y = (sh - h) // 2
     window.geometry(f"{w}x{h}+{x}+{y}")
 
+
 def get_geometry():
     global geometry_normal
     geometry_normal = window.geometry()
+
 
 # os.path.join("images","webcam_sample.jpg")
 # gets called by the "Start Game"-Button
