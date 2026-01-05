@@ -33,7 +33,8 @@ _thread = None
 _model = None
 model_path = None
 
-P_THRESH = 0.7  # threshold for landmark confidence
+P_THRESH = Settings.p_thresh  # threshold for model confidence
+VOTE_RATIO = Settings.vote_ratio    # ratio for the majority vote
 
 
 def init():
@@ -92,7 +93,7 @@ def _worker():
 
         # skip frames with low landmark visibility
         vis = lm_arr[:, 3]
-        if np.mean(vis) < 0.4:  # can be tuned later
+        if np.mean(vis) < Settings.frame_quality:  # can be tuned later
             time.sleep(0.01)
             continue
 
@@ -127,8 +128,13 @@ def _worker():
         if label is not None:
             smooth.append(label)
             vals, counts = np.unique(list(smooth), return_counts=True)
-            _current_pose = vals[np.argmax(counts)]
-            state_manager.set_pose_full_body(_current_pose)
+            best_i = int(np.argmax(counts))
+            best_label = vals[best_i]
+            best_ratio = counts[best_i] / len(smooth)
+
+            if best_ratio >= VOTE_RATIO:
+                _current_pose = best_label
+                state_manager.set_pose_full_body(_current_pose)
 
         time.sleep(0.001)
 

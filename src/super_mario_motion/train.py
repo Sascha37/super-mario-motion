@@ -18,6 +18,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
 from super_mario_motion import user_data
+from super_mario_motion.settings import Settings
 from super_mario_motion.state import StateManager
 
 # StateManager
@@ -120,7 +121,7 @@ def main():
     # drop samples with low average visibilities
     n_vis = 33
     vis = x[:, -n_vis:]
-    mask = np.mean(vis, axis=1) > 0.6
+    mask = np.mean(vis, axis=1) > Settings.frame_quality
     x = x[mask]
     y = y[mask]
 
