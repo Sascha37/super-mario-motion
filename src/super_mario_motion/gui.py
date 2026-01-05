@@ -830,18 +830,20 @@ def apply_mode(mode: str):
 
     else:
         previous_mode_collect = False
-        if platform.system() != "Linux":
-            window.resizable(True, True)
-            window.geometry(geometry_normal)
-            #center_window(window_width, window_height)
-        else:
-            screen_width_linux, screen_height_linux = \
-                geometry_collect.split("+")[0].split("x")
-            swl = int(screen_width_linux)
-            shl = int(screen_height_linux)
-            posx = (swl - window_width) // 2
-            posy = (shl - window_height) // 2
-            window.geometry(f"{window_width}x{window_height}+{posx}+{posy}")
+        window.resizable(True, True)
+        window.geometry(geometry_normal)
+        # if platform.system() != "Linux":
+        #     window.resizable(True, True)
+        #     window.geometry(geometry_normal)
+            # center_window(window_width, window_height)
+        # else:
+            # screen_width_linux, screen_height_linux = \
+            #     geometry_collect.split("+")[0].split("x")
+            # swl = int(screen_width_linux)
+            # shl = int(screen_height_linux)
+            # posx = (swl - window_width) // 2
+            # posy = (shl - window_height) // 2
+            # window.geometry(f"{window_width}x{window_height}+{posx}+{posy}")
 
         window.resizable(False, False)
         label_collect_status.configure(font=font_collect_normal)
