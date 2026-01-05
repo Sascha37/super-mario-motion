@@ -96,18 +96,19 @@ def load_csv(csv_path: Path):
     return x, y
 
 
+
 def main():
-    """Train and evaluate the pose classifier, then save the best model.
+    """Train and evualuate a linear SVM classifier.
 
     Steps:
       * Combine all run CSV files.
       * Load feature matrix X and labels y.
-      * Split into train/test sets with stratification.
-      * Build a pipeline: StandardScaler -> PCA (95% var) -> SVC.
-      * Run GridSearchCV over SVC hyperparameters (C, kernel, gamma).
-      * Print best parameters, classification report and confusion matrix.
-      * Save the best estimator to MODEL_PATH.
+      * Split into train/test sets
+      * Setup the pipeline: StandardScaler -> SVC
+      * Print classification report and confusion matrix.
+      * Save the model to MODEL_PATH.
     """
+    # Check if CSV files exists. If so, concatenate them
     if not CSV_PATH.exists():
         raise FileNotFoundError(
             f"{CSV_PATH} not found. Collect data first"
@@ -130,30 +131,25 @@ def main():
     pipe = Pipeline(
         [
             ("scaler", StandardScaler()),
-            ("pca", PCA(n_components=0.95, svd_solver="full")),
-            # optional, can be removed
-            ("clf", SVC(probability=True))
+            ("clf", SVC(
+                kernel="linear",
+                C=5.0,
+                gamma="scale",
+                probability=True,
+                class_weight="balanced"
+            ))
             ]
         )
 
-    grid = {
-        "clf__C": [0.5, 1, 2, 5],
-        "clf__kernel": ["rbf", "linear"],
-        "clf__gamma": ["scale", "auto"]
-        }
 
-    gs = GridSearchCV(
-        pipe, grid, cv=5, n_jobs=-1, scoring="f1_weighted",
-        verbose=1
-        )
-    gs.fit(s_train, y_train)
+    pipe.fit(s_train, y_train)
 
-    print("Best params:", gs.best_params_)
-    y_pred = gs.predict(s_test)
+    y_pred = pipe.predict(s_test)
+
     print(classification_report(y_test, y_pred))
     print("Confusion matrix:\n", confusion_matrix(y_test, y_pred))
 
-    dump(gs.best_estimator_, MODEL_PATH)
+    dump(pipe, MODEL_PATH)
     print(f"Saved model -> {MODEL_PATH}")
 
 
