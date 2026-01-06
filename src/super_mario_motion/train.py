@@ -10,9 +10,8 @@ from pathlib import Path
 
 import numpy as np
 from joblib import dump
-from sklearn.decomposition import PCA
 from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
@@ -97,19 +96,18 @@ def load_csv(csv_path: Path):
     return x, y
 
 
-
 def main():
-    """Train and evualuate a linear SVM classifier.
+    """Train and evaluate a linear SVM classifier.
 
     Steps:
       * Combine all run CSV files.
       * Load feature matrix X and labels y.
       * Split into train/test sets
-      * Setup the pipeline: StandardScaler -> SVC
+      * Set up the pipeline: StandardScaler -> SVC
       * Print classification report and confusion matrix.
       * Save the model to MODEL_PATH.
     """
-    # Check if CSV files exists. If so, concatenate them
+    # Check if CSV files exist. If so, concatenate them
     if not CSV_PATH.exists():
         raise FileNotFoundError(
             f"{CSV_PATH} not found. Collect data first"
@@ -132,16 +130,16 @@ def main():
     pipe = Pipeline(
         [
             ("scaler", StandardScaler()),
-            ("clf", SVC(
-                kernel="linear",
-                C=5.0,
-                gamma="scale",
-                probability=True,
-                class_weight="balanced"
-            ))
+            (
+                "clf", SVC(
+                    kernel="linear",
+                    C=5.0,
+                    probability=True,
+                    class_weight="balanced"
+                    )
+                )
             ]
         )
-
 
     pipe.fit(s_train, y_train)
 

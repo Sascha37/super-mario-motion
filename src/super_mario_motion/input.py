@@ -12,8 +12,8 @@ import threading
 import time
 from pathlib import Path
 
-from super_mario_motion.state import StateManager
 from super_mario_motion.settings import Settings
+from super_mario_motion.state import StateManager
 
 module_prefix = "[Input]"
 
@@ -306,6 +306,7 @@ def build_pydirectinput_letter_map():
 
     return out
 
+
 def load_custom_keymap():
     global CONTROL_SCHEMES
     config_file = state_manager.get_config_path()
@@ -316,7 +317,8 @@ def load_custom_keymap():
         CONTROL_SCHEMES["Custom"] = extracted_mapping
         print(f"{module_prefix} loaded scheme from config.")
     except Exception as e:
-        print(f"{module_prefix} Failed reading config: {e}.\n"
+        print(
+            f"{module_prefix} Failed reading config: {e}.\n"
             f"{module_prefix} using RetroArch mapping as fallback"
             f" for custom."
             )

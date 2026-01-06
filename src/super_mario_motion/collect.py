@@ -108,9 +108,6 @@ def main():
         next_t = 0.0
         start_time = time.time()
 
-        stable_buffer = []
-        last_feat = None
-
         while time.time() < t_end:
             bgr = None
 
