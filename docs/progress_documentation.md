@@ -235,3 +235,14 @@ But we managed work through them all. With that our program ist mostly feature c
 - Added a **warning inside of the program**, if the config is invalid
 - **Made our pose recognition logic better**, by deciding the pose based on a majority vote and other performance related enhancements
 - **Fixed an issue** where the program would not send keystrokes correctly on windows with certain keyboard layouts
+
+## Weeks 12-14 (16.12.25 - 06.01.26)
+University winter break started during this timeframe (22.12.25 - 06.01.26).
+We still managed to get a few important things done.
+
+- Made our code **more readable** by setting up Ruff to detect magic numbers so that we could fix them
+- **Got feedback** from another person and usability problems that occurred have been noted and fixed
+- **Added a reload config button** to reload the config instantly instead of reopening the program
+- We now have a **camera selector** inside of our application
+- Created a new module to create a **report on how well a model performs**
+- **Tested different algorithms** for our classifier and created graphs showing how each performs. The algorithms we tested were: SVC, KNN, Decision Tree, Random Forest
