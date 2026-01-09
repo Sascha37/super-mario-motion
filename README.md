@@ -134,7 +134,7 @@ No webcam images or videos are saved.
 
 [Look at this flowchart for more information](docs/smm_flowchart.png)
 
-### Collecting training data
+### Collecting Training Data
 When collect mode is enabled, pose data will be recorded for training.
 - Stored data consists of:
   -  pose labels
