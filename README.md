@@ -132,7 +132,7 @@ If you encounter issues on any version, please leave an issue so we can investig
 Uses the webcam input of your selected camera to estimate your body pose in real time.
 No webcam images or videos are saved.
 
-[Look at this flowchart for more information](docs/smm_flowchart.md)
+[Look at this flowchart for more information](docs/smm_flowchart.png)
 
 ### Collecting training data
 When collect mode is enabled, pose data will be recorded for training.
