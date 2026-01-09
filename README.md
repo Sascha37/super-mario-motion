@@ -41,7 +41,7 @@ If you don't have an emulator, the application also supports sending inputs to a
 - **Python**: Version 3.12.10 / 3.12.11
 
 - **External libraries**: All required modules can be found in
-  the [requirements.txt](https://github.com/Sascha37/super-mario-motion/blob/main/requirements.txt)
+  the [requirements.txt](requirements.txt)
   file
 
 ## Downloads
@@ -73,7 +73,7 @@ To modify the source code, open the project in your preferred text editor or IDE
 
 Alternatively to using the makefile, you can manually create a Python virtual environment and
 install dependencies using pip. Look into
-the [Makefile](https://github.com/Sascha37/super-mario-motion/blob/main/Makefile) of this project
+the [Makefile](Makefile) of this project
 for reference.
 
 ### On Windows (without PyCharm)
@@ -102,7 +102,7 @@ There are a few steps to set up this project inside the IDE.
 - Select between `Simple` (designed to be used while sitting) or `Full-body` mode (designed to be used while standing). 
 - Inputs can only be sent to the game if the window of the game is in focus and the `Send Inputs` checkbox has been checked.
 
-**For more information please press the `Help`-Button or [open this file](https://github.com/Sascha37/super-mario-motion/blob/main/docs/help/help_page.pdf)**
+**For more information please press the `Help`-Button or [open this file](docs/help/help_page.pdf)**
 
 <p align="center">
     <img src="docs/screenshots/ss1.png" alt="Screenshot" height="730"/>
@@ -113,7 +113,7 @@ There are a few steps to set up this project inside the IDE.
 - Everything related to documentation can be found in the `docs/` folder.
     - For PDFs used as bullet points to discuss in the weekly meetings, see `docs/meetings/`
     - A comprehensive report, including weekly feature updates, can be found
-      in [progress_documentation.md](https://github.com/Sascha37/super-mario-motion/blob/main/docs/progress_documentation.md)
+      in [progress_documentation.md](docs/progress_documentation.md)
 
 ## Compatibility
 
@@ -149,4 +149,4 @@ If you want to contribute to the project, please take a look at [CONTRIBUTING.md
 ## License
 
 This project is available under the GPL v3.0. See
-the [LICENSE](https://github.com/Sascha37/super-mario-motion/blob/main/LICENSE) file for more info.
+the [LICENSE](LICENSE) file for more info.
