@@ -13,6 +13,7 @@ import platform
 import subprocess
 import sys
 import threading
+import time
 from pathlib import Path
 
 import cv2 as cv
@@ -24,41 +25,115 @@ from super_mario_motion import (
 from super_mario_motion.settings import Settings
 from super_mario_motion.state import StateManager
 
-gui_cams_available = None
+gui_cams_available = []
+cams_available = []
+
+
+# --- macOS camera permission helper ---
+def _ensure_macos_camera_permission() -> str:
+    """Ensure camera permission on macOS.
+
+    Returns one of: "authorized", "denied", "restricted", "not_determined", "unknown".
+    """
+    if platform.system() != "Darwin":
+        return "unknown"
+
+    try:
+        # PyObjC AVFoundation
+        from AVFoundation import AVCaptureDevice
+        try:
+            from AVFoundation import AVMediaTypeVideo  # type: ignore
+            media_type = AVMediaTypeVideo
+        except Exception:
+            media_type = "video"
+
+        status = AVCaptureDevice.authorizationStatusForMediaType_(media_type)
+        # Apple's mapping: 0=notDetermined, 1=restricted, 2=denied, 3=authorized
+        if status == 3:
+            return "authorized"
+        if status == 2:
+            return "denied"
+        if status == 1:
+            return "restricted"
+
+        # Not determined -> request access
+        if status == 0:
+            evt = threading.Event()
+            result = {"granted": False}
+
+            def _handler(granted):
+                result["granted"] = bool(granted)
+                evt.set()
+
+            try:
+                AVCaptureDevice.requestAccessForMediaType_completionHandler_(
+                    media_type, _handler
+                )
+            except Exception:
+                # If the request API is unavailable, fall back to "not_determined"
+                return "not_determined"
+
+            # Wait a bit for the user to respond
+            evt.wait(30)
+
+            # Re-check status (more reliable than handler)
+            try:
+                status2 = AVCaptureDevice.authorizationStatusForMediaType_(media_type)
+                if status2 == 3:
+                    return "authorized"
+                if status2 == 2:
+                    return "denied"
+                if status2 == 1:
+                    return "restricted"
+                return "not_determined"
+            except Exception:
+                return "unknown"
+
+        return "unknown"
+    except Exception:
+        return "unknown"
 
 
 def webcam_is_available(x):
-    """Best-effort check if a webcam is available on index 0.
+    """Best-effort check if a webcam is available on index x.
+
+    Some webcams (and phone-continuity cameras) need a short warm-up or
+    permission prompt on first access. We therefore retry a few times.
 
     Returns:
         bool: True if a frame can be captured from the webcam, otherwise False.
     """
+    cam = None
     try:
-        cam = cv.VideoCapture(x)
+        # Prefer AVFoundation backend on macOS when available
+        if platform.system() == "Darwin" and hasattr(cv, "CAP_AVFOUNDATION"):
+            cam = cv.VideoCapture(x, cv.CAP_AVFOUNDATION)
+        else:
+            cam = cv.VideoCapture(x)
+
         if cam is None:
             return False
-        try:
-            is_opened = cam.isOpened()
-        except Exception:
-            is_opened = False
-        if not is_opened:
+
+        # Give the device a moment to initialize and allow permission prompts.
+        for _ in range(8):  # ~1.6s total
             try:
-                cam.release()
+                if cam.isOpened():
+                    ret, _ = cam.read()
+                    if ret:
+                        return True
             except Exception:
                 pass
-            return False
+            time.sleep(0.2)
 
-        try:
-            ret, _ = cam.read()
-        except Exception:
-            ret = False
-        try:
-            cam.release()
-        except Exception:
-            pass
-        return bool(ret)
+        return False
     except Exception:
         return False
+    finally:
+        try:
+            if cam is not None:
+                cam.release()
+        except Exception:
+            pass
 
 
 def find_cams():
@@ -98,7 +173,7 @@ def find_cams():
     elif system == "Darwin":
         from AVFoundation import AVCaptureDevice
         try:
-            devices = AVCaptureDevice.devicesWithMediaType_("vide")
+            devices = AVCaptureDevice.devicesWithMediaType_("video")
             for device in devices:
                 cams_available.append(device.localizedName())
         except Exception:
@@ -108,12 +183,11 @@ def find_cams():
         if not webcam_is_available(i):
             cams_available[i] = ""
 
-    gui_cams_available = [x for x in cams_available if x != ""]
+    gui_cams_available = [x for x in cams_available if x]
     return cams_available
 
 
-cams_available = find_cams()
-print(cams_available)
+
 
 
 def _start_heavy_init_async(on_ready):
@@ -135,6 +209,86 @@ def _start_heavy_init_async(on_ready):
         except Exception:
             pass
 
+        # Detect available cameras after GUI is shown.
+        # On macOS we first ensure camera permission is granted; otherwise
+        # enumerating/validating cameras will look like "no camera found".
+        try:
+            if platform.system() == "Darwin":
+                try:
+                    gui.window.after(
+                        0, lambda: gui.show_startup_overlay(
+                            "Camera access required…\nPlease allow camera access when prompted."
+                        )
+                    )
+                except Exception:
+                    pass
+
+                perm = _ensure_macos_camera_permission()
+
+                if perm != "authorized":
+                    # Provide actionable message and skip scanning for now.
+                    msg = (
+                        "Camera access not granted.\n"
+                        "Enable it in System Settings → Privacy & Security → Camera,\n"
+                        "then restart the app."
+                    )
+                    try:
+                        gui.window.after(0, lambda: gui.show_startup_overlay(msg))
+                    except Exception:
+                        pass
+
+                    # Inform GUI combobox with a clearer placeholder.
+                    try:
+                        gui.window.after(0, lambda: gui.set_available_cams([], [], status_text="(camera access required)"))
+                    except Exception:
+                        pass
+                else:
+                    try:
+                        gui.window.after(
+                            0, lambda: gui.show_startup_overlay(
+                                "Loading cameras…"
+                            )
+                        )
+                    except Exception:
+                        pass
+
+                    cams = find_cams()
+                    globals()["cams_available"] = cams
+                    globals()["gui_cams_available"] = [c for c in cams if c]
+
+                    # Push list into GUI (combobox) on Tk thread
+                    try:
+                        gui.window.after(
+                            0,
+                            lambda: gui.set_available_cams(gui_cams_available, cams_available)
+                        )
+                    except Exception:
+                        pass
+            else:
+                # Non-macOS: just scan.
+                try:
+                    gui.window.after(
+                        0, lambda: gui.show_startup_overlay(
+                            "Loading cameras…"
+                        )
+                    )
+                except Exception:
+                    pass
+
+                cams = find_cams()
+                globals()["cams_available"] = cams
+                globals()["gui_cams_available"] = [c for c in cams if c]
+
+                try:
+                    gui.window.after(
+                        0,
+                        lambda: gui.set_available_cams(gui_cams_available, cams_available)
+                    )
+                except Exception:
+                    pass
+        except Exception as e:
+            errors.append(f"Camera detection failed: {e}")
+
         # Lazy-import heavy modules here to avoid blocking GUI import time.
         try:
             import importlib
@@ -149,8 +303,7 @@ def _start_heavy_init_async(on_ready):
             try:
                 gui.window.after(
                     0, lambda: gui.show_startup_overlay(
-                        "Starting camera… \n If prompted, please allow "
-                        "camera access."
+                        "Starting camera…"
                         )
                     )
             except Exception:
@@ -285,6 +438,10 @@ if __name__ == "__main__":
     gui.init()
     try:
         gui.show_startup_overlay("Please wait… Initializing camera and model…")
+        try:
+            gui.window.update_idletasks()
+        except Exception:
+            pass
     except Exception:
         pass
 

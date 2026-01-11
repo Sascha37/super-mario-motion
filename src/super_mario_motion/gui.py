@@ -23,7 +23,7 @@ import cv2
 from PIL import Image, ImageTk
 
 from super_mario_motion import (
-    game_launcher, main as main, path_helper as ph,
+    game_launcher, path_helper as ph,
     vision as vision
     )
 from super_mario_motion.settings import Settings
@@ -55,6 +55,11 @@ font_collect_normal, font_collect_large = None, None
 button_launch_game, label_config_warning = None, None
 selected_cam = None
 index = None
+
+# Camera lists and combobox reference
+option_menu_cam = None
+cams_available = []          # raw list (may include "" for unavailable)
+gui_cams_available = []      # filtered list shown in GUI
 
 # Webcam preview
 webcam_image_width = 612
@@ -415,18 +420,20 @@ def init():
         )
     label_mode.grid(row=4, column=0)
 
+
     # Webcam Combobox
     global selected_cam
+    global option_menu_cam
     selected_cam = tk.StringVar()
     option_menu_cam = ttk.Combobox(
         frame_bottom_left,
         textvariable=selected_cam,
-        state="readonly",
+        state="disabled",
         style="Custom.TCombobox"
         )
 
     option_menu_cam.bind("<<ComboboxSelected>>", change_cam)
-    option_menu_cam["values"] = main.gui_cams_available
+    option_menu_cam["values"] = ["(loading…)"]
     option_menu_cam.current(0)
     option_menu_cam.grid(row=2, column=1)
 
@@ -670,6 +677,28 @@ def hide_startup_overlay():
             pass
     startup_overlay = None
     startup_overlay_label = None
+
+
+def set_available_cams(gui_list, raw_list, status_text: str | None = None):
+    """Update the camera combobox values once detection has finished."""
+    global gui_cams_available, cams_available
+    gui_cams_available = list(gui_list) if gui_list else []
+    cams_available = list(raw_list) if raw_list else []
+
+    if option_menu_cam is None or selected_cam is None:
+        return
+
+    if not gui_cams_available:
+        option_menu_cam.config(state="disabled")
+        placeholder = status_text or "(no camera found)"
+        option_menu_cam["values"] = [placeholder]
+        selected_cam.set(placeholder)
+        return
+
+    option_menu_cam.config(state="readonly")
+    option_menu_cam["values"] = gui_cams_available
+    # Select first camera by default
+    selected_cam.set(gui_cams_available[0])
 
 
 # set_webcam_image and set_pose_image are supposed to be called in the
@@ -1149,7 +1178,20 @@ def change_cam(event):
     global index
     event.widget.selection_clear()
     selected_cam_value = selected_cam.get()
-    index = main.cams_available.index(selected_cam_value)
+
+    if not cams_available or not selected_cam_value:
+        return
+
+    # Map the displayed name back to the raw list index
+    try:
+        index = cams_available.index(selected_cam_value)
+    except ValueError:
+        # Fallback: try in the filtered list
+        try:
+            index = gui_cams_available.index(selected_cam_value)
+        except ValueError:
+            return
+
     state_manager.set_current_cam_index(index)
     print(index)
     vision.init()
