@@ -1,4 +1,6 @@
-# Super Mario Motion ![GitHub License](https://img.shields.io/github/license/Sascha37/super-mario-motion) ![GitHub last commit](https://img.shields.io/github/last-commit/Sascha37/super-mario-motion) [![Run Unit Test via Pytest](https://github.com/Sascha37/super-mario-motion/actions/workflows/run_test.yml/badge.svg)](https://github.com/Sascha37/super-mario-motion/actions/workflows/run_test.yml)
+# Super Mario Motion 
+![GitHub License](https://img.shields.io/github/license/Sascha37/super-mario-motion) ![GitHub last commit](https://img.shields.io/github/last-commit/Sascha37/super-mario-motion) [![Run Unit Test via Pytest](https://github.com/Sascha37/super-mario-motion/actions/workflows/run_test.yml/badge.svg)](https://github.com/Sascha37/super-mario-motion/actions/workflows/run_test.yml)
+
 
 An application written in Python that uses OpenCV alongside MediaPipe to translate your movements,
 captured by your webcam, into inputs for *Super Mario Bros. 1*.
@@ -20,6 +22,7 @@ If you don't have an emulator, the application also supports sending inputs to a
 - [Project Documentation](#project-documentation)
 - [Compatibility](#compatibility)
 - [Data Processing](#data-processing)
+- [Contributing](#contributing)
 - [License](#license)
 
 ## Requirements
@@ -38,7 +41,7 @@ If you don't have an emulator, the application also supports sending inputs to a
 - **Python**: Version 3.12.10 / 3.12.11
 
 - **External libraries**: All required modules can be found in
-  the [requirements.txt](https://github.com/Sascha37/super-mario-motion/blob/main/requirements.txt)
+  the [requirements.txt](requirements.txt)
   file
 
 ## Downloads
@@ -59,16 +62,18 @@ cd super-mario-motion/
 make run
 ```
 
-- `make run` will start the application
+- `make run`  starts the application
 - `make pyinstaller` will build an executable (for the current os)
 - `make train` builds the ML model (needs training data)
 - `make test` will run the pytest testsuite
+- `make doc` creates the sphinx html docs page
+- `make metrics` runs tests on the current joblib to get metrics
 
 To modify the source code, open the project in your preferred text editor or IDE.
 
 Alternatively to using the makefile, you can manually create a Python virtual environment and
 install dependencies using pip. Look into
-the [Makefile](https://github.com/Sascha37/super-mario-motion/blob/main/Makefile) of this project
+the [Makefile](Makefile) of this project
 for reference.
 
 ### On Windows (without PyCharm)
@@ -86,7 +91,7 @@ There are a few steps to set up this project inside the IDE.
 1. Make sure you have the correct version of the Python interpreter installed (3.12.10 or 3.12.11)
 2. PyCharm will prompt you to create a virtual environment and install the dependencies listed in `requirements.txt`. Do that.
 3. Now you need to set up the run configurations. Do that by clicking on the top right where it says `Current File`. And select `edit configurations`. A new window will pop up. There, you will add a new configuration by pressing the `+`-Button. You need to select `Python`. You can give it a name like `main`, make sure that you select `module` from the drop-down menu and set the path as `super_mario_motion.main`.
-4. Right-click the `\src\` folder and select: `Mark Directory as` -> `Sources Root`.
+4. Right-click the `src` folder and select: `Mark Directory as` -> `Sources Root`.
 
 ## Usage
 
@@ -94,10 +99,10 @@ There are a few steps to set up this project inside the IDE.
 
 - Start the program (either from source code or the standalone application).
 - Select the version of the game you want to play (web or original).
-- Select between `Simple` (designed to be used while sitting) or `Full-body ' mode (designed to be used while standing). 
+- Select between `Simple` (designed to be used while sitting) or `Full-body` mode (designed to be used while standing). 
 - Inputs can only be sent to the game if the window of the game is in focus and the `Send Inputs` checkbox has been checked.
 
-**For more information please press the `Help`-Button or [open this file](https://github.com/Sascha37/super-mario-motion/blob/main/docs/help/help_page.pdf)**
+**For more information please press the `Help`-Button or [open this file](docs/help/help_page.pdf)**
 
 <p align="center">
     <img src="docs/screenshots/ss1.png" alt="Screenshot" height="730"/>
@@ -108,7 +113,7 @@ There are a few steps to set up this project inside the IDE.
 - Everything related to documentation can be found in the `docs/` folder.
     - For PDFs used as bullet points to discuss in the weekly meetings, see `docs/meetings/`
     - A comprehensive report, including weekly feature updates, can be found
-      in [progress_documentation.md](https://github.com/Sascha37/super-mario-motion/blob/main/docs/progress_documentation.md)
+      in [progress_documentation.md](docs/progress_documentation.md)
 
 ## Compatibility
 
@@ -124,70 +129,24 @@ If you encounter issues on any version, please leave an issue so we can investig
 
 ## Data Processing
 
-### GUI Inputs (User Interaction)
+Uses the webcam input of your selected camera to estimate your body pose in real time.
+No webcam images or videos are saved.
 
-#### What the user does
-The user interacts with:
-- Mode selection (`Simple`, `Full-body`, `Collect`)
-- Preview selection (Webcam / Skeleton / Skeleton Only)
-- Game selection
-- Checkboxes (e.g. *Send Inputs*, *Debug*)
-- Buttons (Start game, Start collecting)
+[Look at this flowchart for more information](docs/smm_flowchart.png)
 
-#### What happens internally
-- Every GUI interaction updates the **current program state**
-- This state controls:
-  - how movements are interpreted
-  - what is shown on screen
-  - whether inputs are sent to the game
+### Collecting Training Data
+When collect mode is enabled, pose data will be recorded for training.
+- Stored data consists of:
+  -  pose labels
+  -  list of skeleton landmark coordinates
+- Data each run is saved as a CSV file to your Application Data Directory
 
-#### What is stored?
-- **Nothing is saved to disk**
-- GUI inputs exist **only while the program is running**
+### Model Training
+Searches for all CSV files in your Application Data Directory, concatenates them into a single file. This file is then used to produce a single `.joblib` model file.
 
-
-### Webcam Input
-
-#### What the program does with it
-For every frame:
-1. The image is analyzed to detect the user's body
-2. The body pose is estimated (arms, legs, torso)
-3. A simple pose label is determined (e.g., standing, jumping)
-4. Optional visual previews are rendered
-
-#### What is stored?
-- Webcam images are **not saved**
-- All data is used **during runtime** and replaced by the next frame
-
-
-### Collect Mode (Recording Data)
-
-#### When does this happen?
-- Only when the user activates **Collect mode**
-- Used to create training data
-
-#### What is recorded?
-- The webcam is analyzed the same way as in normal mode
-- Instead of showing results only:
-  - movement data is converted into **numbers**
-  - each set of numbers is linked to a pose name
-
-#### What is stored?
-- **CSV files** containing:
-  - pose label (text)
-  - skeleton landmark coordinates
-- No images, videos, or screenshots are saved
-
-
-### Model Training (After Collecting)
-
-- Collected CSV files are used to train a model, the result is **one model file** in the form of a `.joblib` file
-
-#### What is stored?
-- One trained model file
-- No webcam or GUI data
-
+## Contributing
+If you want to contribute to the project, please take a look at [CONTRIBUTING.md](CONTRIBUTING.md)
 ## License
 
 This project is available under the GPL v3.0. See
-the [LICENSE](https://github.com/Sascha37/super-mario-motion/blob/main/LICENSE) file for more info.
+the [LICENSE](LICENSE) file for more info.
