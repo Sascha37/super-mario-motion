@@ -10,9 +10,6 @@ import json
 import sys
 import threading
 import time
-import subprocess
-import atexit
-import signal
 from pathlib import Path
 
 from super_mario_motion.settings import Settings
@@ -57,10 +54,10 @@ pose = "standing"
 currently_held_keys = []
 last_orientation = "right"
 
-
 # Swimming repeat press configuration
 last_swim_press_time = 0.0
 PDI_LETTER_MAP = {}
+DARWIN_LETTER_MAP = {}
 MAPVK_VSC_TO_VK_EX = 3
 SC = {
     "a": 0x1E, "b": 0x30, "c": 0x2E, "d": 0x20, "e": 0x12, "f": 0x21,
@@ -97,21 +94,23 @@ def init():
                 )
             PDI_LETTER_MAP = {}
 
+    if sys.platform == "darwin":
+        try:
+            global DARWIN_LETTER_MAP
+            DARWIN_LETTER_MAP = build_darwin_letter_map()
+            print(
+                f"{module_prefix} darwin letter map loaded ("
+                f"{len(DARWIN_LETTER_MAP)}/26)."
+                )
+        except Exception as e:
+            print(
+                f"{module_prefix} Failed building darwin letter map: "
+                f"{e}."
+                )
+            DARWIN_LETTER_MAP = {}
+
     # Load the scheme of the config
     load_custom_keymap()
-
-    # Ensure we don't leave keys stuck when the process exits
-    atexit.register(release_held_keys)
-
-    def _handle_exit(_signum, _frame):
-        release_held_keys()
-        raise SystemExit
-
-    try:
-        signal.signal(signal.SIGINT, _handle_exit)
-        signal.signal(signal.SIGTERM, _handle_exit)
-    except Exception:
-        pass
 
     thread = threading.Thread(target=input_loop, daemon=True)
     thread.start()
@@ -157,8 +156,6 @@ def input_loop():
                 if now - last_swim_press_time >= Settings.swim_interval:
                     press_designated_input("swimming")
                     last_swim_press_time = now
-
-
         elif previous_send_permission:
             # When send_permission just changed from True to False
             release_held_keys()
@@ -167,83 +164,40 @@ def input_loop():
         time.sleep(0.02)
 
 
-def send_key_macos(key_input, is_down):
-    """Send key events on macOS via osascript/System Events.
-
-    Notes:
-    - For special keys we use `key code` (layout-independent).
-    - For character keys ("x", "y", etc.) we send the character itself,
-      which respects the active keyboard layout (avoids Y/Z swap).
-    - Always send BOTH key down and key up.
-    """
-
-    # Hardware key codes (layout-independent)
-    key_code_map = {
-        "shift": 56,
-        "left": 123,
-        "right": 124,
-        "down": 125,
-        "up": 126,
-        "enter": 36,
-        "return": 36,
-        "space": 49,
-        "escape": 53,
-    }
-
-    key_str = str(key_input)
-    key_lower = key_str.lower()
-    state = "key down" if is_down else "key up"
-
-    if key_lower in key_code_map:
-        code = key_code_map[key_lower]
-        as_cmd = (
-            f'tell application "System Events" to {state} (key code {code})'
-        )
-    else:
-        # Quote the character safely for AppleScript, e.g. "x"
-        quoted = json.dumps(key_str)
-        as_cmd = (
-            f'tell application "System Events" to {state} {quoted}'
-        )
-
-    try:
-        subprocess.run(["osascript", "-e", as_cmd], check=True)
-    except Exception as e:
-        print(f"Fehler beim Senden von {key_input}: {e}")
-
-
-
-
 def _key_down(key: str):
-    if sys.platform == "win32" and isinstance(key, str) and len(
-            key
-            ) == 1 and key.isalpha():
+    # Normalize single-letter keys to physical US positions where possible,
+    # so custom mappings behave consistently across keyboard layouts.
+    if isinstance(key, str) and len(key) == 1 and key.isalpha():
         k = key.lower()
-        mapped = PDI_LETTER_MAP.get(k)
-        if mapped:
-            pyautogui.keyDown(mapped)
-            return
+        if sys.platform == "win32":
+            mapped = PDI_LETTER_MAP.get(k)
+            if mapped:
+                pyautogui.keyDown(mapped)
+                return
+        if sys.platform == "darwin":
+            mapped = DARWIN_LETTER_MAP.get(k)
+            if mapped:
+                pyautogui.keyDown(mapped)
+                return
 
-    if sys.platform == "darwin":
-        send_key_macos(key, True)
-    else:
-        pyautogui.keyDown(key)
+    pyautogui.keyDown(key)
 
 
 def _key_up(key: str):
-    if sys.platform == "win32" and isinstance(key, str) and len(
-            key
-            ) == 1 and key.isalpha():
+    if isinstance(key, str) and len(key) == 1 and key.isalpha():
         k = key.lower()
-        mapped = PDI_LETTER_MAP.get(k)
-        if mapped:
-            pyautogui.keyUp(mapped)
-            return
+        if sys.platform == "win32":
+            mapped = PDI_LETTER_MAP.get(k)
+            if mapped:
+                pyautogui.keyUp(mapped)
+                return
+        if sys.platform == "darwin":
+            mapped = DARWIN_LETTER_MAP.get(k)
+            if mapped:
+                pyautogui.keyUp(mapped)
+                return
 
-    if sys.platform == "darwin":
-        send_key_macos(key, False)
-    else:
-        pyautogui.keyUp(key)
+    pyautogui.keyUp(key)
 
 
 def press_designated_input(pose_):
@@ -379,6 +333,65 @@ def build_pydirectinput_letter_map():
             break
 
     return out
+
+
+def build_darwin_letter_map():
+    """Best-effort mapping for macOS to keep letter mappings consistent.
+
+    Problem:
+      On macOS with QWERTZ layouts (e.g., German), pressing the *physical* key
+      at the US-'y' position yields 'z' and vice-versa.
+
+    Goal:
+      When a user config says "y", we want to press the US physical "y" key
+      (so the game receives the same physical input across systems).
+
+    Approach:
+      Detect common QWERTZ layouts via HIToolbox preferences and apply a y/z
+      swap. If we cannot detect the layout, return an empty mapping and fall
+      back to pyautogui's default behavior.
+    """
+    from pathlib import Path
+    import plistlib
+
+    pref_path = Path.home() / "Library" / "Preferences" / "com.apple.HIToolbox.plist"
+    if not pref_path.exists():
+        return {}
+
+    try:
+        data = plistlib.loads(pref_path.read_bytes())
+    except Exception:
+        return {}
+
+    sources = data.get("AppleCurrentKeyboardLayoutInputSourceID")
+    # Fallback: try to infer from selected input sources list
+    selected = data.get("AppleSelectedInputSources") or []
+
+    def _looks_qwertz(name_or_id: str) -> bool:
+        s = (name_or_id or "").lower()
+        # Common identifiers/names for German/Swiss layouts
+        return any(tok in s for tok in [
+            "german", "de", "swiss", "ch", "qwertz", "com.apple.keylayout.german",
+            "com.apple.keylayout.swissgerman", "com.apple.keylayout.swissfrench",
+            ])
+
+    is_qwertz = False
+    if isinstance(sources, str) and _looks_qwertz(sources):
+        is_qwertz = True
+
+    if not is_qwertz:
+        for item in selected:
+            if isinstance(item, dict):
+                name = item.get("KeyboardLayout Name") or item.get("InputSourceID")
+                if isinstance(name, str) and _looks_qwertz(name):
+                    is_qwertz = True
+                    break
+
+    if not is_qwertz:
+        return {}
+
+    # Swap to force US-physical meaning for y/z on QWERTZ.
+    return {"y": "z", "z": "y"}
 
 
 def load_custom_keymap():
