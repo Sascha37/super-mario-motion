@@ -11,6 +11,8 @@ import sys
 import threading
 import time
 import subprocess
+import atexit
+import signal
 from pathlib import Path
 
 from super_mario_motion.settings import Settings
@@ -55,6 +57,7 @@ pose = "standing"
 currently_held_keys = []
 last_orientation = "right"
 
+
 # Swimming repeat press configuration
 last_swim_press_time = 0.0
 PDI_LETTER_MAP = {}
@@ -96,6 +99,19 @@ def init():
 
     # Load the scheme of the config
     load_custom_keymap()
+
+    # Ensure we don't leave keys stuck when the process exits
+    atexit.register(release_held_keys)
+
+    def _handle_exit(_signum, _frame):
+        release_held_keys()
+        raise SystemExit
+
+    try:
+        signal.signal(signal.SIGINT, _handle_exit)
+        signal.signal(signal.SIGTERM, _handle_exit)
+    except Exception:
+        pass
 
     thread = threading.Thread(target=input_loop, daemon=True)
     thread.start()
@@ -141,6 +157,8 @@ def input_loop():
                 if now - last_swim_press_time >= Settings.swim_interval:
                     press_designated_input("swimming")
                     last_swim_press_time = now
+
+
         elif previous_send_permission:
             # When send_permission just changed from True to False
             release_held_keys()
@@ -150,38 +168,51 @@ def input_loop():
 
 
 def send_key_macos(key_input, is_down):
-    # Mapping für Pfeiltasten auf ihre nativen macOS Key Codes
-    # Diese sind Hardware-gebunden und daher Layout-unabhängig
+    """Send key events on macOS via osascript/System Events.
+
+    Notes:
+    - For special keys we use `key code` (layout-independent).
+    - For character keys ("x", "y", etc.) we send the character itself,
+      which respects the active keyboard layout (avoids Y/Z swap).
+    - Always send BOTH key down and key up.
+    """
+
+    # Hardware key codes (layout-independent)
     key_code_map = {
-        'a': 0, 's': 1, 'd': 2, 'f': 3, 'h': 4, 'g': 5, 'z': 6, 'x': 7,
-        'c': 8, 'v': 9, 'b': 11, 'q': 12, 'w': 13, 'e': 14, 'r': 15, 'y': 16,
-        't': 17, 'm': 46, 'p': 35,
+        "shift": 56,
         "left": 123,
         "right": 124,
         "down": 125,
         "up": 126,
         "enter": 36,
+        "return": 36,
         "space": 49,
         "escape": 53,
-        "shift": 56
-        }
+    }
 
-    key_lower = key_input.lower()
-
-    if key_lower not in key_code_map:
-        print(f"Key {key_input} ist nicht im macOS Key Code Mapping enthalten.")
-        return
-
-    code = key_code_map[key_lower]
+    key_str = str(key_input)
+    key_lower = key_str.lower()
     state = "key down" if is_down else "key up"
 
-    # AppleScript-Befehl: Wir nutzen jetzt ÜBERALL key code
-    as_cmd = f'tell application "System Events" to {state} {code}'
+    if key_lower in key_code_map:
+        code = key_code_map[key_lower]
+        as_cmd = (
+            f'tell application "System Events" to {state} (key code {code})'
+        )
+    else:
+        # Quote the character safely for AppleScript, e.g. "x"
+        quoted = json.dumps(key_str)
+        as_cmd = (
+            f'tell application "System Events" to {state} {quoted}'
+        )
 
     try:
         subprocess.run(["osascript", "-e", as_cmd], check=True)
     except Exception as e:
         print(f"Fehler beim Senden von {key_input}: {e}")
+
+
+
 
 def _key_down(key: str):
     if sys.platform == "win32" and isinstance(key, str) and len(
@@ -195,8 +226,8 @@ def _key_down(key: str):
 
     if sys.platform == "darwin":
         send_key_macos(key, True)
-
-    else: pyautogui.keyDown(key)
+    else:
+        pyautogui.keyDown(key)
 
 
 def _key_up(key: str):
@@ -211,8 +242,8 @@ def _key_up(key: str):
 
     if sys.platform == "darwin":
         send_key_macos(key, False)
-
-    else: pyautogui.keyUp(key)
+    else:
+        pyautogui.keyUp(key)
 
 
 def press_designated_input(pose_):
