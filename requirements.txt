@@ -13,3 +13,5 @@ sphinx
 furo
 pygrabber; platform_system == "Windows"
 pyobjc-framework-AVFoundation; platform_system == "Darwin"
+pyobjc-framework-ApplicationServices; platform_system == "Darwin"
+pynput

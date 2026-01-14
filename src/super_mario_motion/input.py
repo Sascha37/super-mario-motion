@@ -11,12 +11,13 @@ import sys
 import threading
 import time
 from pathlib import Path
+from pynput.keyboard import Key, KeyCode
 
 from super_mario_motion.settings import Settings
 from super_mario_motion.state import StateManager
 
 module_prefix = "[Input]"
-
+keyboard = None
 state_manager = StateManager()
 
 CONTROL_SCHEMES = {
@@ -38,10 +39,41 @@ CONTROL_SCHEMES = {
     }
 alphabet_len = 26
 
-if sys.platform == "win32":
-    import pydirectinput as pyautogui
-else:
-    import pyautogui
+SPECIAL_KEYS = {
+    "shift": Key.shift,
+    "shift_l": Key.shift_l,
+    "shift_r": Key.shift_r,
+    "ctrl": Key.ctrl,
+    "ctrl_l": Key.ctrl_l,
+    "ctrl_r": Key.ctrl_r,
+    "alt": Key.alt,
+    "alt_l": Key.alt_l,
+    "alt_r": Key.alt_r,
+    "alt_gr": Key.alt_gr,
+    "cmd": Key.cmd,
+    "command": Key.cmd,
+    "win": Key.cmd,
+    "space": Key.space,
+    "enter": Key.enter,
+    "return": Key.enter,
+    "tab": Key.tab,
+    "esc": Key.esc,
+    "escape": Key.esc,
+    "backspace": Key.backspace,
+    "delete": Key.delete,
+    "home": Key.home,
+    "end": Key.end,
+    "page_up": Key.page_up,
+    "page_down": Key.page_down,
+    "left": Key.left,
+    "right": Key.right,
+    "up": Key.up,
+    "down": Key.down,
+    "caps_lock": Key.caps_lock,
+    }
+
+for i in range(1, 13):
+    SPECIAL_KEYS[f"f{i}"] = getattr(Key, f"f{i}")
 
 mapping = None
 
@@ -58,14 +90,30 @@ last_orientation = "right"
 last_swim_press_time = 0.0
 PDI_LETTER_MAP = {}
 MAPVK_VSC_TO_VK_EX = 3
-SC = {
-    "a": 0x1E, "b": 0x30, "c": 0x2E, "d": 0x20, "e": 0x12, "f": 0x21,
-    "g": 0x22, "h": 0x23, "i": 0x17, "j": 0x24, "k": 0x25, "l": 0x26,
-    "m": 0x32, "n": 0x31, "o": 0x18, "p": 0x19, "q": 0x10, "r": 0x13,
-    "s": 0x1F, "t": 0x14, "u": 0x16, "v": 0x2F, "w": 0x11, "x": 0x2D,
-    "y": 0x15, "z": 0x2C,
-    }
 
+
+def check_accessibility_permissions():
+    """Prüft Berechtigungen und erzwingt ggf. den macOS-System-Dialog."""
+    if sys.platform == 'darwin':  # Nur für macOS
+        try:
+            from ApplicationServices import AXIsProcessTrustedWithOptions, \
+                kAXTrustedCheckOptionPrompt
+            # Die Option kAXTrustedCheckOptionPrompt: True löst den System-Dialog aus
+            options = {kAXTrustedCheckOptionPrompt: True}
+            trusted = AXIsProcessTrustedWithOptions(options)
+            if not trusted:
+                print("[Input] Bedienungshilfen sind NICHT freigegeben.")
+                print(
+                    "[Input] Bitte im soeben geöffneten macOS-Dialog erlauben und das Programm neu starten.")
+                # Wir geben dem User Zeit, den Dialog zu sehen, bevor wir beenden
+                time.sleep(2)
+                return False
+            return True
+        except Exception:
+            print(
+                "[Input] 'pyobjc-framework-ApplicationServices' fehlt. Bitte mit pip installieren.")
+            return False
+    return True
 
 def get_current_key_mapping():
     scheme = state_manager.get_control_scheme()
@@ -78,22 +126,10 @@ def get_current_key_mapping():
 
 def init():
     global PDI_LETTER_MAP
+    if not check_accessibility_permissions():
+        sys.exit(1)
 
-    if sys.platform == "win32":
-        try:
-            PDI_LETTER_MAP = build_pydirectinput_letter_map()
-            print(
-                f"{module_prefix} pydirectinput letter map loaded ("
-                f"{len(PDI_LETTER_MAP)}/26)."
-                )
-        except Exception as e:
-            print(
-                f"{module_prefix} Failed building pydirectinput letter map: "
-                f"{e}."
-                )
-            PDI_LETTER_MAP = {}
-
-    # Load the scheme of the config
+    # Load the scheme of the config (needed before macOS mapping so Custom is included)
     load_custom_keymap()
 
     thread = threading.Thread(target=input_loop, daemon=True)
@@ -111,9 +147,20 @@ def input_loop():
         send input for the new pose.
       * On send_permission falling edge: release all currently held keys.
     """
-    print(Path(__file__).name + " initialized")
     global pose, last_pose, mapping, send_permission, \
-        previous_send_permission, last_swim_press_time
+        previous_send_permission, last_swim_press_time, keyboard
+    check_accessibility_permissions()
+
+    if keyboard is None:
+        try:
+            from pynput.keyboard import Controller
+            keyboard = Controller()
+            print(f"{module_prefix} Controller erfolgreich geladen.")
+        except Exception as e:
+            print(f"{module_prefix} Fehler bei Controller-Initialisierung: {e}")
+            return
+
+    print(Path(__file__).name + " initialized")
     while True:
         pose = state_manager.get_pose_full_body() if (
                 state_manager.get_current_mode() ==
@@ -149,27 +196,48 @@ def input_loop():
 
 
 def _key_down(key: str):
-    if sys.platform == "win32" and isinstance(key, str) and len(
-            key
-            ) == 1 and key.isalpha():
-        k = key.lower()
-        mapped = PDI_LETTER_MAP.get(k)
-        if mapped:
-            pyautogui.keyDown(mapped)
-            return
-    pyautogui.keyDown(key)
+    """
+    Drückt eine Taste.
+    key:
+      - einzelnes Zeichen: 'a', '1', '+', 'ä', 'Y'
+      - Sondertaste: 'shift', 'left', 'enter', 'f5', ...
+    """
+    if not isinstance(key, str) or not key:
+        return
+
+    k = key.lower()
+
+    # Sondertaste
+    if k in SPECIAL_KEYS:
+        keyboard.press(SPECIAL_KEYS[k])
+        return
+
+    # Einzelnes Zeichen (layout-aware!)
+    if len(key) == 1:
+        keyboard.press(KeyCode.from_char(key))
+        return
+
+    raise ValueError(f"Unbekannte Taste: {key}")
 
 
 def _key_up(key: str):
-    if sys.platform == "win32" and isinstance(key, str) and len(
-            key
-            ) == 1 and key.isalpha():
-        k = key.lower()
-        mapped = PDI_LETTER_MAP.get(k)
-        if mapped:
-            pyautogui.keyUp(mapped)
-            return
-    pyautogui.keyUp(key)
+    """
+    Lässt eine Taste los.
+    """
+    if not isinstance(key, str) or not key:
+        return
+
+    k = key.lower()
+
+    if k in SPECIAL_KEYS:
+        keyboard.release(SPECIAL_KEYS[k])
+        return
+
+    if len(key) == 1:
+        keyboard.release(KeyCode.from_char(key))
+        return
+
+    raise ValueError(f"Unbekannte Taste: {key}")
 
 
 def press_designated_input(pose_):
@@ -242,69 +310,6 @@ def release_held_keys():
     for key in currently_held_keys:
         _key_up(key)
     currently_held_keys = []
-
-
-def build_pydirectinput_letter_map():
-    """
-    Map intended a–z to the pydirectinput key name (physical US key) that
-    produces it on the active Windows layout.
-    """
-    import ctypes
-    from ctypes import wintypes
-
-    user32 = ctypes.WinDLL("user32", use_last_error=True)
-
-    user32.GetKeyboardLayout.argtypes = [wintypes.DWORD]
-    user32.GetKeyboardLayout.restype = wintypes.HANDLE
-
-    user32.MapVirtualKeyExW.argtypes = [
-        wintypes.UINT, wintypes.UINT,
-        wintypes.HANDLE
-        ]
-    user32.MapVirtualKeyExW.restype = wintypes.UINT
-
-    user32.ToUnicodeEx.argtypes = [
-        wintypes.UINT, wintypes.UINT,
-        ctypes.POINTER(ctypes.c_ubyte),
-        wintypes.LPWSTR, ctypes.c_int,
-        wintypes.UINT, wintypes.HANDLE
-        ]
-    user32.ToUnicodeEx.restype = ctypes.c_int
-
-    # Set-1 scancodes for physical A–Z keys (US positions)
-
-    hkl = user32.GetKeyboardLayout(0)
-    if not hkl:
-        return {}
-
-    buf = ctypes.create_unicode_buffer(8)
-    out = {}  # produced_char -> physical_key_name
-
-    def produced_char(scancode: int) -> str | None:
-        vk = user32.MapVirtualKeyExW(scancode, MAPVK_VSC_TO_VK_EX, hkl)
-        if not vk:
-            return None
-
-        state = (ctypes.c_ubyte * 256)()  # no modifiers
-        buf.value = ""
-
-        rc = user32.ToUnicodeEx(vk, scancode, state, buf, len(buf), 0, hkl)
-
-        # dead key / no translation
-        if rc <= 0:
-            return None
-
-        return buf.value[0].lower()
-
-    for physical_key, sc in SC.items():
-        ch = produced_char(sc)
-        if ch and "a" <= ch <= "z" and ch not in out:
-            out[ch] = physical_key
-
-        if len(out) == alphabet_len:
-            break
-
-    return out
 
 
 def load_custom_keymap():
