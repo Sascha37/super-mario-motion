@@ -149,30 +149,40 @@ def input_loop():
         time.sleep(0.02)
 
 
-def send_key_macos(char, is_down):
-    """
-    Sendet Tastenevents über AppleScript.
-    Das System übersetzt 'z' automatisch in den richtigen KeyCode für das aktuelle Layout.
-    """
-    special_map = {
-        "left": "left arrow",
-        "right": "right arrow",
-        "up": "up arrow",
-        "down": "down arrow",
-        "enter": "return",
-        "space": "space",
-        "shift": "shift"
+def send_key_macos(key_input, is_down):
+    # Mapping für Pfeiltasten auf ihre nativen macOS Key Codes
+    # Diese sind Hardware-gebunden und daher Layout-unabhängig
+    key_code_map = {
+        "left": 123,
+        "right": 124,
+        "down": 125,
+        "up": 126,
+        "enter": 36,
+        "space": 49,
+        "escape": 53,
+        "shift": 56
         }
 
-    key = special_map.get(char.lower(), f'"{char}"')
-    state = "key down" if is_down else "key up"
+    key_lower = key_input.lower()
 
-    as_cmd = f'tell application "System Events" to {state} {key}'
+    if key_lower in key_code_map:
+        # Systemtasten über Key Code (is_down/up funktioniert hier meist nur mit Modifiern)
+        # Für Spiele nutzen wir daher oft den direkten Key Code Befehl
+        code = key_code_map[key_lower]
+        state = "key down" if is_down else "key up"
+        as_cmd = f'tell application "System Events" to {state} {code}'
+    else:
+        # Normale Buchstaben: AppleScript's 'keystroke' respektiert das Layout (Y/Z)
+        # 'key down' für Buchstaben ist in AppleScript oft nicht definiert (Syntax-Fehler)
+        if not is_down:
+            return  # keystroke simuliert beides, daher ignorieren wir key_up hier
+        as_cmd = f'tell application "System Events" to keystroke "{key_input}"'
 
     try:
         subprocess.run(["osascript", "-e", as_cmd], check=True)
-    except Exception as e:
-        print(f"Fehler beim Senden: {e}")
+    except subprocess.CalledProcessError:
+        # Falls System Events nicht reagiert, einmal kurz 'quitten' zum Reset
+        subprocess.run(["osascript", "-e", 'tell application "System Events" to quit'])
 
 def _key_down(key: str):
     if sys.platform == "win32" and isinstance(key, str) and len(
