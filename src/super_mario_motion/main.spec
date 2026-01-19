@@ -11,8 +11,10 @@ cwd = os.getcwd()
 
 datas = [
     # mediapipe modules
-    (os.path.join(mediapipe_path, 'modules'),
-     os.path.join('mediapipe', 'modules')),
+    (
+        os.path.join(mediapipe_path, 'modules'),
+        os.path.join('mediapipe', 'modules')
+        ),
     # images
     (os.path.join(cwd, 'src', 'super_mario_motion', 'images'), 'images'),
     # help doc
@@ -78,12 +80,15 @@ if sys.platform == "darwin":
         target_arch=None,
         codesign_identity=None,
         entitlements_file=None,
-        icon=os.path.join(cwd, 'src', 'super_mario_motion', 'images', 'icon.png'),
+        icon=os.path.join(
+            cwd, 'src', 'super_mario_motion', 'images', 'icon.png'
+            ),
         exclude_binaries=True,
         info_plist={
-            'NSCameraUsageDescription': 'This application uses the camera for motion tracking.',
-        }
-    )
+            'NSCameraUsageDescription': 'This application uses the camera '
+                                        'for motion tracking.',
+            }
+        )
 
     coll = COLLECT(
         exe,
@@ -94,16 +99,19 @@ if sys.platform == "darwin":
         upx=False,
         upx_exclude=[],
         name='SuperMarioMotion',
-    )
+        )
 
     app = BUNDLE(
         coll,
         name='SuperMarioMotion.app',
-        icon=os.path.join(cwd, 'src', 'super_mario_motion', 'images', 'icon.png'),
+        icon=os.path.join(
+            cwd, 'src', 'super_mario_motion', 'images', 'icon.png'
+            ),
         info_plist={
-            'NSCameraUsageDescription': 'This application uses the camera for motion tracking.',
-        },
-    )
+            'NSCameraUsageDescription': 'This application uses the camera '
+                                        'for motion tracking.',
+            },
+        )
 else:
     exe = EXE(
         pyz,
@@ -124,6 +132,7 @@ else:
         target_arch=None,
         codesign_identity=None,
         entitlements_file=None,
-        icon=os.path.join(cwd, 'src', 'super_mario_motion', 'images', 'icon.png'),
-    )
-
+        icon=os.path.join(
+            cwd, 'src', 'super_mario_motion', 'images', 'icon.png'
+            ),
+        )

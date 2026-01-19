@@ -14,7 +14,7 @@ run: venv
 
 train: venv
 	PYTHONPATH=src $(PYTHON) -m super_mario_motion.train
-
+make
 test: venv
 	PYTHONPATH=src $(PYTHON) -m pytest
 

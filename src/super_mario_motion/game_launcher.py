@@ -53,17 +53,17 @@ def init():
         config_retroarch_path = (
             json.loads(Path(config_path).read_text())[
                 "emu-path"]
-            )
+        )
 
         config_rom_path = (
             json.loads(Path(config_path).read_text())[
                 "rom-path"]
-            )
+        )
 
         config_custom_path = (
             json.loads(Path(config_path).read_text())[
                 "custom-game-path"]
-            )
+        )
     except Exception as e:
         config_retroarch_path = "null"
         config_rom_path = "null"

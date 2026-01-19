@@ -33,7 +33,8 @@ cams_available = []
 def _ensure_macos_camera_permission() -> str:
     """Ensure camera permission on macOS.
 
-    Returns one of: "authorized", "denied", "restricted", "not_determined", "unknown".
+    Returns one of: "authorized", "denied", "restricted", "not_determined",
+    "unknown".
     """
     if platform.system() != "Darwin":
         return "unknown"
@@ -48,7 +49,8 @@ def _ensure_macos_camera_permission() -> str:
             media_type = "video"
 
         status = AVCaptureDevice.authorizationStatusForMediaType_(media_type)
-        # Apple's mapping: 0=notDetermined, 1=restricted, 2=denied, 3=authorized
+        # Apple's mapping: 0=notDetermined, 1=restricted, 2=denied,
+        # 3=authorized
         if status == 3:
             return "authorized"
         if status == 2:
@@ -68,9 +70,10 @@ def _ensure_macos_camera_permission() -> str:
             try:
                 AVCaptureDevice.requestAccessForMediaType_completionHandler_(
                     media_type, _handler
-                )
+                    )
             except Exception:
-                # If the request API is unavailable, fall back to "not_determined"
+                # If the request API is unavailable, fall back to
+                # "not_determined"
                 return "not_determined"
 
             # Wait a bit for the user to respond
@@ -78,7 +81,9 @@ def _ensure_macos_camera_permission() -> str:
 
             # Re-check status (more reliable than handler)
             try:
-                status2 = AVCaptureDevice.authorizationStatusForMediaType_(media_type)
+                status2 = AVCaptureDevice.authorizationStatusForMediaType_(
+                    media_type
+                    )
                 if status2 == 3:
                     return "authorized"
                 if status2 == 2:
@@ -187,9 +192,6 @@ def find_cams():
     return cams_available
 
 
-
-
-
 def _start_heavy_init_async(on_ready):
     """Start camera/ML/input modules in a background thread.
 
@@ -210,36 +212,44 @@ def _start_heavy_init_async(on_ready):
             pass
 
         # Detect available cameras after GUI is shown.
-        # On macOS we first ensure camera permission is granted; otherwise
-        # enumerating/validating cameras will look like "no camera found".
+        # On macOS, we first ensure camera permission is granted; otherwise
+        # listing/validating cameras will look like "no camera found".
         try:
             if platform.system() == "Darwin":
                 try:
                     gui.window.after(
                         0, lambda: gui.show_startup_overlay(
-                            "Camera access required…\nPlease allow camera access when prompted."
+                            "Camera access required…\nPlease allow camera "
+                            "access when prompted."
+                            )
                         )
-                    )
                 except Exception:
                     pass
 
                 perm = _ensure_macos_camera_permission()
 
                 if perm != "authorized":
-                    # Provide actionable message and skip scanning for now.
+                    # Provide an actionable message and skip scanning for now.
                     msg = (
                         "Camera access not granted.\n"
-                        "Enable it in System Settings → Privacy & Security → Camera,\n"
+                        "Enable it in System Settings → Privacy & Security → "
+                        "Camera,\n"
                         "then restart the app."
                     )
                     try:
-                        gui.window.after(0, lambda: gui.show_startup_overlay(msg))
+                        gui.window.after(
+                            0, lambda: gui.show_startup_overlay(msg)
+                            )
                     except Exception:
                         pass
 
                     # Inform GUI combobox with a clearer placeholder.
                     try:
-                        gui.window.after(0, lambda: gui.set_available_cams([], [], status_text="(camera access required)"))
+                        gui.window.after(
+                            0, lambda: gui.set_available_cams(
+                                [], [], status_text="(camera access required)"
+                                )
+                            )
                     except Exception:
                         pass
                 else:
@@ -247,8 +257,8 @@ def _start_heavy_init_async(on_ready):
                         gui.window.after(
                             0, lambda: gui.show_startup_overlay(
                                 "Loading cameras…"
+                                )
                             )
-                        )
                     except Exception:
                         pass
 
@@ -260,8 +270,10 @@ def _start_heavy_init_async(on_ready):
                     try:
                         gui.window.after(
                             0,
-                            lambda: gui.set_available_cams(gui_cams_available, cams_available)
-                        )
+                            lambda: gui.set_available_cams(
+                                gui_cams_available, cams_available
+                                )
+                            )
                     except Exception:
                         pass
             else:
@@ -270,8 +282,8 @@ def _start_heavy_init_async(on_ready):
                     gui.window.after(
                         0, lambda: gui.show_startup_overlay(
                             "Loading cameras…"
+                            )
                         )
-                    )
                 except Exception:
                     pass
 
@@ -282,8 +294,10 @@ def _start_heavy_init_async(on_ready):
                 try:
                     gui.window.after(
                         0,
-                        lambda: gui.set_available_cams(gui_cams_available, cams_available)
-                    )
+                        lambda: gui.set_available_cams(
+                            gui_cams_available, cams_available
+                            )
+                        )
                 except Exception:
                     pass
         except Exception as e:
@@ -402,7 +416,7 @@ def update():
         current_pose_full_body
         if state_manager.get_current_mode() == "Full-body"
         else current_pose
-        )
+    )
     send_active = state_manager.get_send_permission()
     gamepad_img = gamepad_visualizer.create_gamepad_image(
         pose_for_gamepad, send_active=send_active

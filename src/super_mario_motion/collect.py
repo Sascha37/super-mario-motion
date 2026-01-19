@@ -16,8 +16,8 @@ import mediapipe as mp
 import numpy as np
 
 from super_mario_motion.pose_features import extract_features
-from super_mario_motion.state import StateManager
 from super_mario_motion.settings import Settings
+from super_mario_motion.state import StateManager
 
 # Init StateManager
 state_manager = StateManager()

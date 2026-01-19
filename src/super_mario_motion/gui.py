@@ -58,8 +58,8 @@ index = None
 
 # Camera lists and combobox reference
 option_menu_cam = None
-cams_available = []          # raw list (may include "" for unavailable)
-gui_cams_available = []      # filtered list shown in GUI
+cams_available = []  # raw list (may include "" for unavailable)
+gui_cams_available = []  # filtered list shown in GUI
 
 # Webcam preview
 webcam_image_width = 612
@@ -420,7 +420,6 @@ def init():
         )
     label_mode.grid(row=4, column=0)
 
-
     # Webcam Combobox
     global selected_cam
     global option_menu_cam
@@ -697,7 +696,7 @@ def set_available_cams(gui_list, raw_list, status_text: str | None = None):
 
     option_menu_cam.config(state="readonly")
     option_menu_cam["values"] = gui_cams_available
-    # Select first camera by default
+    # Select the first camera by default
     selected_cam.set(gui_cams_available[0])
 
 
@@ -975,7 +974,8 @@ def run_collect_step(index_: int):
 
 
 def show_collect_countdown(
-        n: int, pose_name: str, seconds: float, index_: int):
+    n: int, pose_name: str, seconds: float, index_: int
+    ):
     """Show a countdown before recording a specific pose.
 
     When the countdown reaches zero, starts recording for the given pose.
@@ -1089,10 +1089,10 @@ def update_launch_button_state():
     scheme = selected_control_scheme.get() or ""
     disable = (
             (
-                scheme == "Original (RetroArch)" and not
-                game_launcher.retro_paths_valid) or
+                    scheme == "Original (RetroArch)" and not
+                    game_launcher.retro_paths_valid) or
             (scheme == "Custom" and not game_launcher.custom_path_valid)
-        )
+    )
     button_launch_game.state(["disabled"] if disable else ["!disabled"])
 
 
