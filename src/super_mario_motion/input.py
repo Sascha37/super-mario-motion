@@ -340,7 +340,7 @@ def build_darwin_letter_map():
 
     Problem:
       On macOS with QWERTZ layouts (e.g., German), pressing the *physical* key
-      at the US-'y' position yields 'z' and vice-versa.
+      at the US-'y' position yields 'z' and vice versa.
 
     Goal:
       When a user config says "y", we want to press the US physical "y" key
@@ -354,7 +354,8 @@ def build_darwin_letter_map():
     from pathlib import Path
     import plistlib
 
-    pref_path = Path.home() / "Library" / "Preferences" / "com.apple.HIToolbox.plist"
+    pref_path = (Path.home() / "Library" / "Preferences" /
+                 "com.apple.HIToolbox.plist")
     if not pref_path.exists():
         return {}
 
@@ -364,16 +365,20 @@ def build_darwin_letter_map():
         return {}
 
     sources = data.get("AppleCurrentKeyboardLayoutInputSourceID")
-    # Fallback: try to infer from selected input sources list
+    # Fallback: try to infer from the selected input sources list
     selected = data.get("AppleSelectedInputSources") or []
 
     def _looks_qwertz(name_or_id: str) -> bool:
         s = (name_or_id or "").lower()
         # Common identifiers/names for German/Swiss layouts
-        return any(tok in s for tok in [
-            "german", "de", "swiss", "ch", "qwertz", "com.apple.keylayout.german",
-            "com.apple.keylayout.swissgerman", "com.apple.keylayout.swissfrench",
-            ])
+        return any(
+            tok in s for tok in [
+                "german", "de", "swiss", "ch", "qwertz",
+                "com.apple.keylayout.german",
+                "com.apple.keylayout.swissgerman",
+                "com.apple.keylayout.swissfrench",
+                ]
+            )
 
     is_qwertz = False
     if isinstance(sources, str) and _looks_qwertz(sources):
@@ -382,7 +387,9 @@ def build_darwin_letter_map():
     if not is_qwertz:
         for item in selected:
             if isinstance(item, dict):
-                name = item.get("KeyboardLayout Name") or item.get("InputSourceID")
+                name = item.get("KeyboardLayout Name") or item.get(
+                    "InputSourceID"
+                    )
                 if isinstance(name, str) and _looks_qwertz(name):
                     is_qwertz = True
                     break

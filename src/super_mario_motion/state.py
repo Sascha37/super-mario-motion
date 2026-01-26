@@ -117,7 +117,7 @@ class StateManager:
     def set_all_opencv_images(
         cls, new_webcam, new_webcam_skeleton,
         new_skeleton_only
-            ):
+        ):
         cls.opencv_image_webcam = new_webcam
         cls.opencv_image_webcam_skeleton = new_webcam_skeleton
         cls.opencv_image_skeleton_only = new_skeleton_only

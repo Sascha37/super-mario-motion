@@ -87,7 +87,7 @@ def pose_to_buttons(pose: str) -> List[str]:
 def draw_highlight_overlay(
     base_size: tuple[int, int],
     pressed: Iterable[str]
-        ) -> Image.Image:
+    ) -> Image.Image:
     """Create an RGBA overlay that highlights pressed buttons.
 
     Args:
@@ -124,7 +124,7 @@ def draw_highlight_overlay(
 def create_gamepad_image(
     pose: str, send_active: bool = True,
     base_image_: Image.Image | None = None
-        ) -> Image.Image:
+    ) -> Image.Image:
     """Create a gamepad image with highlighted buttons for a given pose.
 
     Args:
