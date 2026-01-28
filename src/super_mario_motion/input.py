@@ -225,7 +225,7 @@ def press_designated_input(pose_):
         case "jumping":
             _key_down(jump)
             _key_down(last_orientation)
-            time.sleep(0.1)
+            time.sleep(0.5)
             _key_up(last_orientation)
             _key_up(jump)
         case "running_right":
